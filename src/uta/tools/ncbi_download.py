@@ -1,4 +1,4 @@
-# Step 1 in the new uta-light update
+# Step 1 in the new uta update process
 # download all files that are needed from the NCBI website
 
 import os
@@ -58,7 +58,7 @@ class NCBIDownloader:
         return local_files
 
     def _exists_locally(self, url_str):
-        """check if a file has been"""
+        """Check if a file has been already downloaded locally."""
         p = self._get_local_path(url_str)
         return p.exists()
 
