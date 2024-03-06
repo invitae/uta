@@ -251,6 +251,7 @@ the installation environment.*
 
 ## Developer Setup
 
+### Virtual Environment
 To develop UTA, follow these steps.
 
 1.  Set up a virtual environment using your preferred method.
@@ -270,3 +271,18 @@ To develop UTA, follow these steps.
 4.  To run the tests:
 
         $ python3 -m unittest
+
+### Docker
+
+1. Clone UTA and build docker image:
+        
+        $ git clone git@github.com:biocommons/uta.git
+        $ cd uta
+        $ docker build -t uta .
+
+2. Restore a database or load a new one using the instructions [above](#installing-from-database-dumps).
+
+3. Run container and tests
+
+        $ docker run -it --rm uta-build uta:latest
+        $ python -m unittest

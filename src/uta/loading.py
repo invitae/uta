@@ -14,9 +14,10 @@ from bioutils.digests import seq_md5
 from bioutils.sequences import reverse_complement
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm.exc import NoResultFound
+from sqlalchemy import text
 import psycopg2.extras
 import six
-import uta_align.align.algorithms as utaaa
+import uta_align as utaa
 
 from uta.lru_cache import lru_cache
 
@@ -46,10 +47,10 @@ def align_exons(session, opts, cf):
         return cur
 
     def align(s1, s2):
-        score, cigar = utaaa.needleman_wunsch_gotoh_align(s1.encode("ascii"),
-                                                          s2.encode("ascii"),
-                                                          extended_cigar=True)
-        tx_aseq, alt_aseq = utaaa.cigar_alignment(
+        score, cigar = utaa.algorithms.needleman_wunsch_gotoh_align(s1.encode("ascii"),
+                                                                    s2.encode("ascii"),
+                                                                    extended_cigar=True)
+        tx_aseq, alt_aseq = utaa.algorithms.cigar_alignment(
             tx_seq, alt_seq, cigar, hide_match=False)
         return tx_aseq.decode("ascii"), alt_aseq.decode("ascii"), cigar.to_string().decode("ascii")
 
@@ -282,9 +283,9 @@ def load_exonset(session, opts, cf):
 
 
 def load_geneinfo(session, opts, cf):
-    session.execute("set role {admin_role};".format(
-        admin_role=cf.get("uta", "admin_role")))
-    session.execute("set search_path = " + usam.schema_name)
+    session.execute(text("set role {admin_role};".format(
+        admin_role=cf.get("uta", "admin_role"))))
+    session.execute(text("set search_path = " + usam.schema_name))
 
     gir = ufgi.GeneInfoReader(gzip.open(opts["FILE"], 'rt'))
     logger.info("opened " + opts["FILE"])
