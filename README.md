@@ -286,3 +286,30 @@ To develop UTA, follow these steps.
 
         $ docker run -it --rm uta-build uta:latest
         $ python -m unittest
+
+## Testing local build
+
+### Docker
+To test local build of UTA you can follow these steps...
+
+1. Pick a version to start with (ex. "uta_20210129b")
+
+2. Setup local database follow the steps above (`Installing with Docker`) to pull image, 
+   start and populate. NOTE...it does take about 5 minutes for the local database is ready.
+
+3. Build the image
+
+        $ docker build -t uta .
+
+4. Run UTA build. Supplying a local path with data needed by the workflow is a requirement.
+
+        $ docker run \
+           -it \
+           --rm \
+           --name uta-build \
+           --volume .:/opt/repos/uta \
+           --volume ~/locus/data/work/uta/test-uta-22:/temp \
+           --network=host uta-build:latest
+
+5. Once in the container you can run this script to create new schema, process input files, 
+   update the database, and dump a new artifact.
