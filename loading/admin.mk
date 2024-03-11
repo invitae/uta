@@ -30,7 +30,7 @@ dump-%: dumps/%.pgd.gz dumps/%.pgd.gz.sha1 dumps/%-schema.pgd.gz dumps/%-schema.
 .PRECIOUS: dumps/%.pgd.gz
 dumps/%.pgd.gz:
 	# expect ~5 minutes
-	(time pg_dump -U uta_admin -h localhost -d uta -n $* | gzip) >$@.tmp 2>$@.log
+	(time pg_dump -U uta_admin -h localhost -d uta_dev -n $* | gzip) >$@.tmp 2>$@.log
 	mv "$@.tmp" "$@"
 
 #=> dumps/%-schema.pgd.gz -- create dump of named schema wo/data (e.g., uta_20140210)
