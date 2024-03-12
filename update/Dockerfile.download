@@ -1,0 +1,12 @@
+FROM debian:stable-slim
+
+RUN apt-get -y update
+RUN apt-get -y install curl
+
+# Download NCBI files
+WORKDIR /download_ncbi
+VOLUME [ "/data/ncbi" ]
+RUN mkdir -p /data/ncbi
+
+COPY download.sh ./
+CMD ./download.sh /data/ncbi
