@@ -12,7 +12,7 @@
 cat <<EOF >"$PGDATA/pg_hba.conf"
 # allow the anonymous user to access uta without password
 # These lines must occur before more stringent authentication methods
-host   all   all         all              trust
+host   all   anonymous     0.0.0.0/0      trust
 host   all   PUBLIC        0.0.0.0/0      trust
 local  all   all                          trust
 host   all   all         127.0.0.1/32     trust
