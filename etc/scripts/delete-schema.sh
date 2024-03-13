@@ -1,14 +1,15 @@
 #!/bin/bash
 
-if [ "$#" -lt 1 ]
+if [ "$#" -lt 2 ]
 then
-    echo "error: too few arguments, you provided $#, 1 required"
-    echo "usage: delete-schema.sh <source_uta_v>"
+    echo "error: too few arguments, you provided $#, 2 required"
+    echo "usage: delete-schema.sh <db_host> <source_uta_v>"
     exit 1
 fi
 
 set -euxo pipefail
 
-source_uta_v=$1
+db_host="$1"
+source_uta_v="$2"
 
-psql -h localhost -U uta_admin -d uta -c "DROP SCHEMA IF EXISTS $source_uta_v CASCADE"
+psql -h "$db_host" -U uta_admin -d uta -c "DROP SCHEMA IF EXISTS $source_uta_v CASCADE"

@@ -203,8 +203,8 @@ you will not need to install PostgreSQL or any of its dependencies.
     (code) version used to build the instance.
 
         $ psql -h localhost -U anonymous -d uta -c "select * from $uta_v.meta"
-        
-              key       |                               value                                
+
+              key       |                               value
         ----------------+--------------------------------------------------------------------
          schema_version | 1.1
          created on     | 2015-08-21T10:53:50.666152
@@ -213,7 +213,7 @@ you will not need to install PostgreSQL or any of its dependencies.
          (4 rows)
 
 6.  (Optional) To configure [hgvs](https://github.com/biocommons/hgvs)
-    to use this local installation, consult the 
+    to use this local installation, consult the
     [hgvs documentation](https://hgvs.readthedocs.io/en/latest/installation.html#local-installation-of-uta-optional)
 
 ### Installing from database dumps
@@ -243,7 +243,7 @@ the installation environment.*
     uta_admin are likely to ease installation.
 
         $ createuser -U postgres uta_admin
-        $ createdb -U postgres -O uta_admin uta 
+        $ createdb -U postgres -O uta_admin uta
 
 3.  Restore the database.
 
@@ -275,7 +275,7 @@ To develop UTA, follow these steps.
 ### Docker
 
 1. Clone UTA and build docker image:
-        
+
         $ git clone git@github.com:biocommons/uta.git
         $ cd uta
         $ docker build -t uta .
@@ -294,7 +294,7 @@ To run local build of UTA you can follow these steps...
 
 1. Pick a UTA version as the base (ex. "uta_20210129b")
 
-2. Setup local database follow the steps above (`Installing with Docker`) to pull image, 
+2. Setup local database follow the steps above (`Installing with Docker`) to pull image,
    start and populate. __NOTE__...it does take about 5 minutes for the local database is ready.
 
 3. Build the image
@@ -309,7 +309,7 @@ To run local build of UTA you can follow these steps...
            --name uta-build \
            --volume .:/opt/repos/uta \
            --volume /System/Volumes/Data/locus/data/test-uta-22:/temp \
-           --network=host uta-build:latest
+           --network=host uta:latest
 
-5. Once in the container you can run this script to create new schema, process input files, 
+5. Once in the container you can run this script to create new schema, process input files,
    update the database, and dump a new artifact.

@@ -9,21 +9,21 @@ services:
       - uta-sr-net
   uta-update:
     container_name: uta-update
-    image: ubuntu:latest
+    image: uta-update:latest
     # todo: use command from uta container
-    command: ls /data/ncbi
+    command: etc/scripts/run-uta-build.sh previous-uta ${previous_uta_version}
     depends_on:
       previous-uta:
         condition: service_healthy
       # seqrepo:
       #   condition: service_healthy
     volumes:
-      - ./ncbi:/data/ncbi
+      - ./ncbi:/temp
     networks:
       - uta-sr-net
   previous-uta:
     container_name: previous-uta
-    image: biocommons/uta:${previous_uta_version}
+    image: uta:${previous_uta_version}
     environment:
       - POSTGRES_HOST_AUTH_METHOD=trust
     healthcheck:

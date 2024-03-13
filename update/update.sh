@@ -15,6 +15,8 @@ docker run -it --mount type=bind,source=$LOCAL_NCBI_DIR,target=/data/ncbi ncbi:l
 # docker run seqrepo:latest -- seqrepo load
 
 # Update UTA, which depends on an updated SeqRepo
+docker build --file ../Dockerfile --tag uta-update:latest ..
+docker build --file ../misc/docker/uta.dockerfile --tag uta:$PREVIOUS_UTA_VERSION --build-arg uta_version=$PREVIOUS_UTA_VERSION ../misc/docker
 previous_uta_version=$PREVIOUS_UTA_VERSION docker compose -f docker-compose.uta.yml run --rm uta-update
 
 # Stop dependency containers
