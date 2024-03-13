@@ -2,9 +2,14 @@
 
 set -e
 
-TOP_LEVEL_DIR=$1
+FILE_DIR=$1
+FILES=(
+    'gene/DATA/GENE_INFO/Mammalia/Homo_sapiens.gene_info.gz'
+    'gene/DATA/gene2accession.gz'
+)
 
-FILE=gene/DATA/GENE_INFO/Mammalia/Homo_sapiens.gene_info.gz
-mkdir -p $TOP_LEVEL_DIR/gene/DATA/GENE_INFO/Mammalia
-curl https://ftp.ncbi.nih.gov/$FILE -o $TOP_LEVEL_DIR/$FILE
-ls $TOP_LEVEL_DIR/gene/DATA/GENE_INFO/Mammalia/Homo_sapiens.gene_info.gz
+for FILE in "${FILES[@]}"
+do
+    mkdir -p "$(dirname $FILE_DIR/$FILE)"
+    curl "https://ftp.ncbi.nih.gov/$FILE" -o "$FILE_DIR/$FILE"
+done

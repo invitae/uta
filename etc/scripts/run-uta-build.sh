@@ -28,7 +28,6 @@ etc/scripts/create-new-schema.sh "$db_host" "$source_uta_v" "$loading_schema"
 # genes
 sbin/ncbi-parse-geneinfo /temp/gene/DATA/GENE_INFO/Mammalia/Homo_sapiens.gene_info.gz | \
   gzip -c > "$loading_dir/genes.geneinfo.gz" 2>&1 | tee "$logs_dir/ncbi-parse-geneinfo.log"
-exit 0
 
 # transcript protein associations
 sbin/ncbi-parse-gene2refseq /temp/gene/DATA/gene2accession.gz | gzip -c > "$loading_dir/assocacs.gz" 2>&1 | \
