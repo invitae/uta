@@ -5,13 +5,11 @@ services:
     container_name: seqrepo
     image: ubuntu:latest
     command: echo 'Start SeqRepo, which is required for UTA update'
-    networks:
-      - uta-sr-net
+    network_mode: host
   uta-update:
     container_name: uta-update
     image: uta-update:latest
-    # todo: use command from uta container
-    command: etc/scripts/run-uta-build.sh previous-uta ${previous_uta_version}
+    command: etc/scripts/run-uta-build.sh ${previous_uta_version}
     depends_on:
       previous-uta:
         condition: service_healthy
@@ -19,8 +17,7 @@ services:
       #   condition: service_healthy
     volumes:
       - ./ncbi:/temp
-    networks:
-      - uta-sr-net
+    network_mode: host
   previous-uta:
     container_name: previous-uta
     image: uta:${previous_uta_version}
@@ -30,8 +27,4 @@ services:
       test: pg_isready && psql -h localhost -U anonymous -d uta -c "select * from ${previous_uta_version}.meta"
       interval: 10s
       retries: 60
-    networks:
-      - uta-sr-net
-
-networks:
-  uta-sr-net:
+    network_mode: host

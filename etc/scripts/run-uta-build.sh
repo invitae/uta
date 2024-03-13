@@ -1,13 +1,12 @@
 #!/bin/bash
 
-if [ "$#" -lt 2 ]
+if [ "$#" -lt 1 ]
 then
-    echo "error: too few arguments, you provided $#, 2 required"
-    echo "usage: run_uta_build_gene.sh <db_host> <source_uta_v>"
+    echo "error: too few arguments, you provided $#, 1 required"
+    echo "usage: run_uta_build_gene.sh <source_uta_v>"
     exit 1
 fi
-db_host=$1
-source_uta_v=$2
+source_uta_v=$1
 
 set -euxo pipefail
 
@@ -21,8 +20,8 @@ for d in "$loading_dir" "$dumps_dir" "$logs_dir";
 done
 
 ## Drop loading schema, and recreate
-etc/scripts/delete-schema.sh "$db_host" "$loading_schema"
-etc/scripts/create-new-schema.sh "$db_host" "$source_uta_v" "$loading_schema"
+etc/scripts/delete-schema.sh $loading_schema
+etc/scripts/create-new-schema.sh "$source_uta_v" "$loading_schema"
 
 ### extract meta data
 # genes
@@ -49,4 +48,4 @@ uta --conf=etc/global.conf --conf=etc/uta_dev@localhost.conf load-geneinfo "$loa
 #  tee "$logs_dir/load-txinfo.log"
 
 ### psql_dump
-pg_dump -U uta_admin -h $db_host -d uta -t "$loading_schema.gene" | gzip -c > "$dumps_dir/uta.pgd.gz"
+pg_dump -U uta_admin -h localhost -d uta -t "$loading_schema.gene" | gzip -c > "$dumps_dir/uta.pgd.gz"
