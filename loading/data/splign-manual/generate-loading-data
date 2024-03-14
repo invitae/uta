@@ -64,6 +64,7 @@ def parse_splign(fn, txdata):
         raise KeyError(f"{tx_ac}: no cds or hgnc info in {txdata_fn}")
 
     hgnc = txd["hgnc"]
+    gene_id = txd.get("gene_id")
     if hgnc is None:
         _logger.warn(f"No HGNC symbol in {txdata_fn} for {tx_ac}")
 
@@ -79,6 +80,7 @@ def parse_splign(fn, txdata):
     txinfo = uta.formats.txinfo.TxInfo(
         origin=origin,
         ac=tx_ac,
+        gene_id=gene_id,
         hgnc=hgnc,
         cds_se_i=cds_se_i,
         exons_se_i=tx_exons_str)
