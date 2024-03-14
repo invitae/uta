@@ -350,3 +350,9 @@ To run local build of UTA you can follow these steps...
                      ├── human.1.protein.faa.gz
                      ├── human.1.rna.fna.gz
                      └── human.1.rna.gbff.gz
+
+## Updating UTA
+
+To update UTA and SeqRepo, run `update.sh` from the `update` directory.
+
+The only dependencies of the script are bash and docker.
