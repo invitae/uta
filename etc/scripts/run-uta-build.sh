@@ -54,8 +54,8 @@ uta --conf=etc/global.conf --conf=etc/uta_dev@localhost.conf load-geneinfo "$loa
   tee "$logs_dir/load-geneinfo.log"
 
 # transcript info
-uta --conf=etc/global.conf --conf=etc/uta_dev@localhost.conf load-txinfo "$loading_dir/gbff.txinfo.gz" 2>&1 | \
-  tee "$logs_dir/load-txinfo.log"
+#uta --conf=etc/global.conf --conf=etc/uta_dev@localhost.conf load-txinfo "$loading_dir/gbff.txinfo.gz" 2>&1 | \
+#  tee "$logs_dir/load-txinfo.log"
 
 # exon alignments
 uta --conf=etc/global.conf --conf=etc/uta_dev@localhost.conf load-exonset "$loading_dir/ncbi-gff.exonset.gz" 2>&1 | \
