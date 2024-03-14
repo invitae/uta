@@ -294,13 +294,14 @@ To run local build of UTA you can follow these steps...
 
 1. Pick a UTA version as the base (ex. "uta_20210129b")
 
-2. Setup local Docker container running UTA Postgresql database follow the steps above 
-   (`Installing with Docker`) to pull image, start and populate. __NOTE__...it does take 
-   about 5 minutes for the local database is ready.
+2. Setup local UTA Postgresql database Docker container by following the steps above 
+   (`Installing with Docker`). __NOTE__...It takes about 5 minutes before the local 
+   database is ready.
 
-3. Setup local Docker volume for SeqRepo. This can be done by running the following two
-   commands. __NOTE__...this step does require aourn ~13Gb of local disk space and takes
-   roughly 30 minutes to complete. You need to wait until the `Docker run` command completes.
+3. Setup local SeqRepo Docker volume. This can be done by running the following two
+   commands. __NOTE__...this step does require around ~13Gb of local disk space and 
+   takes roughly 30 minutes to complete. You need to wait until the `Docker run` 
+   command completes before moving to the next step.
 
         $ docker pull biocommons/seqrepo
         $ docker run --name seqrepo biocommons/seqrepo
