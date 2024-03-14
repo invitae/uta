@@ -11,7 +11,7 @@ PREVIOUS_UTA_VERSION=uta_20210129b
 # Output: LOCAL_NCBI_DIR populated with downloaded files
 mkdir -p $LOCAL_NCBI_DIR
 docker build --file Dockerfile.download --tag ncbi:latest --progress plain .
-# docker run -it --mount type=bind,source=$LOCAL_NCBI_DIR,target=/data/ncbi ncbi:latest
+docker run -it --mount type=bind,source=$LOCAL_NCBI_DIR,target=/data/ncbi ncbi:latest
 
 # 2. Prepare SeqRepo
 # Input: TBD
