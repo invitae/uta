@@ -656,7 +656,7 @@ def load_txinfo(session, opts, cf):
             u_tx = usam.Transcript(
                 ac=ti.ac,
                 origin=ori,
-                hgnc=ti.hgnc,
+                hgnc=ti.gene_symbol,
                 cds_start_i=cds_start_i,
                 cds_end_i=cds_end_i,
                 cds_md5=cds_md5,
