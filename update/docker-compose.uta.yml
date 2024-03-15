@@ -11,7 +11,7 @@ services:
     network_mode: host
   uta:
     container_name: uta
-    image: uta:${previous_uta_version}
+    image: biocommons/uta:${previous_uta_version}
     environment:
       - POSTGRES_HOST_AUTH_METHOD=trust
     healthcheck:

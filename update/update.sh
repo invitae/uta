@@ -22,7 +22,11 @@ docker pull biocommons/seqrepo:$SEQREPO_VERSION
 docker run --name seqrepo biocommons/seqrepo:$SEQREPO_VERSION
 
 # 3. Prepare UTA
-docker build --file ../misc/docker/uta.dockerfile --tag uta:$PREVIOUS_UTA_VERSION --build-arg uta_version=$PREVIOUS_UTA_VERSION ../misc/docker
+# Input: uta version
+# Output: docker image
+# This would also be done automatically as part of the docker compose run,
+# but explicitly pulling here for symmetry with seqrepo
+docker pull biocommons/uta:$PREVIOUS_UTA_VERSION
 
 # 4. Update UTA and SeqRepo
 # Input: LOCAL_NCBI_DIR populated with downloaded files
