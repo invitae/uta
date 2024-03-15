@@ -4,6 +4,7 @@ set -e
 
 # Input variables
 LOCAL_NCBI_DIR=$(pwd)/ncbi
+SEQREPO_VERSION=latest  # 2021-01-29
 PREVIOUS_UTA_VERSION=uta_20210129b
 
 # 1. Download files for SeqRepo and UTA updates
@@ -14,8 +15,11 @@ docker build --file Dockerfile.download --tag ncbi:latest --progress plain .
 docker run -it --mount type=bind,source=$LOCAL_NCBI_DIR,target=/data/ncbi ncbi:latest
 
 # 2. Prepare SeqRepo
-# Input: TBD
-# Output: TBD
+# Input: seqrepo version
+# Output: a container that has run once and pulled seqrepo data
+# Pulling data takes 30 minutes and 13 GB.
+docker pull biocommons/seqrepo:$SEQREPO_VERSION
+docker run --name seqrepo biocommons/seqrepo:$SEQREPO_VERSION
 
 # 3. Prepare UTA
 docker build --file ../misc/docker/uta.dockerfile --tag uta:$PREVIOUS_UTA_VERSION --build-arg uta_version=$PREVIOUS_UTA_VERSION ../misc/docker
@@ -26,7 +30,7 @@ docker build --file ../misc/docker/uta.dockerfile --tag uta:$PREVIOUS_UTA_VERSIO
 # Output: Updated SeqRepo (updated in place)
 # Output: Updated UTA as a database dump
 docker build --file ../Dockerfile --tag uta-update:latest ..
-previous_uta_version=$PREVIOUS_UTA_VERSION docker compose -f docker-compose.uta.yml run --rm uta-update
+seqrepo_version=$SEQREPO_VERSION previous_uta_version=$PREVIOUS_UTA_VERSION docker compose -f docker-compose.uta.yml run --rm uta-update
 docker compose -f docker-compose.uta.yml down
 
 # 5. Publish UTA and SeqRepo

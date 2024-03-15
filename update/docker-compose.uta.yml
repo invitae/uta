@@ -3,8 +3,11 @@ version: '3'
 services:
   seqrepo:
     container_name: seqrepo
-    image: ubuntu:latest
-    command: echo 'Start SeqRepo, which is required for UTA update'
+    # https://hub.docker.com/r/biocommons/seqrepo/tags
+    image: biocommons/seqrepo:${seqrepo_version}
+    # note that the data is downloaded after running the image once
+    volumes:
+      - seqrepo-data:/usr/local/share/seqrepo
     network_mode: host
   uta:
     container_name: uta
@@ -27,4 +30,8 @@ services:
       #   condition: service_healthy
     volumes:
       - ./ncbi:/temp
+      - seqrepo-data:/usr/local/share/seqrepo
     network_mode: host
+
+volumes:
+  seqrepo-data:
