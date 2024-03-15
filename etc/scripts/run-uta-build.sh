@@ -45,16 +45,14 @@ GBFF_files=$(ls /temp/refseq/H_sapiens/mRNA_Prot/human.*.rna.gbff.gz)
 sbin/ncbi-parse-gbff "$GBFF_files" | gzip -c > "$loading_dir/gbff.txinfo.gz" 2>&1 | \
   tee "$logs_dir/ncbi-parse-gbff.log"
 
-# parse genomic gff to get exon alignments
-GFF_dir="/temp/genomes/refseq/vertebrate_mammalian/Homo_sapiens/all_assembly_versions/"
-GFF_files=$(find "$GFF_dir" -type f -name "*.gff.gz")
-if [ -z "$GFF_files" ]
-then
-    echo "error: no GFF files found in $GFF_dir"
-    exit 1
-fi
-python sbin/ncbi_parse_genomic_gff.py "$GFF_files" | gzip -c > "$loading_dir/ncbi-gff.exonset.gz" 2>&1 | \
-  tee "$logs_dir/ncbi_parse_genomic_gff.log"
+# parse alignments from GFF input files
+GFF_files=$(ls /temp/genomes/refseq/vertebrate_mammalian/Homo_sapiens/all_assembly_versions/GCF_000001405*/GCF_*_genomic.gff.gz)
+sbin/ncbi_parse_genomic_gff.py "$GFF_files" | gzip -c > "$loading_dir/gff.exonsets.gz" 2>&1 | \
+  tee "$logs_dir/ncbi-parse-genomic-gff.log"
+
+# generate seqinfo files from exonsets
+sbin/exonset-to-seqinfo -o NCBI "$loading_dir/gff.exonsets.gz" | gzip -c > "$loading_dir/seqinfo.gz" 2>&1 | \
+  tee "$logs_dir/exonset-to-seqinfo.log"
 
 ### update the uta database
 # genes
@@ -64,6 +62,13 @@ uta --conf=etc/global.conf --conf=etc/uta_dev@localhost.conf load-geneinfo "$loa
 # transcript info
 uta --conf=etc/global.conf --conf=etc/uta_dev@localhost.conf load-txinfo "$loading_dir/gbff.txinfo.gz" 2>&1 | \
   tee "$logs_dir/load-txinfo.log"
+
+# gff exon sets
+uta --conf=etc/global.conf --conf=etc/uta_dev@localhost.conf load-exonset "$loading_dir/gff.exonsets.gz" 2>&1 | \
+  tee "$logs_dir/load-exonsets.log"
+
+# align exons
+#uta --conf=etc/global.conf --conf=etc/uta_dev@localhost.conf align-exons 2>&1 | tee "$logs_dir/align-exons.log"
 
 
 ### run diff
