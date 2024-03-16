@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# This script downloads the files listed below to the given directory.
+# This script downloads the files needed for a UTA+SeqRepo update into to the given directory.
 
 set -e
 
@@ -13,8 +13,10 @@ DOWNLOAD_PATHS=(
 
 if [ -z "$DOWNLOAD_DIR" ]
 then
-    echo 'Usage: download.sh <download_dir>'
+    echo 'Usage: sbin/ncbi-download <download_dir>'
     exit 1
+else
+    echo "Downloading files to $DOWNLOAD_DIR"
 fi
 
 for DOWNLOAD_PATH in "${DOWNLOAD_PATHS[@]}"
