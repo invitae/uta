@@ -300,28 +300,26 @@ sbin/ncbi-download-docker $(pwd)/ncbi-data
 
 The specified directory will have the following structure:
 
-    $ tree .
-        .
-        ├── gene
-        │   └── DATA
-        │       ├── GENE_INFO
-        │       │   └── Mammalia
-        │       │       └── Homo_sapiens.gene_info.gz
-        │       └── gene2accession.gz
-        ├── genomes
-        │   └── refseq
-        │       └── vertebrate_mammalian
-        │           └── Homo_sapiens
-        │               └── all_assembly_versions
-        │                   └── GCF_000001405.25_GRCh37.p13
-        │                       ├── GCF_000001405.25_GRCh37.p13_genomic.fna.gz
-        │                       └── GCF_000001405.25_GRCh37.p13_genomic.gff.gz
-        └── refseq
-            └── H_sapiens
-                └── mRNA_Prot
-                    ├── human.1.protein.faa.gz
-                    ├── human.1.rna.fna.gz
-                    └── human.1.rna.gbff.gz
+    ├── gene
+    │   └── DATA
+    │       ├── GENE_INFO
+    │       │   └── Mammalia
+    │       │       └── Homo_sapiens.gene_info.gz
+    │       └── gene2accession.gz
+    ├── genomes
+    │   └── refseq
+    │       └── vertebrate_mammalian
+    │           └── Homo_sapiens
+    │               └── all_assembly_versions
+    │                   └── GCF_000001405.25_GRCh37.p13
+    │                       ├── GCF_000001405.25_GRCh37.p13_genomic.fna.gz
+    │                       └── GCF_000001405.25_GRCh37.p13_genomic.gff.gz
+    └── refseq
+        └── H_sapiens
+            └── mRNA_Prot
+                ├── human.1.protein.faa.gz
+                ├── human.1.rna.fna.gz
+                └── human.1.rna.gbff.gz
 
 ### 2. Download SeqRepo data
 
@@ -338,5 +336,5 @@ Run `sbin/update-uta`. Requires bash and docker.
 
 Example:
 ```
-sbin/update-uta $(pwd)/ncbi-data $(pwd)/seqrepo-data uta_20210129b 2024-02-20
+sbin/update-uta $(pwd)/ncbi-data $(pwd)/seqrepo-data uta_20210129b 2021-01-29
 ```
