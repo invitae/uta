@@ -2,7 +2,6 @@
 
 # This script runs ncbi-download in a docker container.
 
-# param will be checked in the ncbi-download script
 DOWNLOAD_DIR=$1
 
 if [ -z "$DOWNLOAD_DIR" ]
