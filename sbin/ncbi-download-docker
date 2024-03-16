@@ -13,5 +13,11 @@ else
     echo "Downloading files to $DOWNLOAD_DIR"
 fi
 
+if [[ $DOWNLOAD_DIR != /* ]]
+then
+    echo 'Download directory must be an absolute path'
+    exit 1
+fi
+
 docker build --file $(pwd)/misc/docker/ncbi-download.dockerfile --tag ncbi-download --progress plain .
 docker run -it -v $(pwd)/sbin/ncbi-download:/dl-script -v $DOWNLOAD_DIR:/output-dir ncbi-download /dl-script /output-dir
