@@ -17,18 +17,23 @@ then
     echo 'Usage: sbin/seqrepo-download <seqrepo_version> <output_dir>'
     exit 1
 else
-    echo "Downloading SeqRepo version $SEQREPO_VERSION into $OUTPUT_DIR"
+    echo "SeqRepo data for version $SEQREPO_VERSION will be available in $OUTPUT_DIR"
 fi
 
+# Name of seqrepo container
 if [ -z "$SEQREPO_CONTAINER_NAME" ]
 then
     SEQREPO_CONTAINER_NAME=seqrepo
 fi
-echo "seqrepo container will be called $SEQREPO_CONTAINER_NAME"
 
 if [[ $OUTPUT_DIR != /* ]]
 then
     echo 'Output directory must be an absolute path'
+    exit 1
+fi
+
+if [ ! -d "$OUTPUT_DIR" ]; then
+    echo "Directory $OUTPUT_DIR does not exist."
     exit 1
 fi
 
@@ -44,4 +49,5 @@ else
 fi
 
 # Copy seqrepo data into a local directory
-docker run -it -v $OUTPUT_DIR:/output-dir --volumes-from $SEQREPO_CONTAINER_NAME:ro ubuntu bash -c 'cp -R /usr/local/share/seqrepo /output-dir'
+echo "Copying seqrepo data into $OUTPUT_DIR ..."
+docker run -it -v $OUTPUT_DIR:/output-dir --volumes-from $SEQREPO_CONTAINER_NAME:ro ubuntu bash -c 'cp -R /usr/local/share/seqrepo/* /output-dir'
