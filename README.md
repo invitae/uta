@@ -337,9 +337,9 @@ sbin/seqrepo-download 2024-02-20 $(pwd)/seqrepo-data
 
 ### 3. Update UTA and SeqRepo
 
-Run `sbin/update-uta`. Requires bash and docker.
+Run `sbin/uta-update`. Requires bash and docker.
 
 Example:
 ```
-sbin/update-uta $(pwd)/ncbi-data $(pwd)/seqrepo-data uta_20210129b 2021-01-29
+sbin/uta-update $(pwd)/ncbi-data $(pwd)/seqrepo-data uta_20210129b 2021-01-29
 ```

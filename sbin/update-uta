@@ -16,7 +16,7 @@ export SEQREPO_VERSION=$5
 
 if [ -z "$NCBI_DIR" ] || [ -z "$SEQREPO_DIR" ] || [ -z "$WORKING_DIR" ] || [ -z "$UTA_VERSION" ] || [ -z "$SEQREPO_VERSION" ]
 then
-    echo 'Usage: sbin/update-uta <ncbi_file_dir> <seqrepo_dir> <working_dir> <uta_version> <seqrepo_version>'
+    echo 'Usage: sbin/uta-update <ncbi_file_dir> <seqrepo_dir> <working_dir> <uta_version> <seqrepo_version>'
     exit 1
 else
     echo "Updating UTA and SeqRepo using files in $NCBI_DIR and SeqRepo data in $SEQREPO_DIR"
