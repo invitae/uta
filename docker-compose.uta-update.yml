@@ -1,0 +1,26 @@
+version: '3'
+
+services:
+  uta:
+    container_name: uta
+    image: biocommons/uta:${uta_version}
+    environment:
+      - POSTGRES_HOST_AUTH_METHOD=trust
+    healthcheck:
+      test: psql -h localhost -U anonymous -d uta -c "select * from ${uta_version}.meta"
+      interval: 10s
+      retries: 60
+    network_mode: host
+  uta-update:
+    image: uta-update
+    build:
+      context: .
+      dockerfile: .
+    command: etc/scripts/run-uta-build.sh ${uta_version} ${seqrepo_version}
+    depends_on:
+      uta:
+        condition: service_healthy
+    volumes:
+      - ${ncbi_files}:/temp
+      - ${seqrepo_dir}:/usr/local/share/seqrepo
+    network_mode: host

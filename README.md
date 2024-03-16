@@ -291,20 +291,29 @@ To develop UTA, follow these steps.
 
 ### 1. Download files from NCBI
 
-Run the `sbin/ncbi-download-docker` script. Requires bash and docker.
+Run `sbin/ncbi-download-docker`. Requires bash and docker.
 
 Example:
 ```
 sbin/ncbi-download-docker local-ncbi-dir
 ```
 
-### 2. Update UTA and SeqRepo
+### 2. Download SeqRepo data
 
-Run the `sbin/update-uta` script. Requires bash and docker.
+Run `sbin/seqrepo-download`. Requires bash and docker.
 
 Example:
 ```
-sbin/update-uta local-ncbi-dir uta_20210129b 2024-02-20
+sbin/seqrepo-download 2024-02-20 $(pwd)/seqrepo-data
+```
+
+### 3. Update UTA and SeqRepo
+
+Run `sbin/update-uta`. Requires bash and docker.
+
+Example:
+```
+sbin/update-uta local-ncbi-dir $(pwd)/seqrepo-data uta_20210129b 2024-02-20
 ```
 
 ### Docker

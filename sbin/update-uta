@@ -1,46 +1,38 @@
 #!/usr/bin/env bash
 
 # This script updates the specified UTA and SeqRepo using the given NCBI files.
+# It produces a postgres dump of the updated UTA database and an updated SeqRepo (updated in place).
 # It expects to be run from the root of the uta repository.
 
 set -e
 
 NCBI_FILE_DIR=$1
-UTA_VERSION=$2
-SEQREPO_VERSION=$3
+SEQREPO_DIR=$2
+UTA_VERSION=$3
+SEQREPO_VERSION=$4
 
-if [ -z "$NCBI_FILE_DIR" ] || [ -z "$UTA_VERSION" ] || [ -z "$SEQREPO_VERSION" ]
+if [ -z "$NCBI_FILE_DIR" ] || [ -z "$SEQREPO_DIR" ] || [ -z "$UTA_VERSION" ] || [ -z "$SEQREPO_VERSION" ]
 then
-    echo 'Usage: sbin/update-uta <ncbi_file_dir> <uta_version> <seqrepo_version>'
+    echo 'Usage: sbin/update-uta <ncbi_file_dir> <seqrepo_dir> <uta_version> <seqrepo_version>'
     exit 1
 else
-    echo "Updating UTA and SeqRepo using files from $NCBI_FILE_DIR"
+    echo "Updating UTA and SeqRepo using files from $NCBI_FILE_DIR and SeqRepo data in $SEQREPO_DIR"
     echo "Starting from UTA version $UTA_VERSION and SeqRepo version $SEQREPO_VERSION"
 fi
 
-exit 0
+if [[ $NCBI_FILE_DIR != /* ]] && [[ $NCBI_FILE_DIR != .* ]]
+then
+    echo 'NCBI file directory must start with / or .'
+    exit 1
+fi
 
-# 2. Prepare SeqRepo
-# Input: seqrepo version
-# Output: a container that has run once and pulled seqrepo data
-# Pulling data takes 30 minutes and 13 GB.
-docker pull biocommons/seqrepo:$SEQREPO_VERSION
-docker run --name seqrepo biocommons/seqrepo:$SEQREPO_VERSION
+if [[ $SEQREPO_DIR != /* ]] && [[ $SEQREPO_DIR != .* ]]
+then
+    echo 'SeqRepo data directory must start with / or .'
+    exit 1
+fi
 
-# 3. Prepare UTA
-# Input: uta version
-# Output: docker image
-# This would also be done automatically as part of the docker compose run,
-# but explicitly pulling here for symmetry with seqrepo
-docker pull biocommons/uta:$UTA_VERSION
+ncbi_files=$NCBI_FILE_DIR seqrepo_dir=$SEQREPO_DIR seqrepo_version=$SEQREPO_VERSION uta_version=$UTA_VERSION \
+    docker compose -f docker-compose.uta-update.yml run --rm --name uta-update uta-update
 
-# 4. Update UTA and SeqRepo
-# Input: NCBI_FILE_DIR populated with downloaded files
-# Input: UTA_VERSION
-# Output: Updated SeqRepo (updated in place)
-# Output: Updated UTA as a database dump
-docker build --file ../Dockerfile --tag uta-update:latest ..
-seqrepo_version=$SEQREPO_VERSION previous_uta_version=$UTA_VERSION docker compose -f docker-compose.uta.yml run --rm uta-update
 docker compose -f docker-compose.uta.yml down
-
-# 5. Publish UTA and SeqRepo
