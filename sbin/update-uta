@@ -1,11 +1,11 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 set -e
 
 # Input variables
 LOCAL_NCBI_DIR=$(pwd)/ncbi
-SEQREPO_VERSION=latest  # 2021-01-29
 PREVIOUS_UTA_VERSION=uta_20210129b
+SEQREPO_VERSION=2024-02-20
 
 # 1. Download files for SeqRepo and UTA updates
 # Input: N/A
