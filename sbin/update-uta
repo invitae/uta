@@ -6,21 +6,23 @@
 
 set -e
 
-NCBI_FILE_DIR=$1
-SEQREPO_DIR=$2
-UTA_VERSION=$3
-SEQREPO_VERSION=$4
+# export environment variables for docker compose file
+export NCBI_DIR=$1
+export SEQREPO_DIR=$2
+export WORKING_DIR=$3
+export UTA_VERSION=$4
+export SEQREPO_VERSION=$5
 
-if [ -z "$NCBI_FILE_DIR" ] || [ -z "$SEQREPO_DIR" ] || [ -z "$UTA_VERSION" ] || [ -z "$SEQREPO_VERSION" ]
+if [ -z "$NCBI_DIR" ] || [ -z "$SEQREPO_DIR" ] || [ -z "$WORKING_DIR" ] || [ -z "$UTA_VERSION" ] || [ -z "$SEQREPO_VERSION" ]
 then
     echo 'Usage: sbin/update-uta <ncbi_file_dir> <seqrepo_dir> <uta_version> <seqrepo_version>'
     exit 1
 else
-    echo "Updating UTA and SeqRepo using files from $NCBI_FILE_DIR and SeqRepo data in $SEQREPO_DIR"
+    echo "Updating UTA and SeqRepo using files from $NCBI_DIR and SeqRepo data in $SEQREPO_DIR"
     echo "Starting from UTA version $UTA_VERSION and SeqRepo version $SEQREPO_VERSION"
 fi
 
-if [[ $NCBI_FILE_DIR != /* ]] && [[ $NCBI_FILE_DIR != .* ]]
+if [[ $NCBI_DIR != /* ]] && [[ $NCBI_DIR != .* ]]
 then
     echo 'NCBI file directory must start with / or .'
     exit 1
@@ -32,7 +34,15 @@ then
     exit 1
 fi
 
-ncbi_files=$NCBI_FILE_DIR seqrepo_dir=$SEQREPO_DIR seqrepo_version=$SEQREPO_VERSION uta_version=$UTA_VERSION \
-    docker compose -f docker-compose.uta-update.yml run --rm --name uta-update uta-update
+if [[ $WORKING_DIR != /* ]] && [[ $WORKING_DIR != .* ]]
+then
+    echo 'Working directory must start with / or .'
+    exit 1
+fi
 
-docker compose -f docker-compose.uta.yml down
+docker build -t uta-update .
+
+# docker compose doesn't respect the container name specified in the compose file, so container name is specified here
+docker compose run --rm --name uta-update uta-update
+
+# docker compose -f docker-compose.uta.yml down
