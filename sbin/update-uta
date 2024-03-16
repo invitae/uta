@@ -1,13 +1,24 @@
 #!/usr/bin/env bash
 
-# This script is the entrypoint for UTA updates. It expects to be run from the root of the uta repository.
+# This script updates the specified UTA and SeqRepo using the given NCBI files.
+# It expects to be run from the root of the uta repository.
 
 set -e
 
-# Input variables
-NCBI_DOWNLOAD_DIR=$(pwd)/ncbi
-PREVIOUS_UTA_VERSION=uta_20210129b
-SEQREPO_VERSION=2024-02-20
+NCBI_FILE_DIR=$1
+UTA_VERSION=$2
+SEQREPO_VERSION=$3
+
+if [ -z "$NCBI_FILE_DIR" ] || [ -z "$UTA_VERSION" ] || [ -z "$SEQREPO_VERSION" ]
+then
+    echo 'Usage: sbin/update-uta <ncbi_file_dir> <uta_version> <seqrepo_version>'
+    exit 1
+else
+    echo "Updating UTA and SeqRepo using files from $NCBI_FILE_DIR"
+    echo "Starting from UTA version $UTA_VERSION and SeqRepo version $SEQREPO_VERSION"
+fi
+
+exit 0
 
 # 2. Prepare SeqRepo
 # Input: seqrepo version
@@ -21,15 +32,15 @@ docker run --name seqrepo biocommons/seqrepo:$SEQREPO_VERSION
 # Output: docker image
 # This would also be done automatically as part of the docker compose run,
 # but explicitly pulling here for symmetry with seqrepo
-docker pull biocommons/uta:$PREVIOUS_UTA_VERSION
+docker pull biocommons/uta:$UTA_VERSION
 
 # 4. Update UTA and SeqRepo
-# Input: NCBI_DOWNLOAD_DIR populated with downloaded files
-# Input: PREVIOUS_UTA_VERSION
+# Input: NCBI_FILE_DIR populated with downloaded files
+# Input: UTA_VERSION
 # Output: Updated SeqRepo (updated in place)
 # Output: Updated UTA as a database dump
 docker build --file ../Dockerfile --tag uta-update:latest ..
-seqrepo_version=$SEQREPO_VERSION previous_uta_version=$PREVIOUS_UTA_VERSION docker compose -f docker-compose.uta.yml run --rm uta-update
+seqrepo_version=$SEQREPO_VERSION previous_uta_version=$UTA_VERSION docker compose -f docker-compose.uta.yml run --rm uta-update
 docker compose -f docker-compose.uta.yml down
 
 # 5. Publish UTA and SeqRepo

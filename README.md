@@ -289,6 +289,24 @@ To develop UTA, follow these steps.
 
 ## Running local UTA build
 
+### 1. Download files from NCBI
+
+Run the `sbin/ncbi-download-docker` script. Requires bash and docker.
+
+Example:
+```
+sbin/ncbi-download-docker local-ncbi-dir
+```
+
+### 2. Update UTA and SeqRepo
+
+Run the `sbin/update-uta` script. Requires bash and docker.
+
+Example:
+```
+sbin/update-uta local-ncbi-dir uta_20210129b 2024-02-20
+```
+
 ### Docker
 To run local build of UTA you can follow these steps...
 
@@ -317,9 +335,10 @@ To run local build of UTA you can follow these steps...
            --rm \
            --name uta-build \
            --volume .:/opt/repos/uta \
-           --volume <local path to working directory>:/temp \
+           --volume $(pwd)/uta-data-22:/temp \
            --volumes-from seqrepo \
-           --network=host uta-build:latest
+           --network=host \
+           uta-build:latest
 
 6. Once in the container you can run this script to create new schema, process input files,
    update the database, and dump a new artifact.
@@ -350,9 +369,3 @@ To run local build of UTA you can follow these steps...
                      ├── human.1.protein.faa.gz
                      ├── human.1.rna.fna.gz
                      └── human.1.rna.gbff.gz
-
-## Updating UTA
-
-To update UTA and SeqRepo, run `update.sh` from the `update` directory.
-
-The only dependencies of the script are bash and docker.
