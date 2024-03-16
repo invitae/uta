@@ -15,6 +15,8 @@ RUN pip install --upgrade setuptools
 RUN pip install pysam
 
 WORKDIR /opt/repos/uta/
-COPY pyproject.toml .
+COPY pyproject.toml ./
+COPY etc ./etc
+COPY sbin ./sbin
+COPY src ./src
 RUN pip install -e .[dev]
-COPY . .
