@@ -284,7 +284,12 @@ To develop UTA, follow these steps.
 
 3. Run container and tests
 
-        $ docker run -it --rm uta-build uta:latest
+        $ docker run -it --rm uta bash
+
+4. Testing
+
+        $ docker build --target uta-test -t uta-test .
+        $ docker run -it --rm uta-test bash
         $ python -m unittest
 
 ## UTA update procedure

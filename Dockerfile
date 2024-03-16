@@ -1,4 +1,4 @@
-FROM ubuntu:22.04
+FROM ubuntu:22.04 as uta
 
 # set python version and define arguments
 ARG python_version="3.10"
@@ -20,3 +20,9 @@ COPY etc ./etc
 COPY sbin ./sbin
 COPY src ./src
 RUN pip install -e .[dev]
+
+
+# UTA test image
+FROM uta as uta-test
+COPY tests ./tests
+RUN pip install -e .[test]
