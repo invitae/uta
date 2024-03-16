@@ -45,5 +45,3 @@ docker build -t uta-update .
 
 # docker compose doesn't respect the container name specified in the compose file, so container name is specified here
 docker compose run --rm --name uta-update uta-update
-
-# docker compose -f docker-compose.uta.yml down
