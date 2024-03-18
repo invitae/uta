@@ -1,4 +1,4 @@
-FROM ubuntu:22.04
+FROM ubuntu:22.04 as uta
 
 # set python version and define arguments
 ARG python_version="3.10"
@@ -14,11 +14,15 @@ RUN python -m pip install --upgrade pip
 RUN pip install --upgrade setuptools
 RUN pip install pysam
 
-ENV APP_HOME="/opt/repos/uta/"
-
-RUN mkdir -p ${APP_HOME}
-
-COPY . ${APP_HOME}
-WORKDIR ${APP_HOME}
-
+WORKDIR /opt/repos/uta/
+COPY pyproject.toml ./
+COPY etc ./etc
+COPY sbin ./sbin
+COPY src ./src
 RUN pip install -e .[dev]
+
+
+# UTA test image
+FROM uta as uta-test
+COPY tests ./tests
+RUN pip install -e .[test]

@@ -203,8 +203,8 @@ you will not need to install PostgreSQL or any of its dependencies.
     (code) version used to build the instance.
 
         $ psql -h localhost -U anonymous -d uta -c "select * from $uta_v.meta"
-        
-              key       |                               value                                
+
+              key       |                               value
         ----------------+--------------------------------------------------------------------
          schema_version | 1.1
          created on     | 2015-08-21T10:53:50.666152
@@ -213,7 +213,7 @@ you will not need to install PostgreSQL or any of its dependencies.
          (4 rows)
 
 6.  (Optional) To configure [hgvs](https://github.com/biocommons/hgvs)
-    to use this local installation, consult the 
+    to use this local installation, consult the
     [hgvs documentation](https://hgvs.readthedocs.io/en/latest/installation.html#local-installation-of-uta-optional)
 
 ### Installing from database dumps
@@ -243,7 +243,7 @@ the installation environment.*
     uta_admin are likely to ease installation.
 
         $ createuser -U postgres uta_admin
-        $ createdb -U postgres -O uta_admin uta 
+        $ createdb -U postgres -O uta_admin uta
 
 3.  Restore the database.
 
@@ -275,7 +275,7 @@ To develop UTA, follow these steps.
 ### Docker
 
 1. Clone UTA and build docker image:
-        
+
         $ git clone git@github.com:biocommons/uta.git
         $ cd uta
         $ docker build -t uta .
@@ -284,69 +284,62 @@ To develop UTA, follow these steps.
 
 3. Run container and tests
 
-        $ docker run -it --rm uta-build uta:latest
+        $ docker run -it --rm uta bash
+
+4. Testing
+
+        $ docker build --target uta-test -t uta-test .
+        $ docker run -it --rm uta-test bash
         $ python -m unittest
 
-## Running local UTA build
+## UTA update procedure
 
-### Docker
-To run local build of UTA you can follow these steps...
+### 1. Download files from NCBI
 
-1. Pick a UTA version as the base (ex. "uta_20210129b")
+Run `sbin/ncbi-download-docker`. Requires bash and docker.
 
-2. Setup local UTA Postgresql database Docker container by following the steps above 
-   (`Installing with Docker`). __NOTE__...It takes about 5 minutes before the local 
-   database is ready.
+Example:
+```
+sbin/ncbi-download-docker $(pwd)/ncbi-data
+```
 
-3. Setup local SeqRepo Docker volume. This can be done by running the following two
-   commands. __NOTE__...this step does require around ~13Gb of local disk space and 
-   takes roughly 30 minutes to complete. You need to wait until the `Docker run` 
-   command completes before moving to the next step.
+The specified directory will have the following structure:
 
-        $ docker pull biocommons/seqrepo
-        $ docker run --name seqrepo biocommons/seqrepo
+    ├── gene
+    │   └── DATA
+    │       ├── GENE_INFO
+    │       │   └── Mammalia
+    │       │       └── Homo_sapiens.gene_info.gz
+    │       └── gene2accession.gz
+    ├── genomes
+    │   └── refseq
+    │       └── vertebrate_mammalian
+    │           └── Homo_sapiens
+    │               └── all_assembly_versions
+    │                   └── GCF_000001405.25_GRCh37.p13
+    │                       ├── GCF_000001405.25_GRCh37.p13_genomic.fna.gz
+    │                       └── GCF_000001405.25_GRCh37.p13_genomic.gff.gz
+    └── refseq
+        └── H_sapiens
+            └── mRNA_Prot
+                ├── human.1.protein.faa.gz
+                ├── human.1.rna.fna.gz
+                └── human.1.rna.gbff.gz
 
-4. Build the image
+### 2. Download SeqRepo data
 
-        $ docker build -t uta-build .
+Run `sbin/seqrepo-download`. Requires bash and docker.
 
-5. Run UTA build. Supplying a local path with data needed for the workflow is a requirement.
+Example:
+```
+sbin/seqrepo-download 2024-02-20 $(pwd)/seqrepo-data
+```
 
-        $ docker run \
-           -it \
-           --rm \
-           --name uta-build \
-           --volume .:/opt/repos/uta \
-           --volume <local path to working directory>:/temp \
-           --volumes-from seqrepo \
-           --network=host uta-build:latest
+### 3. Update UTA and SeqRepo
 
-6. Once in the container you can run this script to create new schema, process input files, 
-   update the database, and dump a new artifact.
+Run `sbin/uta-update`. Requires bash and docker.
 
-        $ bash etc/scripts/run-uta-build.sh <previous UTA version> <seqrepo data release>
-
-   This update script is dependent on the following directory structure.
-
-        $ tree .
-         .
-         ├── gene
-         │   └── DATA
-         │       ├── GENE_INFO
-         │       │   └── Mammalia
-         │       │       └── Homo_sapiens.gene_info.gz
-         │       └── gene2accession.gz
-         ├── genomes
-         │   └── refseq
-         │       └── vertebrate_mammalian
-         │           └── Homo_sapiens
-         │               └── all_assembly_versions
-         │                   └── GCF_000001405.25_GRCh37.p13
-         │                       ├── GCF_000001405.25_GRCh37.p13_genomic.fna.gz
-         │                       └── GCF_000001405.25_GRCh37.p13_genomic.gff.gz
-         └── refseq
-             └── H_sapiens
-                 └── mRNA_Prot
-                     ├── human.1.protein.faa.gz
-                     ├── human.1.rna.fna.gz
-                     └── human.1.rna.gbff.gz
+Example:
+```
+sbin/uta-update $(pwd)/ncbi-data $(pwd)/seqrepo-data uta_20210129b 2021-01-29
+```
