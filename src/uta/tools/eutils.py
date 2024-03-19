@@ -1,10 +1,6 @@
-import logging
-
 import requests
 
 from uta import EutilsDownloadError
-
-logger = logging.getLogger(__name__)
 
 
 def download_from_eutils(accession: str, file_format: str, output_file: str) -> None:
