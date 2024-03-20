@@ -185,7 +185,7 @@ class TestUtaModels(unittest.TestCase):
         self.assertEqual(len(all_origins), 1)
 
         o = all_origins[0]
-        self.assertRegexpMatches(o.name, 'Testing')
+        self.assertRegex(o.name, 'Testing')
         self.assertEquals(o.url, 'http://bogus.com/')
         self.assertEquals(o.url_ac_fmt, 'http://bogus.com/{ac}')
 
@@ -216,14 +216,14 @@ class TestUtaModels(unittest.TestCase):
             usam.SeqAnno.ac == 'NC_000008.10').one()
         self.assertEquals(n.ac, u'NC_000008.10')
         # self.assertTrue(len(n.exon_sets),2)
-        self.assertRegexpMatches(n.origin.name, '^Testing')
+        self.assertRegex(n.origin.name, '^Testing')
         #self.assertEquals(len(n.transcripts), 0)
 
         n = self.session.query(usam.SeqAnno).filter(
             usam.SeqAnno.ac == 'NM_000680.2').one()
         self.assertEquals(n.ac, u'NM_000680.2')
         # self.assertTrue(len(n.exon_sets),1)
-        self.assertRegexpMatches(n.origin.name, '^Testing')
+        self.assertRegex(n.origin.name, '^Testing')
 
         n = self.session.query(usam.Seq).join(usam.Seq.aliases).filter(
             usam.SeqAnno.ac == 'NM_000680.2').one()
