@@ -186,8 +186,8 @@ class TestUtaModels(unittest.TestCase):
 
         o = all_origins[0]
         self.assertRegex(o.name, 'Testing')
-        self.assertEquals(o.url, 'http://bogus.com/')
-        self.assertEquals(o.url_ac_fmt, 'http://bogus.com/{ac}')
+        self.assertEqual(o.url, 'http://bogus.com/')
+        self.assertEqual(o.url_ac_fmt, 'http://bogus.com/{ac}')
 
         # NM_000680.2, NM_033302.2, NM_033303.3, NM_033304.2
         self.assertEqual(len(o.transcripts), 4)
@@ -214,23 +214,23 @@ class TestUtaModels(unittest.TestCase):
 
         n = self.session.query(usam.SeqAnno).filter(
             usam.SeqAnno.ac == 'NC_000008.10').one()
-        self.assertEquals(n.ac, u'NC_000008.10')
+        self.assertEqual(n.ac, u'NC_000008.10')
         # self.assertTrue(len(n.exon_sets),2)
         self.assertRegex(n.origin.name, '^Testing')
-        #self.assertEquals(len(n.transcripts), 0)
+        #self.assertEqual(len(n.transcripts), 0)
 
         n = self.session.query(usam.SeqAnno).filter(
             usam.SeqAnno.ac == 'NM_000680.2').one()
-        self.assertEquals(n.ac, u'NM_000680.2')
+        self.assertEqual(n.ac, u'NM_000680.2')
         # self.assertTrue(len(n.exon_sets),1)
         self.assertRegex(n.origin.name, '^Testing')
 
         n = self.session.query(usam.Seq).join(usam.Seq.aliases).filter(
             usam.SeqAnno.ac == 'NM_000680.2').one()
-        self.assertEquals(len(n.seq), 2281)
+        self.assertEqual(len(n.seq), 2281)
         self.assertTrue(n.seq.startswith('gaattccgaa'))
         self.assertTrue(n.seq.endswith('gacatttatg'))
-        #self.assertEquals(len(n.transcripts), 1)
+        #self.assertEqual(len(n.transcripts), 1)
 
     def test_exon_set(self):
         all_exon_sets = self.session.query(usam.Seq).all()
@@ -241,12 +241,12 @@ class TestUtaModels(unittest.TestCase):
 
         # http://www.ncbi.nlm.nih.gov/nuccore/NM_000680.2
         ## es = [ es for es in exon_sets if es.is_primary ][0]
-        ## self.assertEquals( (es.cds_start_i,es.cds_end_i), (436, 1837) )
-        ## self.assertEquals( len(es.exons), 2 )
-        ## self.assertEquals( es.is_primary, True )
-        ## self.assertEquals( es.ref_dnaseq.ac, 'NM_000680.2' )
-        ## self.assertEquals( es.strand, 1 )
-        ## self.assertEquals( es.transcript.ac, 'NM_000680.2' )
+        ## self.assertEqual( (es.cds_start_i,es.cds_end_i), (436, 1837) )
+        ## self.assertEqual( len(es.exons), 2 )
+        ## self.assertEqual( es.is_primary, True )
+        ## self.assertEqual( es.ref_dnaseq.ac, 'NM_000680.2' )
+        ## self.assertEqual( es.strand, 1 )
+        ## self.assertEqual( es.transcript.ac, 'NM_000680.2' )
 
         # seq_gene.md.gz:
         # 9606	8	26627222	26627665	-	NT_167187.1	14485368	14485811	-	NM_000680.2	GeneID:148	UTR	GRCh37.p10-Primary Assembly	NM_000680.2	-
@@ -254,12 +254,12 @@ class TestUtaModels(unittest.TestCase):
         # 9606	8	26721604	26722486	-	NT_167187.1	14579750	14580632	-	NP_000671.2	GeneID:148	CDS	GRCh37.p10-Primary Assembly	NM_000680.2	-
         # 9606	8	26722487	26722922	-	NT_167187.1	14580633	14581068	-	NM_000680.2	GeneID:148	UTR	GRCh37.p10-Primary Assembly	NM_000680.2	-
         ## es = [ es for es in exon_sets if not es.is_primary ][0]
-        ## self.assertEquals( (es.cds_start_i,es.cds_end_i), (26627665, 26722486) )
-        ## self.assertEquals( len(es.exons), 2 )
-        ## self.assertEquals( es.is_primary, False )
-        ## self.assertEquals( es.ref_dnaseq.ac, 'NC_000008.10' )
-        ## self.assertEquals( es.strand, -1 )
-        ## self.assertEquals( es.transcript.ac, 'NM_000680.2' )
+        ## self.assertEqual( (es.cds_start_i,es.cds_end_i), (26627665, 26722486) )
+        ## self.assertEqual( len(es.exons), 2 )
+        ## self.assertEqual( es.is_primary, False )
+        ## self.assertEqual( es.ref_dnaseq.ac, 'NC_000008.10' )
+        ## self.assertEqual( es.strand, -1 )
+        ## self.assertEqual( es.transcript.ac, 'NM_000680.2' )
 
     def test_exon(self):
         t = self.session.query(usam.Transcript).filter(
