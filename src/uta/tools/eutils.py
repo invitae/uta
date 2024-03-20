@@ -1,9 +1,16 @@
+from enum import Enum
+
 import requests
 
 from uta import EutilsDownloadError
 
 
-def download_from_eutils(accession: str, file_format: str, output_file: str) -> None:
+class NcbiFileFormatEnum(str, Enum):
+    FASTA = "fasta"
+    GENBANK = "gb"
+
+
+def download_from_eutils(accession: str, file_format: NcbiFileFormatEnum, output_file: str) -> None:
     """
     Download a file from NCBI using the eutils endpoint.
     Args:
@@ -11,8 +18,6 @@ def download_from_eutils(accession: str, file_format: str, output_file: str) -> 
     - file_format: File format to download ("fasta" or "gb")
     - output_file: Path to the file where the downloaded content will be saved
     """
-    if file_format not in ["fasta", "gb"]:
-        raise ValueError("file_format must be either 'fasta' or 'gb'")
 
     base_url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi"
     params = {

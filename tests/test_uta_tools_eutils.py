@@ -3,7 +3,7 @@ import unittest
 from unittest.mock import Mock, patch
 
 from uta import EutilsDownloadError
-from uta.tools.eutils import download_from_eutils
+from uta.tools.eutils import download_from_eutils, NcbiFileFormatEnum
 
 
 class TestEutils(unittest.TestCase):
@@ -23,7 +23,7 @@ class TestEutils(unittest.TestCase):
         mock_response.text = 'file content'
         mock_get.return_value = mock_response
 
-        download_from_eutils('accession', 'fasta', self.output_file)
+        download_from_eutils('accession', NcbiFileFormatEnum.FASTA, self.output_file)
 
         mock_get.assert_called_once_with(
             self.URL,
@@ -44,8 +44,4 @@ class TestEutils(unittest.TestCase):
         mock_response.status_code = 404
         mock_get.return_value = mock_response
         with self.assertRaises(EutilsDownloadError):
-            download_from_eutils('accession', 'fasta', self.output_file)
-
-    def test_invalid_file_format_raises(self):
-        with self.assertRaises(ValueError):
-            download_from_eutils('accession', 'invalid', self.output_file)
+            download_from_eutils('accession', NcbiFileFormatEnum.FASTA, self.output_file)
