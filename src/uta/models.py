@@ -251,7 +251,7 @@ class AssociatedAccessions(Base):
 
     # relationships:
     origin = sao.relationship("Origin", backref="associated_accessions")
-    transcript = sao.relationship("Seq", backref="associated_accessions")
+    transcript = sao.relationship("Transcript", backref="associated_accessions")
 
 
 # <LICENSE>

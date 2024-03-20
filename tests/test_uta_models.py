@@ -1,6 +1,7 @@
 import unittest
 
 import sqlalchemy
+from sqlalchemy import text
 import testing.postgresql
 
 import uta
@@ -54,8 +55,10 @@ class TestUtaModels(unittest.TestCase):
         cls._postgresql = testing.postgresql.Postgresql()
 
         engine = sqlalchemy.create_engine(cls._postgresql.url())
-        engine.execute('drop schema if exists {schema} cascade'.format(schema=usam.schema_name))
-        engine.execute('create schema {schema}'.format(schema=usam.schema_name))
+        with engine.connect() as connection:
+            connection.execute(text('drop schema if exists {schema} cascade'.format(schema=usam.schema_name)))
+            connection.execute(text('create schema {schema}'.format(schema=usam.schema_name)))
+            connection.commit()
         engine.dispose()
 
         cls.session = uta.connect(cls._postgresql.url())
@@ -171,7 +174,7 @@ class TestUtaModels(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        # sqlalchemy is keeping connections open and I can't figure out where
+        cls.session.close()
         # kill the database (we started it)
         import signal
         cls._postgresql.stop(_signal=signal.SIGKILL)
@@ -264,6 +267,10 @@ class TestUtaModels(unittest.TestCase):
         #es = [ es for es in t.exon_sets if es.is_primary ][0]
         #self.assertEqual( (es.exons[0].start_i,es.exons[0].end_i) , (0,1319) )
         #self.assertEqual( (es.exons[1].start_i,es.exons[1].end_i) , (1319,2281) )
+
+    def test_associated_accessions(self):
+        all_aa = self.session.query(usam.AssociatedAccessions).all()
+        self.assertEqual(len(all_aa), 4)
 
 
 if __name__ == '__main__':
