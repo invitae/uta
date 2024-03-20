@@ -6,6 +6,8 @@ import hashlib
 
 import sqlalchemy as sa
 import sqlalchemy.orm as sao
+import sqlalchemy.types
+import sqlalchemy.sql.functions
 from sqlalchemy.ext.declarative import declarative_base
 
 
@@ -218,6 +220,37 @@ class ExonAln(Base):
         "Exon", backref="alt_aln", foreign_keys=[alt_exon_id])
 
     # methods:
+
+
+class AssociatedAccessions(Base):
+    __tablename__ = "associated_accessions"
+    __table_args__ = (
+        sa.UniqueConstraint(
+            "tx_ac", "pro_ac", name="<tx_ac,pro_ac> must be unique"
+        ),
+    )
+
+    # columns:
+    tx_ac = sa.Column(
+        sa.Text,
+        sa.ForeignKey("transcript.ac", onupdate="CASCADE", ondelete="CASCADE"),
+        nullable=False,
+    )
+    pro_ac = sa.Column(sa.Text, nullable=False)
+    origin_id = sa.Column(
+        sa.Integer,
+        sa.ForeignKey("origin.origin_id", onupdate="CASCADE", ondelete="CASCADE"),
+        nullable=False,
+    )
+    added = sa.Column(
+        sqlalchemy.types.TIMESTAMP,
+        server_default=sqlalchemy.sql.functions.now(),
+        nullable=False,
+    )
+
+    # relationships:
+    origin = sao.relationship("Origin", backref="associated_accessions")
+    transcript = sao.relationship("Seq", backref="associated_accessions")
 
 
 # <LICENSE>
