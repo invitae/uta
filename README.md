@@ -289,7 +289,7 @@ To develop UTA, follow these steps.
 4. Testing
 
         $ docker build --target uta-test -t uta-test .
-        $ docker run -it --rm uta-test bash
+        $ docker run -it --rm -v $(pwd)/tests:/opt/repos/uta/tests uta-test bash
         $ python -m unittest
 
 ## UTA update procedure
