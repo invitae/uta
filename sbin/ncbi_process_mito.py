@@ -1,5 +1,54 @@
 """
-Download mito fasta and gbff file.
+Download mito fasta and gbff file. Use BioPython to parse the features in the Mitochondrial genbank file to get
+the attributes of a region of the genome that correspond to genes along with their attributes. Output gene/tx/alignment
+details to intermediate file needed to update UTA database and SeqRepo.
+
+    FEATURES             Location/Qualifiers
+     source          1..16569
+                     /organism="Homo sapiens"
+                     /organelle="mitochondrion"
+                     /mol_type="genomic DNA"
+                     /isolation_source="caucasian"
+                     /db_xref="taxon:9606"
+                     /tissue_type="placenta"
+                     /country="United Kingdom: Great Britain"
+                     /note="this is the rCRS"
+     D-loop          complement(join(16024..16569,1..576))
+     gene            577..647
+                     /gene="TRNF"
+                     /nomenclature="Official Symbol: MT-TF | Name:
+                     mitochondrially encoded tRNA phenylalanine | Provided by:
+                     HGNC:HGNC:7481"
+                     /db_xref="GeneID:4558"
+                     /db_xref="HGNC:HGNC:7481"
+                     /db_xref="MIM:590070"
+     tRNA            577..647
+                     /gene="TRNF"
+                     /product="tRNA-Phe"
+                     /note="NAR: 1455"
+                     /anticodon=(pos:611..613,aa:Phe,seq:gaa)
+                     /codon_recognized="UUC"
+                     /db_xref="GeneID:4558"
+                     /db_xref="HGNC:HGNC:7481"
+                     /db_xref="MIM:590070"
+     gene            648..1601
+                     /gene="RNR1"
+                     /gene_synonym="MTRNR1"
+                     /nomenclature="Official Symbol: MT-RNR1 | Name:
+                     mitochondrially encoded 12S RNA | Provided by:
+                     HGNC:HGNC:7470"
+                     /db_xref="GeneID:4549"
+                     /db_xref="HGNC:HGNC:7470"
+                     /db_xref="MIM:561000"
+     rRNA            648..1601
+                     /gene="RNR1"
+                     /gene_synonym="MTRNR1"
+                     /product="s-rRNA"
+                     /note="12S rRNA; 12S ribosomal RNA"
+                     /db_xref="GeneID:4549"
+                     /db_xref="HGNC:HGNC:7470"
+                     /db_xref="MIM:561000"
+                     ...
 """
 import argparse
 import dataclasses
@@ -121,7 +170,6 @@ def get_mito_genes(gbff_filepath: str):
             for feature in record.features:
                 xrefs = parse_db_xrefs(feature)
 
-                # slice sequence using feature location
                 feature_start, feature_end = (
                     feature.location.start,
                     feature.location.end,
@@ -129,6 +177,7 @@ def get_mito_genes(gbff_filepath: str):
 
                 # dependent on feature type, process data and output if appropriate
                 if feature.type == "gene":
+                    # assert subsequent features represent the same location
                     assert feature_start == feature.location.start
                     assert feature_end == feature.location.end
                     # for gene feature do not yield anything, just set gene level attributes
@@ -136,9 +185,9 @@ def get_mito_genes(gbff_filepath: str):
                     nomenclature = parse_nomenclature_value(feature)
                     hgnc = nomenclature["Official Symbol"]
                     name = nomenclature["Name"]
-                    ac = f"{record.id}_{feature.location.start:05}_{feature.location.end:05}"
 
                 elif feature.type in ("tRNA", "rRNA", "CDS"):
+                    # assert subsequent features represent the same location and gene
                     assert int(xrefs["GeneID"]) == gene_id
                     assert feature_start == feature.location.start
                     assert feature_end == feature.location.end
@@ -149,6 +198,7 @@ def get_mito_genes(gbff_filepath: str):
                     transl_except = None
 
                     # retrieve sequence, and reverse compliment if on reverse strand
+                    ac = f"{record.id}_{feature.location.start:05}_{feature.location.end:05}"
                     feature_seq = record.seq[feature_start:feature_end]
                     strand = "+"
                     if feature.location.strand == -1:
