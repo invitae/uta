@@ -250,8 +250,8 @@ def load_assoc_ac(session, opts, cf):
     """
     logger.info("load_assoc_ac")
 
-    # admin_role = cf.get("uta", "admin_role")
-    # session.execute(text(f"set role {admin_role};"))
+    admin_role = cf.get("uta", "admin_role")
+    session.execute(text(f"set role {admin_role};"))
     session.execute(text(f"set search_path = {usam.schema_name};"))
     fname = opts["FILE"]
     origins = dict()  # map from origin to origin_id. ex: {NCBI: 10}

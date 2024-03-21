@@ -120,11 +120,8 @@ def main():
         cmd=cmd, elapsed=time.time() - t0))
 
 
-
 if __name__ == "__main__":
     main()
-
-
 
 
 # <LICENSE>

@@ -15,12 +15,18 @@ class TestUtaLoading(unittest.TestCase):
     def setUp(self):
         self.db = testing.postgresql.Postgresql()
         self.session = uta.connect(self.db.url())
-        self.session.execute(sa.text('drop schema if exists {schema} cascade'.format(schema=usam.schema_name)))
-        self.session.execute(sa.text('create schema {schema}'.format(schema=usam.schema_name)))
+        schema = usam.schema_name
+        self.session.execute(sa.text(f'drop schema if exists {schema} cascade'))
+        self.session.execute(sa.text(f'create schema {schema}'))
+        self.session.execute(sa.text('create role uta_admin'))
+        self.session.execute(sa.text(f'grant all privileges on schema {schema} to uta_admin'))
         self.session.commit()
 
         # create all uta tables
         usam.Base.metadata.create_all(self.session.bind.engine)
+        self.session.execute(sa.text(f'grant all privileges on all tables in schema {schema} to uta_admin'))
+        self.session.execute(sa.text(f'grant all privileges on all sequences in schema {schema} to uta_admin'))
+        self.session.commit()
 
     def tearDown(self):
         self.session.close()
@@ -77,11 +83,11 @@ class TestUtaLoading(unittest.TestCase):
 
         self.session.commit()
 
-        # cf = configparser.ConfigParser()
-        # cf.add_section('uta')
-        # cf.set('uta', 'admin_role', 'uta_admin')
+        cf = configparser.ConfigParser()
+        cf.add_section('uta')
+        cf.set('uta', 'admin_role', 'uta_admin')
 
-        ul.load_assoc_ac(self.session, {"FILE": "tests/data/assocacs.gz"}, None)
+        ul.load_assoc_ac(self.session, {'FILE': 'tests/data/assocacs.gz'}, cf)
 
         # check associated_accessions table
         aa = self.session.query(usam.AssociatedAccessions).order_by(usam.AssociatedAccessions.tx_ac).all()
@@ -104,4 +110,3 @@ class TestUtaLoading(unittest.TestCase):
             },
         ]
         self.assertEqual(aa_list, expected_aa_list)
-        breakpoint()
