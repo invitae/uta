@@ -84,5 +84,24 @@ class TestUtaLoading(unittest.TestCase):
         ul.load_assoc_ac(self.session, {"FILE": "tests/data/assocacs.gz"}, None)
 
         # check associated_accessions table
-        all_aa = self.session.query(usam.AssociatedAccessions).order_by(usam.AssociatedAccessions.tx_ac).all()
-        self.assertEqual(len(all_aa), 3)
+        aa = self.session.query(usam.AssociatedAccessions).order_by(usam.AssociatedAccessions.tx_ac).all()
+        aa_list = [{'tx_ac': aa.tx_ac, 'pro_ac': aa.pro_ac, 'origin_name': aa.origin.name} for aa in aa]
+        expected_aa_list = [
+            {
+                'tx_ac': 'DummyTx',
+                'pro_ac': 'DummyProtein',
+                'origin_name': 'DummyOrigin',
+            },
+            {
+                'tx_ac': 'NM_001097.3',
+                'pro_ac': 'NP_001088.2',
+                'origin_name': 'NCBI',
+            },
+            {
+                'tx_ac': 'NM_001098.3',
+                'pro_ac': 'NP_001089.1',
+                'origin_name': 'NCBI',
+            },
+        ]
+        self.assertEqual(aa_list, expected_aa_list)
+        breakpoint()
