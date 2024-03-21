@@ -2,17 +2,16 @@
 Download mito fasta and gbff file.
 """
 import argparse
-from collections import Counter
 import dataclasses
+import importlib_resources
 import logging
 import logging.config
-import math
-from pathlib import Path
-import pkg_resources
-import requests
 from typing import Dict, Optional
 
+from Bio.Seq import Seq
 import Bio.SeqIO
+from Bio.SeqFeature import SeqFeature
+from Bio.SeqRecord import SeqRecord
 from bioutils.digests import seq_md5
 from more_itertools import first, one
 
@@ -20,6 +19,7 @@ from uta.formats.geneaccessions import GeneAccessions, GeneAccessionsWriter
 from uta.formats.seqinfo import SeqInfo, SeqInfoWriter
 from uta.formats.txinfo import TxInfo, TxInfoWriter
 from uta.formats.exonset import ExonSet, ExonSetWriter
+from uta.tools.eutils import download_from_eutils, NcbiFileFormatEnum
 
 
 @dataclasses.dataclass
@@ -35,8 +35,9 @@ class MitoGeneData:
     alt_start: int
     alt_end: int
     strand: str
-    transl_table: str
     origin: str = "NCBI"
+    alignment_method: str = "splign"
+    transl_table: Optional[str] = None
     transl_except: Optional[str] = None
     pro_ac: Optional[str] = None
     pro_seq: Optional[str] = None
@@ -45,94 +46,75 @@ class MitoGeneData:
         return f"{self.tx_start},{self.tx_end}"
 
     def cds_se_i(self) -> str:
-        value = ''
-        if self.pro_ac is not None:
-            value = self.exons_se_i()
-        return value
+        return self.exons_se_i() if self.pro_ac else ""
+
+    def alt_exons_se_i(self) -> str:
+        return f"{self.alt_start},{self.alt_end}"
 
 
-logging_conf_fn = pkg_resources.resource_filename(
-    "uta", "etc/logging.conf")
+logging_conf_fn = importlib_resources.files("uta").joinpath("etc/logging.conf")
 logging.config.fileConfig(logging_conf_fn)
 logging.getLogger().setLevel(logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-def parse_args(argv):
-    parser = argparse.ArgumentParser(
-        description=__doc__,
-    )
+def parse_args():
+    parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("accession", type=str)
     parser.add_argument("--output-dir", "-o", default=".", type=str)
-    arguments = parser.parse_args(argv)
-    return arguments
+    return parser.parse_args()
 
 
-def download(url_str, local_path):
-    logger.info(f"downloading {url_str} to {local_path}")
+def download_mito_files(output_dir: str, accession: str) -> Dict[str, str]:
+    logger.info(f"downloading files for {accession}")
+    mt_gb_filepath = f"{output_dir}/{accession}.gbff"
+    mt_fa_filepath = f"{output_dir}/{accession}.fna"
 
-    # get total:
-    response = requests.get(url_str, stream=True)
+    logger.info(f"downloading {NcbiFileFormatEnum.GENBANK} file to {mt_gb_filepath}")
+    download_from_eutils(accession, NcbiFileFormatEnum.GENBANK, mt_gb_filepath)
 
-    with open(local_path, "wb") as handle:
-        for data in response.iter_content():
-            handle.write(data)
-
-
-def check_mito_files(output_dir: str, accession: str) -> Dict[str, Path]:
-    # TODO: replace with built in utility
-    ncbi_fetch_url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=nuccore&id={}&retmode=text&rettype={}"
-    mt_gb_filepath = Path(output_dir) / Path(f"{accession.split('.')[0]}.gbff")
-    mt_fa_filepath = Path(output_dir) / Path(f"{accession.split('.')[0]}.fna")
-
-    if any([not file.exists() for file in (mt_gb_filepath, mt_fa_filepath)]):
-        # get gbff
-        download(url_str=ncbi_fetch_url.format(accession, "gb"), local_path=mt_gb_filepath)
-        # get fasta
-        download(
-            url_str=ncbi_fetch_url.format(accession, "fasta"), local_path=mt_fa_filepath
-        )
-    else:
-        logger.info(f"Previously downloaded files for {accession} have been found")
-        logger.info(f"  - GBFF: {mt_gb_filepath}")
-        logger.info(f"  - FNA: {mt_fa_filepath}")
+    logger.info(f"downloading {NcbiFileFormatEnum.FASTA} file to {mt_fa_filepath}")
+    download_from_eutils(accession, NcbiFileFormatEnum.FASTA, mt_fa_filepath)
 
     return {"gbff": mt_gb_filepath, "fna": mt_fa_filepath}
 
 
-def parse_db_xrefs(gb_feature):
+def parse_db_xrefs(gb_feature: SeqFeature) -> Dict[str, str]:
     """
     Example:
         Key: db_xref
         Value: ['GeneID:4558', 'HGNC:HGNC:7481', 'MIM:590070']
     """
-    if "db_xref" in gb_feature.qualifiers:
-        return {
-            x[0]: x[-1]
-            for x in list(map(lambda x: x.split(":"), gb_feature.qualifiers["db_xref"]))
-        }
-    return {}
+    return {
+        x.partition(":")[0].strip(): x.partition(":")[2].strip()
+        for x in gb_feature.qualifiers.get("db_xref", [])
+    }
 
 
-def parse_nomenclature_value(gb_feature):
+def parse_nomenclature_value(gb_feature: SeqFeature) -> Dict[str, str]:
     """
     Example:
         Key: nomenclature
         Value: ['Official Symbol: MT-TF | Name: mitochondrially encoded tRNA phenylalanine | Provided by: HGNC:HGNC:7481']
     """
-    results = {}
+    nomenclature_key = "nomenclature"
+    nomenclature_results: Dict[str, str] = {}
+    if nomenclature_key in gb_feature.qualifiers:
+        nomenclature_list = list(
+            map(
+                lambda x: x.strip(),
+                one(gb_feature.qualifiers[nomenclature_key]).split("|"),
+            )
+        )
+        nomenclature_results = {
+            x.partition(":")[0].strip(): x.partition(":")[2].strip()
+            for x in nomenclature_list
+        }
 
-    nomenclature_list = list(
-        map(lambda x: x.strip(), one(gb_feature.qualifiers["nomenclature"]).split("|"))
-    )
-    for nomenclature in nomenclature_list:
-        key, value = nomenclature.split(":")
-        results[key.strip()] = value.strip()
-
-    return results
+    return nomenclature_results
 
 
-def get_mito_features(gbff_filepath: str):
+def get_mito_genes(gbff_filepath: str):
     logger.info(f"processing NCBI GBFF file from {gbff_filepath}")
     with open(gbff_filepath) as fh:
         for record in Bio.SeqIO.parse(fh, "gb"):
@@ -144,70 +126,160 @@ def get_mito_features(gbff_filepath: str):
                     feature.location.start,
                     feature.location.end,
                 )
-                feature_seq = record.seq[feature_start:feature_end]
-                strand = "+"
-                if feature.location.strand == -1:
-                    strand = "-"
-                    feature_seq = feature_seq.reverse_complement()
-                    feature_start, feature_end = feature_end, feature_start
 
                 # dependent on feature type, process data and output if appropriate
                 if feature.type == "gene":
+                    assert feature_start == feature.location.start
+                    assert feature_end == feature.location.end
                     # for gene feature do not yield anything, just set gene level attributes
                     gene_id = int(xrefs["GeneID"])
                     nomenclature = parse_nomenclature_value(feature)
                     hgnc = nomenclature["Official Symbol"]
                     name = nomenclature["Name"]
-                    ac = f"{record.id}_{feature.location.start}_{feature.location.end}"
+                    ac = f"{record.id}_{feature.location.start:05}_{feature.location.end:05}"
 
                 elif feature.type in ("tRNA", "rRNA", "CDS"):
                     assert int(xrefs["GeneID"]) == gene_id
+                    assert feature_start == feature.location.start
+                    assert feature_end == feature.location.end
                     # if feature type not CDS, set defaults
                     pro_ac = None
                     pro_seq = None
                     transl_table = None
                     transl_except = None
 
+                    # retrieve sequence, and reverse compliment if on reverse strand
+                    feature_seq = record.seq[feature_start:feature_end]
+                    strand = "+"
+                    if feature.location.strand == -1:
+                        strand = "-"
+                        feature_seq = feature_seq.reverse_complement()
+
                     if feature.type == "CDS":
                         # override defaults for CDS features
                         pro_ac = one(feature.qualifiers["protein_id"])
-                        pro_seq = one(feature.qualifiers["translation"])
+                        pro_seq = str(one(feature.qualifiers["translation"]))
                         transl_table = one(feature.qualifiers["transl_table"])
                         if "transl_except" in feature.qualifiers:
                             transl_except = one(feature.qualifiers["transl_except"])
 
-                # yield gene data
-                yield MitoGeneData(
-                    gene_id=gene_id,
-                    gene_symbol=hgnc,
-                    name=name,
-                    tx_ac=ac,
-                    tx_seq=feature_seq,
-                    tx_start=0,
-                    tx_end=feature.location.end - feature.location.start,
-                    alt_ac=record.id,
-                    alt_start=feature_start,
-                    alt_end=feature_end,
-                    strand=strand,
-                    transl_table=transl_table,
-                    transl_except=transl_except,
-                    pro_ac=pro_ac,
-                    pro_seq=pro_seq,
-                )
+                    # yield gene data
+                    yield MitoGeneData(
+                        gene_id=gene_id,
+                        gene_symbol=hgnc,
+                        name=name,
+                        tx_ac=ac,
+                        tx_seq=str(feature_seq),
+                        tx_start=0,
+                        tx_end=feature.location.end - feature.location.start,
+                        alt_ac=record.id,
+                        alt_start=feature_start,
+                        alt_end=feature_end,
+                        strand=strand,
+                        transl_table=transl_table,
+                        transl_except=transl_except,
+                        pro_ac=pro_ac,
+                        pro_seq=pro_seq,
+                    )
 
 
 def main(ncbi_accession: str, output_dir: str):
     # get input files
-    input_files = check_mito_files(output_dir=output_dir, accession=ncbi_accession)
+    input_files = download_mito_files(output_dir=output_dir, accession=ncbi_accession)
 
     # extract Mitochondrial gene information
-    mito_genes = [mg for mf in input_files.values() for mg in get_mito_features(mf)]
+    mito_genes = [mg for mf in input_files.values() for mg in get_mito_genes(mf)]
     logger.info(f"found {len(mito_genes)} genes from parsing {input_files['gbff']}")
 
-    logger.info(f"found {Counter(gene_types)} from parsing {input_files['gbff']}")
+    # write gene accessions
+    with open(f"{output_dir}/{ncbi_accession}.assocacs", "w") as o_file:
+        gaw = GeneAccessionsWriter(o_file)
+        for mg in mito_genes:
+            if mg.pro_ac is not None:
+                gaw.write(
+                    GeneAccessions(
+                        mg.gene_symbol, mg.tx_ac, mg.gene_id, mg.pro_ac, mg.origin
+                    )
+                )
+
+    # write sequence information
+    with open(f"{output_dir}/{ncbi_accession}.seqinfo", "w") as o_file:
+        siw = SeqInfoWriter(o_file)
+        for mg in mito_genes:
+            siw.write(
+                SeqInfo(
+                    seq_md5(mg.tx_seq),
+                    mg.origin,
+                    mg.tx_ac,
+                    mg.name,
+                    len(mg.tx_seq),
+                    None,
+                )
+            )
+            if mg.pro_ac is not None:
+                siw.write(
+                    SeqInfo(
+                        seq_md5(mg.pro_seq),
+                        mg.origin,
+                        mg.pro_ac,
+                        mg.name,
+                        len(mg.pro_seq),
+                        None,
+                    )
+                )
+
+    # write out transcript sequence fasta files.
+    with open(f"{output_dir}/{ncbi_accession}.rna.fna", "w") as o_file:
+        for mg in mito_genes:
+            record = SeqRecord(
+                Seq(mg.tx_seq),
+                id=mg.tx_ac,
+                description=mg.name,
+            )
+            o_file.write(record.format("fasta"))
+
+    # write out protein sequence fasta files.
+    with open(f"{output_dir}/{ncbi_accession}.protein.faa", "w") as o_file:
+        for mg in mito_genes:
+            if mg.pro_ac is not None:
+                record = SeqRecord(
+                    Seq(mg.pro_seq),
+                    id=mg.pro_ac,
+                    description=mg.name,
+                )
+                o_file.write(record.format("fasta"))
+
+    # write transcript information
+    with open(f"{output_dir}/{ncbi_accession}.txinfo", "w") as o_file:
+        tiw = TxInfoWriter(o_file)
+        for mg in mito_genes:
+            tiw.write(
+                TxInfo(
+                    mg.origin,
+                    mg.tx_ac,
+                    mg.gene_id,
+                    mg.gene_symbol,
+                    mg.cds_se_i(),
+                    mg.exons_se_i(),
+                )
+            )
+
+    # write exonset
+    with open(f"{output_dir}/{ncbi_accession}.exonset", "w") as o_file:
+        esw = ExonSetWriter(o_file)
+        for mg in mito_genes:
+            esw.write(
+                ExonSet(
+                    mg.tx_ac,
+                    mg.alt_ac,
+                    mg.alignment_method,
+                    mg.strand,
+                    mg.alt_exons_se_i(),
+                )
+            )
 
 
 if __name__ == "__main__":
     args = parse_args()
 
-    main(args.output_dir, args.accession)
+    main(args.accession, args.output_dir)
