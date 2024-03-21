@@ -244,10 +244,14 @@ def grant_permissions(session, opts, cf):
 
 
 def load_assoc_ac(session, opts, cf):
+    """
+    Insert rows into `associated_accessions` table in the UTA database,
+    using data from a file written by GeneAccessionsWriter.
+    """
     logger.info("load_assoc_ac")
 
-    admin_role = cf.get("uta", "admin_role")
-    session.execute(text(f"set role {admin_role};"))
+    # admin_role = cf.get("uta", "admin_role")
+    # session.execute(text(f"set role {admin_role};"))
     session.execute(text(f"set search_path = {usam.schema_name};"))
     fname = opts["FILE"]
     origins = dict()  # map from origin to origin_id. ex: {NCBI: 10}
@@ -256,7 +260,7 @@ def load_assoc_ac(session, opts, cf):
     with gzip.open(fname, "rt") as fhandle:
         for row in ufga.GeneAccessionsReader(fhandle):
             if row.origin not in origins:
-                origin = session.get(usam.Origin, {"name": row.origin})
+                origin = session.query(usam.Origin).filter_by(name=row.origin).one()
                 if origin is None:
                     raise UnknownOriginNameError(name=row.origin)
                 else:
