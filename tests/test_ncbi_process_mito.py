@@ -175,9 +175,9 @@ class TestNcbiProcessMito(unittest.TestCase):
         self.assertEqual(
             sorted([r.gene_symbol for r in results]), expected_gene_symbols
         )
-        self.assertEqual(sorted([r.origin for r in results]), [expected_origin] * 37)
+        self.assertEqual([r.origin for r in results], [expected_origin] * 37)
         self.assertEqual(
-            sorted([r.alignment_method for r in results]), [expected_aln_method] * 37
+            [r.alignment_method for r in results], [expected_aln_method] * 37
         )
 
         results_by_gene = {mg.gene_id: mg for mg in results}
