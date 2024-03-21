@@ -21,6 +21,17 @@ class InvalidHGVSVariantError(UTAError):
 class EutilsDownloadError(Exception):
     pass
 
+
+class UnknownOriginNameError(UTAError):
+    """Error raised when an origin name does not exist in UTA origin table."""
+    def __init__(self, name: str):
+        super().__init__()
+        self.name = name
+
+    def __str__(self):
+        return f"Origin name does not exist in UTA: {self.name}"
+
+
 # <LICENSE>
 # Copyright 2014 UTA Contributors (https://bitbucket.org/biocommons/uta)
 ##

@@ -23,7 +23,9 @@ import uta_align as utaa
 from uta.lru_cache import lru_cache
 
 import uta
+from uta.exceptions import UnknownOriginNameError
 import uta.formats.exonset as ufes
+import uta.formats.geneaccessions as ufga
 import uta.formats.geneinfo as ufgi
 import uta.formats.seqinfo as ufsi
 import uta.formats.txinfo as ufti
@@ -241,6 +243,41 @@ def grant_permissions(session, opts, cf):
     session.commit()
 
 
+def load_assoc_ac(session, opts, cf):
+    logger.info("load_assoc_ac")
+
+    admin_role = cf.get("uta", "admin_role")
+    session.execute(text(f"set role {admin_role};"))
+    session.execute(text(f"set search_path = {usam.schema_name};"))
+    fname = opts["FILE"]
+    origins = dict()  # map from origin to origin_id. ex: {NCBI: 10}
+
+    # first pass: get all unique origins
+    with gzip.open(fname, "rt") as fhandle:
+        for row in ufga.GeneAccessionsReader(fhandle):
+            if row.origin not in origins:
+                origin = session.get(usam.Origin, {"name": row.origin})
+                if origin is None:
+                    raise UnknownOriginNameError(name=row.origin)
+                else:
+                    origins[row.origin] = origin.origin_id
+
+    logger.info(f"Unique origins: {origins}")
+
+    # second pass: insert associated_accession records
+    with gzip.open(fname, "rt") as fhandle:
+        for row in ufga.GeneAccessionsReader(fhandle):
+            aa = usam.AssociatedAccessions(
+                origin_id=origins[row.origin],
+                pro_ac=row.pro_ac,
+                tx_ac=row.tx_ac,
+            )
+            session.merge(aa)
+            logger.info(f"Added row: {aa.tx_ac}, {aa.pro_ac}, {aa.origin_id}")
+
+    session.commit()
+
+
 def load_exonset(session, opts, cf):
     # exonsets and associated exons are loaded together
 
@@ -266,7 +303,7 @@ def load_exonset(session, opts, cf):
             logger.exception(e)
             session.rollback()
             n_errors += 1
-        finally:        
+        finally:
             (no) = (n is not None, o is not None)
             if no == (True, False):
                 n_new += 1
@@ -306,7 +343,7 @@ def load_geneinfo(session, opts, cf):
 
 def load_ncbi_geneinfo(session, opts, cf):
     """
-    import data as downloaded (by you) from 
+    import data as downloaded (by you) from
     ftp://ftp.ncbi.nlm.nih.gov/gene/DATA/gene_info.gz
     """
 
@@ -476,7 +513,7 @@ def load_seqinfo(session, opts, cf):
     for md5, si_iter in itertools.groupby(sorted(sir, key=lambda si: si.md5),
                                           key=lambda si: si.md5):
         sis = list(si_iter)
-    
+
         # if sequence doesn't exist in sequence table, make it
         # this is to satisfy a FK dependency, which should be reconsidered
         si = sis[0]
@@ -689,8 +726,6 @@ def load_txinfo(session, opts, cf):
                 i_ti=i_ti, n_rows=n_rows,
                 n_new=n_new, n_unchanged=n_unchanged, n_cds_changed=n_cds_changed, n_exons_changed=n_exons_changed,
                 p=(i_ti + 1) / n_rows * 100))
-            
-
 
 
 def refresh_matviews(session, opts, cf):
@@ -750,7 +785,7 @@ def _upsert_exon_set_record(session, tx_ac, alt_ac, strand, method, ess):
     (new, None) -- no prior record; new was inserted
     (None, old) -- prior record and unchaged; nothing was inserted
     (new, old)  -- prior record existed and was changed
-    
+
     """
 
     key = (tx_ac, alt_ac, method)
