@@ -1,3 +1,4 @@
+import datetime
 import unittest
 
 import sqlalchemy
@@ -271,6 +272,14 @@ class TestUtaModels(unittest.TestCase):
     def test_associated_accessions(self):
         all_aa = self.session.query(usam.AssociatedAccessions).all()
         self.assertEqual(len(all_aa), 4)
+        # check values in one row:
+        aa = self.session.query(usam.AssociatedAccessions).filter_by(tx_ac='NM_000680.2').one()
+        self.assertIsInstance(aa.associated_accession_id, int)
+        self.assertIsInstance(aa.added, datetime.datetime)
+        self.assertEqual(aa.tx_ac, 'NM_000680.2')
+        self.assertEqual(aa.pro_ac, 'NP_000671.2')
+        self.assertEqual(aa.origin.name, 'Testing (originally NCBI, via Eutils)')
+
 
 
 if __name__ == '__main__':
