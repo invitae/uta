@@ -38,24 +38,24 @@ class TestUtaLoading(unittest.TestCase):
         Test loading file tests/data/assocacs.gz
         """
 
-        # # insert origins referenced in data file
-        # o1 = usam.Origin(
-        #     name='NCBI',
-        #     url='http://bogus.com/ncbi',
-        #     url_ac_fmt='http://bogus.com/ncbi/{ac}',
-        # )
-        # o2 = usam.Origin(
-        #     name='DummyOrigin',
-        #     url='http://bogus.com/dummy',
-        #     url_ac_fmt='http://bogus.com/dummy/{ac}',
-        # )
-        # self.session.add(o1)
-        # self.session.add(o2)
+        # insert origins referenced in data file
+        o1 = usam.Origin(
+            name='NCBI',
+            url='http://bogus.com/ncbi',
+            url_ac_fmt='http://bogus.com/ncbi/{ac}',
+        )
+        o2 = usam.Origin(
+            name='DummyOrigin',
+            url='http://bogus.com/dummy',
+            url_ac_fmt='http://bogus.com/dummy/{ac}',
+        )
+        self.session.add(o1)
+        self.session.add(o2)
 
         # insert transcripts referenced in data file
         t1 = usam.Transcript(
             ac='NM_001097.3',
-            origin='NCBI',
+            origin=o1,
             hgnc='ACR',
             cds_start_i=0,
             cds_end_i=1,
@@ -63,7 +63,7 @@ class TestUtaLoading(unittest.TestCase):
         )
         t2 = usam.Transcript(
             ac='NM_001098.3',
-            origin='NCBI',
+            origin=o1,
             hgnc='ACO2',
             cds_start_i=2,
             cds_end_i=3,
@@ -71,7 +71,7 @@ class TestUtaLoading(unittest.TestCase):
         )
         t3 = usam.Transcript(
             ac='DummyTx',
-            origin='DummyOrigin',
+            origin=o2,
             hgnc='DummyGene',
             cds_start_i=4,
             cds_end_i=5,
