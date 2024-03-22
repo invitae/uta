@@ -7,6 +7,7 @@ import hashlib
 import itertools
 import logging
 import time
+from typing import Any
 
 from biocommons.seqrepo import SeqRepo
 from bioutils.coordinates import strand_pm_to_int, MINUS_STRAND
@@ -14,6 +15,7 @@ from bioutils.digests import seq_md5
 from bioutils.sequences import reverse_complement
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy import text
+from sqlalchemy.orm import Session
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy import text
 import psycopg2.extras
@@ -23,7 +25,7 @@ import uta_align as utaa
 from uta.lru_cache import lru_cache
 
 import uta
-from uta.exceptions import UnknownOriginNameError
+from uta.exceptions import InconsistentDataError, UnknownOriginNameError
 import uta.formats.exonset as ufes
 import uta.formats.geneaccessions as ufga
 import uta.formats.geneinfo as ufgi
@@ -256,7 +258,7 @@ def load_assoc_ac(session, opts, cf):
     fname = opts["FILE"]
     origins = dict()  # map from origin to origin_id. ex: {NCBI: 10}
 
-    # first pass: get all unique origins
+    # first pass: get all unique origin names
     with gzip.open(fname, "rt") as fhandle:
         for row in ufga.GeneAccessionsReader(fhandle):
             if row.origin not in origins:
@@ -270,14 +272,26 @@ def load_assoc_ac(session, opts, cf):
 
     # second pass: insert associated_accession records
     with gzip.open(fname, "rt") as fhandle:
-        for row in ufga.GeneAccessionsReader(fhandle):
-            aa = usam.AssociatedAccessions(
-                origin_id=origins[row.origin],
-                pro_ac=row.pro_ac,
-                tx_ac=row.tx_ac,
-            )
-            session.merge(aa)
-            logger.info(f"Added row: {aa.tx_ac}, {aa.pro_ac}, {aa.origin_id}")
+        for file_row in ufga.GeneAccessionsReader(fhandle):
+            row = {
+                "origin_id": origins[file_row.origin],
+                "pro_ac": file_row.pro_ac,
+                "tx_ac": file_row.tx_ac,
+            }
+            aa, created = _get_or_insert(session=session, table=usam.AssociatedAccessions, row=row, row_identifier=('tx_ac', 'pro_ac'))
+            if created:
+                logger.info(f"Added row: {aa.tx_ac}, {aa.pro_ac}, {aa.origin_id}")
+            else:
+                logger.info(f"Did not add file row: {file_row}")
+                # All fields should should match when unique identifiers match.
+                # Discrepancies should be investigated.
+                existing_row = {
+                    "origin_id": aa.origin_id,
+                    "pro_ac": aa.pro_ac,
+                    "tx_ac": aa.tx_ac,
+                }
+                if row != existing_row:
+                    raise InconsistentDataError(current=row, previous=existing_row)
 
     session.commit()
 
@@ -779,6 +793,28 @@ def _get_seqrepo(cf):
 
 _get_seqfetcher = _get_seqrepo
 
+
+def _get_or_insert(session: Session, table: type[usam.Base], row: dict[str, Any], row_identifier: str | tuple[str, ...]) -> tuple[usam.Base, bool]:
+    """
+    Returns a sqlalchemy model of the inserted or fetched row.
+
+    `session` is a sqlalchemy session.
+    `table` is the database table in which to insert `row`.
+    `row` is the a list of key-value pairs to insert into the table.
+    `row_identifier` is a map of key-value pairs which define a match between `row` and an existing row in the table.
+
+    sqlalchemy.orm.exc.MultipleResultsFound may be raised if `row_identifier` does not uniquely identify a row.
+    KeyError may be raised if `row_identifier` refers to columns not present as keys in `row`.
+    """
+    row_filter = {ri: row[ri] for ri in row_identifier}
+    try:
+        row_instance = session.query(table).filter_by(**row_filter).one()
+        created = False
+    except NoResultFound:
+        row_instance = table(**row)
+        session.add(row_instance)
+        created = True
+    return row_instance, created
 
 
 def _upsert_exon_set_record(session, tx_ac, alt_ac, strand, method, ess):
