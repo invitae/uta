@@ -238,11 +238,12 @@ class AssociatedAccessions(Base):
         nullable=False,
     )
     pro_ac = sa.Column(sa.Text, nullable=False)
-    origin_id = sa.Column(
-        sa.Integer,
-        sa.ForeignKey("origin.origin_id", onupdate="CASCADE", ondelete="CASCADE"),
-        nullable=False,
-    )
+    origin = sa.Column(sa.Text, nullable=False)
+    # origin_id = sa.Column(
+    #     sa.Integer,
+    #     sa.ForeignKey("origin.origin_id", onupdate="CASCADE", ondelete="CASCADE"),
+    #     nullable=False,
+    # )
     added = sa.Column(
         sqlalchemy.types.TIMESTAMP,
         server_default=sqlalchemy.sql.functions.now(),
@@ -250,7 +251,7 @@ class AssociatedAccessions(Base):
     )
 
     # relationships:
-    origin = sao.relationship("Origin", backref="associated_accessions")
+    # origin = sao.relationship("Origin", backref="associated_accessions")
     transcript = sao.relationship("Transcript", backref="associated_accessions")
 
 

@@ -69,7 +69,8 @@ class TestUtaModels(unittest.TestCase):
         # http://www.ncbi.nlm.nih.gov/nuccore/NM_033304.2
 
         o = usam.Origin(
-            name='Testing (originally NCBI, via Eutils)',
+            name='NCBI',
+            descr='Testing (originally NCBI, via Eutils)',
             url='http://bogus.com/',
             url_ac_fmt='http://bogus.com/{ac}',
         )
@@ -130,7 +131,7 @@ class TestUtaModels(unittest.TestCase):
             p = usam.AssociatedAccessions(
                 tx_ac=ac,
                 pro_ac=tx_info['pro_ac'],
-                origin=o,
+                origin=o.name,
             )
             cls.session.add(p)
 
@@ -278,7 +279,7 @@ class TestUtaModels(unittest.TestCase):
         self.assertIsInstance(aa.added, datetime.datetime)
         self.assertEqual(aa.tx_ac, 'NM_000680.2')
         self.assertEqual(aa.pro_ac, 'NP_000671.2')
-        self.assertEqual(aa.origin.name, 'Testing (originally NCBI, via Eutils)')
+        self.assertEqual(aa.origin, 'NCBI')
 
 
 

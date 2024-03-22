@@ -38,24 +38,24 @@ class TestUtaLoading(unittest.TestCase):
         Test loading file tests/data/assocacs.gz
         """
 
-        # insert origins referenced in data file
-        o1 = usam.Origin(
-            name='NCBI',
-            url='http://bogus.com/ncbi',
-            url_ac_fmt='http://bogus.com/ncbi/{ac}',
-        )
-        o2 = usam.Origin(
-            name='DummyOrigin',
-            url='http://bogus.com/dummy',
-            url_ac_fmt='http://bogus.com/dummy/{ac}',
-        )
-        self.session.add(o1)
-        self.session.add(o2)
+        # # insert origins referenced in data file
+        # o1 = usam.Origin(
+        #     name='NCBI',
+        #     url='http://bogus.com/ncbi',
+        #     url_ac_fmt='http://bogus.com/ncbi/{ac}',
+        # )
+        # o2 = usam.Origin(
+        #     name='DummyOrigin',
+        #     url='http://bogus.com/dummy',
+        #     url_ac_fmt='http://bogus.com/dummy/{ac}',
+        # )
+        # self.session.add(o1)
+        # self.session.add(o2)
 
         # insert transcripts referenced in data file
         t1 = usam.Transcript(
             ac='NM_001097.3',
-            origin=o1,
+            origin='NCBI',
             hgnc='ACR',
             cds_start_i=0,
             cds_end_i=1,
@@ -63,7 +63,7 @@ class TestUtaLoading(unittest.TestCase):
         )
         t2 = usam.Transcript(
             ac='NM_001098.3',
-            origin=o1,
+            origin='NCBI',
             hgnc='ACO2',
             cds_start_i=2,
             cds_end_i=3,
@@ -71,7 +71,7 @@ class TestUtaLoading(unittest.TestCase):
         )
         t3 = usam.Transcript(
             ac='DummyTx',
-            origin=o2,
+            origin='DummyOrigin',
             hgnc='DummyGene',
             cds_start_i=4,
             cds_end_i=5,
@@ -91,7 +91,7 @@ class TestUtaLoading(unittest.TestCase):
 
         # check associated_accessions table
         aa = self.session.query(usam.AssociatedAccessions).order_by(usam.AssociatedAccessions.tx_ac).all()
-        aa_list = [{'tx_ac': aa.tx_ac, 'pro_ac': aa.pro_ac, 'origin_name': aa.origin.name} for aa in aa]
+        aa_list = [{'tx_ac': aa.tx_ac, 'pro_ac': aa.pro_ac, 'origin_name': aa.origin} for aa in aa]
         expected_aa_list = [
             {
                 'tx_ac': 'DummyTx',

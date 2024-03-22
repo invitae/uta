@@ -274,7 +274,8 @@ def load_assoc_ac(session, opts, cf):
     with gzip.open(fname, "rt") as fhandle:
         for file_row in ufga.GeneAccessionsReader(fhandle):
             row = {
-                "origin_id": origins[file_row.origin],
+                "origin": file_row.origin,
+                # "origin_id": origins[file_row.origin],
                 "pro_ac": file_row.pro_ac,
                 "tx_ac": file_row.tx_ac,
             }
@@ -286,7 +287,8 @@ def load_assoc_ac(session, opts, cf):
                 # All fields should should match when unique identifiers match.
                 # Discrepancies should be investigated.
                 existing_row = {
-                    "origin_id": aa.origin_id,
+                    "origin": aa.origin,
+                    # "origin_id": aa.origin_id,
                     "pro_ac": aa.pro_ac,
                     "tx_ac": aa.tx_ac,
                 }
