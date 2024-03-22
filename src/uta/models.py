@@ -234,7 +234,7 @@ class AssociatedAccessions(Base):
     associated_accession_id = sa.Column(sa.Integer, primary_key=True, autoincrement=True)
     tx_ac = sa.Column(
         sa.Text,
-        sa.ForeignKey("transcript.ac", onupdate="CASCADE", ondelete="CASCADE"),
+        sa.ForeignKey(Transcript.ac, onupdate="CASCADE", ondelete="CASCADE"),
         nullable=False,
     )
     pro_ac = sa.Column(sa.Text, nullable=False)

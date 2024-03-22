@@ -807,6 +807,7 @@ def _get_or_insert(session: Session, table: type[usam.Base], row: dict[str, Any]
 
     sqlalchemy.orm.exc.MultipleResultsFound may be raised if `row_identifier` does not uniquely identify a row.
     KeyError may be raised if `row_identifier` refers to columns not present as keys in `row`.
+    sqlalchemy.exc.IntegrityError (raised from psycopg2.errors.ForeignKeyViolation) may be raised if a foreign key reference does not exist
     """
     row_filter = {ri: row[ri] for ri in row_identifier}
     try:

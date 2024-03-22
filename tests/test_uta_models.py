@@ -281,6 +281,17 @@ class TestUtaModels(unittest.TestCase):
         self.assertEqual(aa.pro_ac, 'NP_000671.2')
         self.assertEqual(aa.origin, 'NCBI')
 
+    def test_associated_accessions_transcript_does_not_exist(self):
+        with self.assertRaises(sqlalchemy.exc.IntegrityError):
+            p = usam.AssociatedAccessions(
+                tx_ac='dummy_transcript',
+                pro_ac='dummy_protein',
+                origin='dummy_origin',
+            )
+            self.session.add(p)
+            self.session.commit()
+        # clean up shared session:
+        self.session.rollback()
 
 
 if __name__ == '__main__':
