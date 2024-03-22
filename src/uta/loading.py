@@ -256,19 +256,19 @@ def load_assoc_ac(session, opts, cf):
     session.execute(text(f"set role {admin_role};"))
     session.execute(text(f"set search_path = {usam.schema_name};"))
     fname = opts["FILE"]
-    origins = dict()  # map from origin to origin_id. ex: {NCBI: 10}
+    # origins = dict()  # map from origin to origin_id. ex: {NCBI: 10}
 
-    # first pass: get all unique origin names
-    with gzip.open(fname, "rt") as fhandle:
-        for row in ufga.GeneAccessionsReader(fhandle):
-            if row.origin not in origins:
-                origin = session.query(usam.Origin).filter_by(name=row.origin).one()
-                if origin is None:
-                    raise UnknownOriginNameError(name=row.origin)
-                else:
-                    origins[row.origin] = origin.origin_id
+    # # first pass: get all unique origin names
+    # with gzip.open(fname, "rt") as fhandle:
+    #     for row in ufga.GeneAccessionsReader(fhandle):
+    #         if row.origin not in origins:
+    #             origin = session.query(usam.Origin).filter_by(name=row.origin).one()
+    #             if origin is None:
+    #                 raise UnknownOriginNameError(name=row.origin)
+    #             else:
+    #                 origins[row.origin] = origin.origin_id
 
-    logger.info(f"Unique origins: {origins}")
+    # logger.info(f"Unique origins: {origins}")
 
     # second pass: insert associated_accession records
     with gzip.open(fname, "rt") as fhandle:

@@ -35,7 +35,7 @@ class TestUtaLoading(unittest.TestCase):
 
     def test_load_assoc_ac(self):
         """
-        Test loading file tests/data/assocacs.gz
+        Loading file tests/data/assocacs.gz should create associated_accessions records in the database.
         """
 
         # insert origins referenced in data file
@@ -89,7 +89,7 @@ class TestUtaLoading(unittest.TestCase):
 
         ul.load_assoc_ac(self.session, {'FILE': 'tests/data/assocacs.gz'}, cf)
 
-        # check associated_accessions table
+        # associated_accessions table should contain one record per line in file
         aa = self.session.query(usam.AssociatedAccessions).order_by(usam.AssociatedAccessions.tx_ac).all()
         aa_list = [{'tx_ac': aa.tx_ac, 'pro_ac': aa.pro_ac, 'origin_name': aa.origin} for aa in aa]
         expected_aa_list = [
@@ -110,3 +110,52 @@ class TestUtaLoading(unittest.TestCase):
             },
         ]
         self.assertEqual(aa_list, expected_aa_list)
+
+    def test_load_assoc_ac_transcript_does_not_exist(self):
+        """
+        Loading file tests/data/assocacs.gz should fail when one of the transcripts does not exist in the database.
+        """
+
+        # insert origins referenced in data file
+        o1 = usam.Origin(
+            name='NCBI',
+            url='http://bogus.com/ncbi',
+            url_ac_fmt='http://bogus.com/ncbi/{ac}',
+        )
+        self.session.add(o1)
+
+        # insert transcripts referenced in data file
+        t1 = usam.Transcript(
+            ac='NM_001097.3',
+            origin=o1,
+            hgnc='ACR',
+            cds_start_i=0,
+            cds_end_i=1,
+            cds_md5='a',
+        )
+        t2 = usam.Transcript(
+            ac='NM_001098.3',
+            origin=o1,
+            hgnc='ACO2',
+            cds_start_i=2,
+            cds_end_i=3,
+            cds_md5='b',
+        )
+        self.session.add(t1)
+        self.session.add(t2)
+
+        self.session.commit()
+
+        cf = configparser.ConfigParser()
+        cf.add_section('uta')
+        cf.set('uta', 'admin_role', 'uta_admin')
+
+        with self.assertRaises(sa.exc.IntegrityError):
+            ul.load_assoc_ac(self.session, {'FILE': 'tests/data/assocacs.gz'}, cf)
+
+        # allow session to be used after failure
+        self.session.rollback()
+
+        # associated_accessions table should be empty because transaction failed
+        aa = self.session.query(usam.AssociatedAccessions).order_by(usam.AssociatedAccessions.tx_ac).all()
+        self.assertEqual(aa, [])
