@@ -20,9 +20,9 @@ fi
 
 # set local variables and create working directories
 loading_uta_v="uta_1_1"
-loading_dir="$working_dir/uta_build/loading"
-dumps_dir="$working_dir/uta_build/dumps"
-logs_dir="$working_dir/uta_build/logs"
+loading_dir="$working_dir/loading"
+dumps_dir="$working_dir/dumps"
+logs_dir="$working_dir/logs"
 for d in "$loading_dir" "$dumps_dir" "$logs_dir";
   do mkdir -p "$d"
 done
