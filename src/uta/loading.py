@@ -281,9 +281,9 @@ def load_assoc_ac(session, opts, cf):
             }
             aa, created = _get_or_insert(session=session, table=usam.AssociatedAccessions, row=row, row_identifier=('tx_ac', 'pro_ac'))
             if created:
-                logger.info(f"Added row: {aa.tx_ac}, {aa.pro_ac}, {aa.origin_id}")
+                logger.info(f"Added: {aa.tx_ac}, {aa.pro_ac}, {aa.origin}")
             else:
-                logger.info(f"Did not add file row: {file_row}")
+                logger.info(f"Already exists: {file_row}")
                 # All fields should should match when unique identifiers match.
                 # Discrepancies should be investigated.
                 existing_row = {
