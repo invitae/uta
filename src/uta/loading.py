@@ -25,7 +25,6 @@ from uta.lru_cache import lru_cache
 
 import uta
 import uta.formats.exonset as ufes
-import uta.formats.geneaccessions as ufga
 import uta.formats.geneinfo as ufgi
 import uta.formats.seqinfo as ufsi
 import uta.formats.txinfo as ufti
