@@ -25,7 +25,6 @@ import uta_align as utaa
 from uta.lru_cache import lru_cache
 
 import uta
-from uta.exceptions import UnknownOriginNameError
 import uta.formats.exonset as ufes
 import uta.formats.geneaccessions as ufga
 import uta.formats.geneinfo as ufgi
