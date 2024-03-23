@@ -68,6 +68,15 @@ class TestUtaLoading(unittest.TestCase):
         self.session.add(t1)
         self.session.add(t2)
 
+        # pre-add one of the associated_acessions from the test data file
+        # to demonstrate get-or-insert behavior
+        p = usam.AssociatedAccessions(
+            tx_ac='NM_001097.3',
+            pro_ac='NP_001088.2',
+            origin='NCBI',
+        )
+        self.session.add(p)
+
         self.session.commit()
 
         cf = configparser.ConfigParser()
