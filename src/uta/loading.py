@@ -248,7 +248,7 @@ def grant_permissions(session, opts, cf):
 def load_assoc_ac(session, opts, cf):
     """
     Insert rows into `associated_accessions` table in the UTA database,
-    using data from a file written by GeneAccessionsWriter.
+    using data from a file written by sbin/assoc-acs-merge.
     """
     logger.info("load_assoc_ac")
 
@@ -258,14 +258,17 @@ def load_assoc_ac(session, opts, cf):
     fname = opts["FILE"]
 
     with gzip.open(fname, "rt") as fhandle:
-        for file_row in ufga.GeneAccessionsReader(fhandle):
+        for file_row in csv.DictReader(fhandle, delimiter="\t"):
             row = {
-                "origin": file_row.origin,
-                "pro_ac": file_row.pro_ac,
-                "tx_ac": file_row.tx_ac,
+                "origin": file_row["origin"],
+                "pro_ac": file_row["pro_ac"],
+                "tx_ac": file_row["tx_ac"],
             }
             aa, created = _get_or_insert(session=session, table=usam.AssociatedAccessions, row=row, row_identifier=('origin', 'tx_ac', 'pro_ac'))
             if created:
+                # If committing on every insert is too slow, we can
+                # look into committing in batches like load_txinfo does.
+                session.commit()
                 logger.info(f"Added: {aa.tx_ac}, {aa.pro_ac}, {aa.origin}")
             else:
                 logger.info(f"Already exists: {file_row}")
@@ -278,8 +281,6 @@ def load_assoc_ac(session, opts, cf):
                 }
                 if row != existing_row:
                     raise InconsistentDataError(current=row, previous=existing_row)
-
-    session.commit()
 
 
 def load_exonset(session, opts, cf):
