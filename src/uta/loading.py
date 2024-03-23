@@ -263,7 +263,12 @@ def load_assoc_ac(session, opts, cf):
                 "pro_ac": file_row["pro_ac"],
                 "tx_ac": file_row["tx_ac"],
             }
-            aa, created = _get_or_insert(session=session, table=usam.AssociatedAccessions, row=row, row_identifier=('origin', 'tx_ac', 'pro_ac'))
+            aa, created = _get_or_insert(
+                session=session,
+                table=usam.AssociatedAccessions,
+                row=row,
+                row_identifier=('origin', 'tx_ac', 'pro_ac'),
+            )
             if created:
                 # If committing on every insert is too slow, we can
                 # look into committing in batches like load_txinfo does.
@@ -778,7 +783,12 @@ def _get_seqrepo(cf):
 _get_seqfetcher = _get_seqrepo
 
 
-def _get_or_insert(session: Session, table: type[usam.Base], row: dict[str, Any], row_identifier: str | tuple[str, ...]) -> tuple[usam.Base, bool]:
+def _get_or_insert(
+    session: Session,
+    table: type[usam.Base],
+    row: dict[str, Any],
+    row_identifier: str | tuple[str, ...],
+) -> tuple[usam.Base, bool]:
     """
     Returns a sqlalchemy model of the inserted or fetched row.
 
