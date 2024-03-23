@@ -50,19 +50,19 @@ sbin/ncbi-parse-gene2refseq $ncbi_dir/gene/DATA/gene2accession.gz | gzip -c > "$
 sbin/assoc-acs-merge "$loading_dir/assocacs.gz" | gzip -c > "$loading_dir/assocacs.cleaned.gz" 2>&1 | \
   tee "$logs_dir/assoc-acs-merge"
 
-# # parse transcript info from GBFF input files
-# GBFF_files=$(ls $ncbi_dir/refseq/H_sapiens/mRNA_Prot/human.*.rna.gbff.gz)
-# sbin/ncbi-parse-gbff "$GBFF_files" | gzip -c > "$loading_dir/gbff.txinfo.gz" 2>&1 | \
-#   tee "$logs_dir/ncbi-parse-gbff.log"
+# parse transcript info from GBFF input files
+GBFF_files=$(ls $ncbi_dir/refseq/H_sapiens/mRNA_Prot/human.*.rna.gbff.gz)
+sbin/ncbi-parse-gbff "$GBFF_files" | gzip -c > "$loading_dir/gbff.txinfo.gz" 2>&1 | \
+  tee "$logs_dir/ncbi-parse-gbff.log"
 
-# # parse alignments from GFF input files
-# GFF_files=$(ls $ncbi_dir/genomes/refseq/vertebrate_mammalian/Homo_sapiens/all_assembly_versions/GCF_000001405*/GCF_*_genomic.gff.gz)
-# sbin/ncbi_parse_genomic_gff.py "$GFF_files" | gzip -c > "$loading_dir/gff.exonsets.gz" 2>&1 | \
-#   tee "$logs_dir/ncbi-parse-genomic-gff.log"
+# parse alignments from GFF input files
+GFF_files=$(ls $ncbi_dir/genomes/refseq/vertebrate_mammalian/Homo_sapiens/all_assembly_versions/GCF_000001405*/GCF_*_genomic.gff.gz)
+sbin/ncbi_parse_genomic_gff.py "$GFF_files" | gzip -c > "$loading_dir/gff.exonsets.gz" 2>&1 | \
+  tee "$logs_dir/ncbi-parse-genomic-gff.log"
 
-# # generate seqinfo files from exonsets
-# sbin/exonset-to-seqinfo -o NCBI "$loading_dir/gff.exonsets.gz" | gzip -c > "$loading_dir/seqinfo.gz" 2>&1 | \
-#   tee "$logs_dir/exonset-to-seqinfo.log"
+# generate seqinfo files from exonsets
+sbin/exonset-to-seqinfo -o NCBI "$loading_dir/gff.exonsets.gz" | gzip -c > "$loading_dir/seqinfo.gz" 2>&1 | \
+  tee "$logs_dir/exonset-to-seqinfo.log"
 
 ### update the uta database
 
@@ -72,8 +72,6 @@ uta --conf=etc/global.conf --conf=etc/uta_dev@localhost.conf load-geneinfo "$loa
 
 uta --conf=etc/global.conf --conf=etc/uta_dev@localhost.conf load-assoc-ac "$loading_dir/assocacs.cleaned.gz" 2>&1 | \
   tee "$logs_dir/load-assoc-ac.log"
-
-exit 0
 
 # transcript info
 uta --conf=etc/global.conf --conf=etc/uta_dev@localhost.conf load-txinfo "$loading_dir/gbff.txinfo.gz" 2>&1 | \
