@@ -25,7 +25,7 @@ import uta_align as utaa
 from uta.lru_cache import lru_cache
 
 import uta
-from uta.exceptions import InconsistentDataError, UnknownOriginNameError
+from uta.exceptions import UnknownOriginNameError
 import uta.formats.exonset as ufes
 import uta.formats.geneaccessions as ufga
 import uta.formats.geneinfo as ufgi
@@ -279,8 +279,6 @@ def load_assoc_ac(session, opts, cf):
                     "pro_ac": aa.pro_ac,
                     "tx_ac": aa.tx_ac,
                 }
-                if row != existing_row:
-                    raise InconsistentDataError(current=row, previous=existing_row)
 
 
 def load_exonset(session, opts, cf):

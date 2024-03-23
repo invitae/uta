@@ -35,17 +35,6 @@ class UnknownOriginNameError(UTAError):
         return f"Origin name does not exist in UTA: {self.name}"
 
 
-class InconsistentDataError(UTAError):
-    """Error raised when a UTA database upsert fails."""
-    def __init__(self, current: Any, previous: Any):
-        super().__init__()
-        self.current = current
-        self.previous = previous
-
-    def __str__(self):
-        return f"Current data: ({self.current}). Previous data: ({self.previous})."
-
-
 # <LICENSE>
 # Copyright 2014 UTA Contributors (https://bitbucket.org/biocommons/uta)
 ##
