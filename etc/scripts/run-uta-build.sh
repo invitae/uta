@@ -65,7 +65,6 @@ sbin/exonset-to-seqinfo -o NCBI "$loading_dir/gff.exonsets.gz" | gzip -c > "$loa
   tee "$logs_dir/exonset-to-seqinfo.log"
 
 ### update the uta database
-
 # genes
 uta --conf=etc/global.conf --conf=etc/uta_dev@localhost.conf load-geneinfo "$loading_dir/genes.geneinfo.gz" 2>&1 | \
   tee "$logs_dir/load-geneinfo.log"
