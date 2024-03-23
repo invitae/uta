@@ -281,17 +281,22 @@ class TestUtaModels(unittest.TestCase):
         self.assertEqual(aa.pro_ac, 'NP_000671.2')
         self.assertEqual(aa.origin, 'NCBI')
 
-    def test_associated_accessions_transcript_does_not_exist(self):
-        with self.assertRaises(sqlalchemy.exc.IntegrityError):
-            p = usam.AssociatedAccessions(
-                tx_ac='dummy_transcript',
-                pro_ac='dummy_protein',
-                origin='dummy_origin',
-            )
-            self.session.add(p)
-            self.session.commit()
-        # clean up shared session:
-        self.session.rollback()
+    def test_associated_accessions_transcript_not_in_database(self):
+        """
+        Should create row in associated_accessions even for transcripts not in database.
+        This is only the case until associated_accessions.tx_ac is converted to a transcript foreign key.
+        """
+        p = usam.AssociatedAccessions(
+            tx_ac='dummy_transcript',
+            pro_ac='dummy_protein',
+            origin='dummy_origin',
+        )
+        self.session.add(p)
+        self.session.commit()
+        aa = self.session.query(usam.AssociatedAccessions).filter_by(tx_ac='dummy_transcript').one()
+        self.assertEqual(aa.tx_ac, 'dummy_transcript')
+        self.assertEqual(aa.pro_ac, 'dummy_protein')
+        self.assertEqual(aa.origin, 'dummy_origin')
 
 
 if __name__ == '__main__':

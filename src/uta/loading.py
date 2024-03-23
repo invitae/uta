@@ -256,30 +256,15 @@ def load_assoc_ac(session, opts, cf):
     session.execute(text(f"set role {admin_role};"))
     session.execute(text(f"set search_path = {usam.schema_name};"))
     fname = opts["FILE"]
-    # origins = dict()  # map from origin to origin_id. ex: {NCBI: 10}
 
-    # # first pass: get all unique origin names
-    # with gzip.open(fname, "rt") as fhandle:
-    #     for row in ufga.GeneAccessionsReader(fhandle):
-    #         if row.origin not in origins:
-    #             origin = session.query(usam.Origin).filter_by(name=row.origin).one()
-    #             if origin is None:
-    #                 raise UnknownOriginNameError(name=row.origin)
-    #             else:
-    #                 origins[row.origin] = origin.origin_id
-
-    # logger.info(f"Unique origins: {origins}")
-
-    # second pass: insert associated_accession records
     with gzip.open(fname, "rt") as fhandle:
         for file_row in ufga.GeneAccessionsReader(fhandle):
             row = {
                 "origin": file_row.origin,
-                # "origin_id": origins[file_row.origin],
                 "pro_ac": file_row.pro_ac,
                 "tx_ac": file_row.tx_ac,
             }
-            aa, created = _get_or_insert(session=session, table=usam.AssociatedAccessions, row=row, row_identifier=('tx_ac', 'pro_ac'))
+            aa, created = _get_or_insert(session=session, table=usam.AssociatedAccessions, row=row, row_identifier=('origin', 'tx_ac', 'pro_ac'))
             if created:
                 logger.info(f"Added: {aa.tx_ac}, {aa.pro_ac}, {aa.origin}")
             else:
@@ -288,7 +273,6 @@ def load_assoc_ac(session, opts, cf):
                 # Discrepancies should be investigated.
                 existing_row = {
                     "origin": aa.origin,
-                    # "origin_id": aa.origin_id,
                     "pro_ac": aa.pro_ac,
                     "tx_ac": aa.tx_ac,
                 }

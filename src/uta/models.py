@@ -225,34 +225,21 @@ class ExonAln(Base):
 class AssociatedAccessions(Base):
     __tablename__ = "associated_accessions"
     __table_args__ = (
-        sa.UniqueConstraint(
-            "tx_ac", "pro_ac", name="<tx_ac,pro_ac> must be unique"
-        ),
+        sa.UniqueConstraint("origin", "tx_ac", "pro_ac", name="unique_pair_in_origin"),
+        sa.Index("associated_accessions_pro_ac", "pro_ac"),
+        sa.Index("associated_accessions_tx_ac", "tx_ac"),
     )
 
     # columns:
     associated_accession_id = sa.Column(sa.Integer, primary_key=True, autoincrement=True)
-    tx_ac = sa.Column(
-        sa.Text,
-        sa.ForeignKey(Transcript.ac, onupdate="CASCADE", ondelete="CASCADE"),
-        nullable=False,
-    )
+    tx_ac = sa.Column(sa.Text, nullable=False)
     pro_ac = sa.Column(sa.Text, nullable=False)
     origin = sa.Column(sa.Text, nullable=False)
-    # origin_id = sa.Column(
-    #     sa.Integer,
-    #     sa.ForeignKey("origin.origin_id", onupdate="CASCADE", ondelete="CASCADE"),
-    #     nullable=False,
-    # )
     added = sa.Column(
         sqlalchemy.types.TIMESTAMP,
         server_default=sqlalchemy.sql.functions.now(),
         nullable=False,
     )
-
-    # relationships:
-    # origin = sao.relationship("Origin", backref="associated_accessions")
-    transcript = sao.relationship("Transcript", backref="associated_accessions")
 
 
 # <LICENSE>
