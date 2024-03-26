@@ -2,74 +2,68 @@ import os
 import unittest
 
 from Bio import SeqIO
+from parameterized import param, parameterized
 
 from uta.parsers.seqrecord import SeqRecordFacade
 
 
-class TestSeqRecordFacade_NM_001396027(unittest.TestCase):
+class TestSeqRecordFacade(unittest.TestCase):
     test_data_dir = os.path.join(os.path.dirname(__file__), 'data')
 
-    @classmethod
-    def setUpClass(cls):
-        gbff_file = os.path.join(cls.test_data_dir, 'rna.NM_001396027.gbff')
+    @parameterized.expand([
+        param(
+            'NM_001396027 - single exon',
+            file_name='rna.NM_001396027.gbff',
+            expected_id='NM_001396027.1',
+            expected_gene_symbol='FAM246C',
+            expected_gene_id='117134596',
+            expected_cds_se_i=(0, 696),
+            expected_exons_se_i=[(0, 696)],
+        ),
+        param(
+            'NM_001396027 - multiple exons',
+            file_name='rna.NM_001996.gbff',
+            expected_id='NM_001996.4',
+            expected_gene_symbol='FBLN1',
+            expected_gene_id='2192',
+            expected_cds_se_i=(103, 2155),
+            expected_exons_se_i=[
+                (0, 182),
+                (182, 288),
+                (288, 424),
+                (424, 587),
+                (587, 647),
+                (647, 749),
+                (749, 887),
+                (887, 1025),
+                (1025, 1169),
+                (1169, 1298),
+                (1298, 1424),
+                (1424, 1544),
+                (1544, 1676),
+                (1676, 1800),
+                (1800, 2251),
+            ],
+        ),
+    ])
+    def test_seq_record_facade(
+        self,
+        test_name,
+        file_name,
+        expected_id,
+        expected_gene_symbol,
+        expected_gene_id,
+        expected_cds_se_i,
+        expected_exons_se_i,
+    ):
+        gbff_file = os.path.join(self.test_data_dir, file_name)
         seq_record = [sr for sr in SeqIO.parse(gbff_file, 'gb')][0]
-        cls.seq_record_facade = SeqRecordFacade(seq_record)
-
-    def test_id(self):
-        assert self.seq_record_facade.id == 'NM_001396027.1'
-
-    def test_gene_symbol(self):
-        assert self.seq_record_facade.gene_symbol == 'FAM246C'
-
-    def test_gene_id(self):
-        assert self.seq_record_facade.gene_id == '117134596'
-
-    def test_cds_se_i(self):
-        assert self.seq_record_facade.cds_se_i == (0, 696)
-
-    def test_exons_se_i(self):
-        assert self.seq_record_facade.exons_se_i == [(0, 696)]
-
-
-class TestSeqRecordFacade_NM_001996(unittest.TestCase):
-    test_data_dir = os.path.join(os.path.dirname(__file__), 'data')
-
-    @classmethod
-    def setUpClass(cls):
-        gbff_file = os.path.join(cls.test_data_dir, 'rna.NM_001996.gbff')
-        seq_record = [sr for sr in SeqIO.parse(gbff_file, 'gb')][0]
-        cls.seq_record_facade = SeqRecordFacade(seq_record)
-
-    def test_id(self):
-        assert self.seq_record_facade.id == 'NM_001996.4'
-
-    def test_gene_symbol(self):
-        assert self.seq_record_facade.gene_symbol == 'FBLN1'
-
-    def test_gene_id(self):
-        assert self.seq_record_facade.gene_id == '2192'
-
-    def test_cds_se_i(self):
-        assert self.seq_record_facade.cds_se_i == (103, 2155)
-
-    def test_exons_se_i(self):
-        assert self.seq_record_facade.exons_se_i == [
-            (0, 182),
-            (182, 288),
-            (288, 424),
-            (424, 587),
-            (587, 647),
-            (647, 749),
-            (749, 887),
-            (887, 1025),
-            (1025, 1169),
-            (1169, 1298),
-            (1298, 1424),
-            (1424, 1544),
-            (1544, 1676),
-            (1676, 1800),
-            (1800, 2251),
-        ]
+        self.seq_record_facade = SeqRecordFacade(seq_record)
+        assert self.seq_record_facade.id == expected_id
+        assert self.seq_record_facade.gene_symbol == expected_gene_symbol
+        assert self.seq_record_facade.gene_id == expected_gene_id
+        assert self.seq_record_facade.cds_se_i == expected_cds_se_i
+        assert self.seq_record_facade.exons_se_i == expected_exons_se_i
 
 
 if __name__ == '__main__':
