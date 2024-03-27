@@ -34,6 +34,11 @@ class SeqRecordFacade:
 
     @property
     def exons_se_i(self):
-        exons = [f for f in self._sr.features if f.type in ["exon"]]
+        feature_types = set(f.type for f in self._sr.features)
+        if "exon" in feature_types:
+            exons = [f for f in self._sr.features if f.type in ["exon"]]
+        elif "ncRNA" in feature_types:
+            exons = [f for f in self._sr.features if f.type in ["ncRNA"]]
+            assert len(exons) == 1
         se = [(f.location.start.real, f.location.end.real) for f in exons]
         return se
