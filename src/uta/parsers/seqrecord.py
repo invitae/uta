@@ -1,3 +1,5 @@
+from collections import defaultdict
+
 import Bio.SeqRecord
 
 
@@ -34,11 +36,15 @@ class SeqRecordFacade:
 
     @property
     def exons_se_i(self):
-        feature_types = set(f.type for f in self._sr.features)
-        if "exon" in feature_types:
-            exons = [f for f in self._sr.features if f.type in ["exon"]]
-        elif "ncRNA" in feature_types:
-            exons = [f for f in self._sr.features if f.type in ["ncRNA"]]
+        features_by_type = defaultdict(list)
+        for feat in self._sr.features:
+            features_by_type[feat.type].append(feat)
+
+        if "exon" in features_by_type:
+            exons = features_by_type["exon"]
+        elif "ncRNA" in features_by_type:
+            exons = features_by_type["ncRNA"]
             assert len(exons) == 1
         se = [(f.location.start.real, f.location.end.real) for f in exons]
+
         return se
