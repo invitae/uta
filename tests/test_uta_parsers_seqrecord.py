@@ -54,6 +54,15 @@ class TestSeqRecordFacade(unittest.TestCase):
             expected_cds_se_i=None,
             expected_exons_se_i=[(0,1073)],
         ),
+        param(
+            'NR_173148 - no exons, misc_RNA',
+            file_name='rna.NR_173148.gbff',
+            expected_id='NR_173148.1',
+            expected_gene_symbol='FAM246C',
+            expected_gene_id='117134596',
+            expected_cds_se_i=None,
+            expected_exons_se_i=[(0,698)],
+        ),
     ])
     def test_seq_record_facade(
         self,

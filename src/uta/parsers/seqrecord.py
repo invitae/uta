@@ -45,6 +45,11 @@ class SeqRecordFacade:
         elif "ncRNA" in features_by_type:
             exons = features_by_type["ncRNA"]
             assert len(exons) == 1
+        elif "misc_RNA" in features_by_type:
+            exons = features_by_type["misc_RNA"]
+            assert len(exons) == 1
+        else:
+            raise Exception("Unable to find or infer exons")
         se = [(f.location.start.real, f.location.end.real) for f in exons]
 
         return se
