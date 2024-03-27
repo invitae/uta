@@ -1,4 +1,5 @@
 from collections import defaultdict
+from functools import cached_property
 
 import Bio.SeqRecord
 
@@ -7,6 +8,13 @@ class SeqRecordFacade:
 
     def __init__(self, seqrecord: Bio.SeqRecord.SeqRecord):
         self._sr = seqrecord
+
+    @cached_property
+    def features_by_type(self):
+        result = defaultdict(list)
+        for feat in self._sr.features:
+            result[feat.type].append(feat)
+        return result
 
     @property
     def id(self):
@@ -36,17 +44,13 @@ class SeqRecordFacade:
 
     @property
     def exons_se_i(self):
-        features_by_type = defaultdict(list)
-        for feat in self._sr.features:
-            features_by_type[feat.type].append(feat)
-
-        if "exon" in features_by_type:
-            exons = features_by_type["exon"]
-        elif "ncRNA" in features_by_type:
-            exons = features_by_type["ncRNA"]
+        if "exon" in self.features_by_type:
+            exons = self.features_by_type["exon"]
+        elif "ncRNA" in self.features_by_type:
+            exons = self.features_by_type["ncRNA"]
             assert len(exons) == 1
-        elif "misc_RNA" in features_by_type:
-            exons = features_by_type["misc_RNA"]
+        elif "misc_RNA" in self.features_by_type:
+            exons = self.features_by_type["misc_RNA"]
             assert len(exons) == 1
         else:
             raise Exception("Unable to find or infer exons")
