@@ -56,7 +56,7 @@ class TestSeqRecordFacade(unittest.TestCase):
             expected_exons_se_i=[(0,1073)],
         ),
         param(
-            'NR_173148 - no exons features, misc_RNA',
+            'NR_173148 - no exon features, misc_RNA',
             file_name='rna.NR_173148.gbff',
             expected_id='NR_173148.1',
             expected_gene_symbol='FAM246C',
