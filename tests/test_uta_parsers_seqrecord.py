@@ -13,7 +13,7 @@ class TestSeqRecordFacade(unittest.TestCase):
 
     @parameterized.expand([
         param(
-            'NM_001396027 - single exon',
+            'NM_001396027 - single exon feature',
             file_name='rna.NM_001396027.gbff',
             expected_id='NM_001396027.1',
             expected_gene_symbol='FAM246C',
@@ -22,7 +22,7 @@ class TestSeqRecordFacade(unittest.TestCase):
             expected_exons_se_i=[(0, 696)],
         ),
         param(
-            'NM_001396027 - multiple exons',
+            'NM_001396027 - multiple exon features',
             file_name='rna.NM_001996.gbff',
             expected_id='NM_001996.4',
             expected_gene_symbol='FBLN1',
@@ -47,7 +47,7 @@ class TestSeqRecordFacade(unittest.TestCase):
             ],
         ),
         param(
-            'NR_173080 - no exons, ncRNA',
+            'NR_173080 - no exon features, ncRNA',
             file_name='rna.NR_173080.gbff',
             expected_id='NR_173080.1',
             expected_gene_symbol='LOC122455341',
@@ -56,7 +56,7 @@ class TestSeqRecordFacade(unittest.TestCase):
             expected_exons_se_i=[(0,1073)],
         ),
         param(
-            'NR_173148 - no exons, misc_RNA',
+            'NR_173148 - no exons features, misc_RNA',
             file_name='rna.NR_173148.gbff',
             expected_id='NR_173148.1',
             expected_gene_symbol='FAM246C',

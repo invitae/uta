@@ -66,14 +66,6 @@ class SeqRecordFacade:
     def exons_se_i(self):
         if "exon" in self.features_by_type:
             exons = self.features_by_type["exon"]
-        elif "ncRNA" in self.features_by_type:
-            exons = self.features_by_type["ncRNA"]
-            assert len(exons) == 1
-        elif "misc_RNA" in self.features_by_type:
-            exons = self.features_by_type["misc_RNA"]
-            assert len(exons) == 1
         else:
-            raise Exception("Unable to find or infer exons")
-        se = [(f.location.start.real, f.location.end.real) for f in exons]
-
-        return se
+            exons = [self.gene_feature]
+        return [(f.location.start.real, f.location.end.real) for f in exons]
