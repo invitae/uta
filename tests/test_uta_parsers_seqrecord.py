@@ -1,10 +1,11 @@
 import os
 import unittest
+from unittest.mock import Mock
 
 from Bio import SeqIO
 from parameterized import param, parameterized
 
-from uta.parsers.seqrecord import SeqRecordFacade
+from uta.parsers.seqrecord import SeqRecordFacade, SeqRecordFeatureError
 
 
 class TestSeqRecordFacade(unittest.TestCase):
@@ -83,6 +84,15 @@ class TestSeqRecordFacade(unittest.TestCase):
         assert self.seq_record_facade.cds_se_i == expected_cds_se_i
         assert self.seq_record_facade.exons_se_i == expected_exons_se_i
 
+    @parameterized.expand([
+        param('no genes', features={}),
+        param('no genes', features={'gene': []}),
+        param('more than one gene', features={'gene': [Mock(), Mock()]}),
+        param('more than one CDS', features={'cds': [Mock(), Mock()], 'gene': []}),
+    ])
+    def test_validate_features_by_type_invalid(self, test_name, features):
+        with self.assertRaises(SeqRecordFeatureError):
+            SeqRecordFacade.validate_features_by_type(features)
 
 if __name__ == '__main__':
     unittest.main()

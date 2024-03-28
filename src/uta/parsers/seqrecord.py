@@ -1,7 +1,13 @@
 from collections import defaultdict
 from functools import cached_property
+from typing import Union
 
 import Bio.SeqRecord
+from Bio.SeqFeature import SeqFeature
+
+
+class SeqRecordFeatureError(Exception):
+    """Raised when SeqRecord does not have the expected shape."""
 
 
 class SeqRecordFacade:
@@ -10,11 +16,25 @@ class SeqRecordFacade:
         self._sr = seqrecord
 
     @cached_property
-    def features_by_type(self):
+    def features_by_type(self) -> dict[str, list]:
         result = defaultdict(list)
         for feat in self._sr.features:
             result[feat.type].append(feat)
+        self.validate_features_by_type(result)
         return result
+
+    @staticmethod
+    def validate_features_by_type(features: dict[str, list]) -> None:
+        """Raise exceptions if feature mapping is invalid."""
+        if "CDS" in features and len(features["CDS"]) > 1:
+            raise SeqRecordFeatueError("Expecte one `CDS` feature at most")
+        if "gene" not in features or len(features["gene"]) != 1:
+            raise SeqRecordFeatureError("Expected exactly one `gene` feature")
+
+    @cached_property
+    def gene_feature(self) -> SeqFeature:
+        """Returns the gene feature, which is assumed to exist for all transcripts. """
+        return self.features_by_type.get("gene")[0]
 
     @property
     def id(self):
@@ -22,25 +42,25 @@ class SeqRecordFacade:
 
     @property
     def gene_symbol(self):
-        genes = [f for f in self._sr.features if f.type == "gene"][0].qualifiers["gene"]
+        genes = self.gene_feature.qualifiers["gene"]
         assert len(genes) == 1
         return genes[0]
 
     @property
     def gene_id(self):
         # db_xref="GeneID:1234"
-        db_xrefs = [f for f in self._sr.features if f.type == "gene"][0].qualifiers["db_xref"]
+        db_xrefs = self.gene_feature.qualifiers["db_xref"]
         gene_ids = [x.partition(":")[2] for x in db_xrefs if x.startswith("GeneID:")]
         assert len(gene_ids) == 1
         return gene_ids[0]
 
     @property
     def cds_se_i(self):
-        try:
-            cds = [f for f in self._sr.features if f.type == "CDS"][0]
-        except IndexError:
+        if self.features_by_type.get("CDS"):
+            cds_feature = self.features_by_type.get("CDS")[0]
+            return (cds_feature.location.start.real, cds_feature.location.end.real)
+        else:
             return None
-        return (cds.location.start.real, cds.location.end.real)
 
     @property
     def exons_se_i(self):
