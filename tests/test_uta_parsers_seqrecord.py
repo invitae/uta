@@ -88,7 +88,7 @@ class TestSeqRecordFacade(unittest.TestCase):
         param('no genes', features={}),
         param('no genes', features={'gene': []}),
         param('more than one gene', features={'gene': [Mock(), Mock()]}),
-        param('more than one CDS', features={'cds': [Mock(), Mock()], 'gene': []}),
+        param('more than one CDS', features={'CDS': [Mock(), Mock()]}),
     ])
     def test_validate_features_by_type_invalid(self, test_name, features):
         with self.assertRaises(SeqRecordFeatureError):

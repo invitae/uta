@@ -27,7 +27,7 @@ class SeqRecordFacade:
     def validate_features_by_type(features: dict[str, list]) -> None:
         """Raise exceptions if feature mapping is invalid."""
         if "CDS" in features and len(features["CDS"]) > 1:
-            raise SeqRecordFeatueError("Expecte one `CDS` feature at most")
+            raise SeqRecordFeatureError("Expected one `CDS` feature at most")
         if "gene" not in features or len(features["gene"]) != 1:
             raise SeqRecordFeatureError("Expected exactly one `gene` feature")
 
