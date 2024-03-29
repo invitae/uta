@@ -7,7 +7,7 @@ from Bio.SeqFeature import SeqFeature
 
 
 class SeqRecordFeatureError(Exception):
-    """Raised when SeqRecord does not have the expected shape."""
+    """Raised when SeqRecord does not have the expected features."""
 
 
 class SeqRecordFacade:
@@ -42,9 +42,7 @@ class SeqRecordFacade:
 
     @property
     def gene_symbol(self):
-        genes = self.gene_feature.qualifiers["gene"]
-        assert len(genes) == 1
-        return genes[0]
+        return self.gene_feature.qualifiers["gene"][0]
 
     @property
     def gene_id(self):
