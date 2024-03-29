@@ -94,5 +94,6 @@ class TestSeqRecordFacade(unittest.TestCase):
         with self.assertRaises(SeqRecordFeatureError):
             SeqRecordFacade.validate_features_by_type(features)
 
+
 if __name__ == '__main__':
     unittest.main()
