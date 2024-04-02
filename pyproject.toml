@@ -47,6 +47,8 @@ dependencies = [
   "configparser",
   "docopt",
   "eutils>=0.3.2",
+  "importlib_resources",
+  "more_itertools",
   "nose",
   "prettytable",
   "psycopg2-binary",
@@ -57,7 +59,11 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-test = ["coverage", "testing.postgresql"]
+test = [
+  "coverage",
+  "parameterized",
+  "testing.postgresql",
+]
 
 [project.urls]  # Optional
 "Homepage" = "https://github.com/biocommons/uta"
