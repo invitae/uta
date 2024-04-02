@@ -22,4 +22,4 @@ jobs:
       - name: Build image
         run: docker build --target uta-test -t uta-test .
       - name: Run tests
-        run: docker run -it --rm uta-test python -m unittest
+        run: docker run --rm uta-test python -m unittest
