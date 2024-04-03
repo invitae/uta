@@ -31,6 +31,10 @@ done
 etc/scripts/delete-schema.sh "$loading_uta_v"
 etc/scripts/create-new-schema.sh "$source_uta_v" "$loading_uta_v"
 
+## for now set up Alembic for schema migrations
+alembic -c etc/alembic.ini stamp 1b8f087cc856
+alembic -c etc/alembic.ini upgrade head
+
 ## Load SeqRepo with new sequences
 seqrepo load -n NCBI -i "$seqrepo_data_release" \
   $ncbi_dir/refseq/H_sapiens/mRNA_Prot/human.*.rna.fna.gz \
