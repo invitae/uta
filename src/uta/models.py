@@ -210,8 +210,8 @@ class ExonAln(Base):
     cigar = sa.Column(sa.Text, nullable=False)
     added = sa.Column(
         sa.DateTime, default=datetime.datetime.now(), nullable=False)
-    tx_aseq = sa.Column(sa.Text, nullable=False)
-    alt_aseq = sa.Column(sa.Text, nullable=False)
+    tx_aseq = sa.Column(sa.Text, nullable=True)
+    alt_aseq = sa.Column(sa.Text, nullable=True)
 
     # relationships:
     tx_exon = sao.relationship(
@@ -225,7 +225,7 @@ class ExonAln(Base):
 class AssociatedAccessions(Base):
     __tablename__ = "associated_accessions"
     __table_args__ = (
-        sa.UniqueConstraint("origin", "tx_ac", "pro_ac", name="unique_pair_in_origin"),
+        sa.Index("unique_pair_in_origin", "origin", "tx_ac", "pro_ac", unique=True),
         sa.Index("associated_accessions_pro_ac", "pro_ac"),
         sa.Index("associated_accessions_tx_ac", "tx_ac"),
     )
