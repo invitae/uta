@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 """
 Download mito fasta and gbff file. Use BioPython to parse the features in the Mitochondrial genbank file to get
 the attributes of a region of the genome that correspond to genes along with their attributes. Output gene/tx/alignment
@@ -166,6 +168,7 @@ def parse_nomenclature_value(gb_feature: SeqFeature) -> Dict[str, str]:
 def get_mito_genes(gbff_filepath: str):
     logger.info(f"processing NCBI GBFF file from {gbff_filepath}")
     with open(gbff_filepath) as fh:
+        # Bio.SeqIO.parse(fh, "gb") returns an empty iterator for .fna files and does not fail
         for record in Bio.SeqIO.parse(fh, "gb"):
             for feature in record.features:
                 xrefs = parse_db_xrefs(feature)
@@ -331,5 +334,4 @@ def main(ncbi_accession: str, output_dir: str):
 
 if __name__ == "__main__":
     args = parse_args()
-
     main(args.accession, args.output_dir)
