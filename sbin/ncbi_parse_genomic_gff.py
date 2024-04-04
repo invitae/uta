@@ -24,27 +24,16 @@ due merely to concatenation of adjacent spans.
 """
 
 import argparse
-import gzip
 import logging.config
 import sys
 from collections import defaultdict
-from contextlib import contextmanager
 from dataclasses import dataclass
 from typing import List, Optional
 
 import pkg_resources
 
 from uta.formats.exonset import ExonSet, ExonSetWriter
-
-
-@contextmanager
-def open_file(filename):
-    if filename.endswith(".gz"):
-        with gzip.open(filename, "rt") as f:
-            yield f
-    else:
-        with open(filename) as f:
-            yield f
+from uta.tools.file_utils import open_file
 
 
 @dataclass
