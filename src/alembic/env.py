@@ -29,7 +29,7 @@ target_metadata = Base.metadata
 
 def include_name(name, type_, parent_names) -> bool:
     if type_ == "schema":
-        return name in ["uta_1_1"]
+        return name in ["uta"]
     else:
         return True
 

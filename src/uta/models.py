@@ -18,11 +18,9 @@ from sqlalchemy.ext.declarative import declarative_base
 schema_version = "1.1"
 use_schema = True
 if use_schema:
-    schema_name = "uta_" + schema_version.replace(".","_")
-    schema_name_dot = schema_name + "."
+    schema_name = "uta"
 else:
     schema_name = None
-    schema_name_dot = ""
 
 
 ############################################################################
@@ -228,6 +226,7 @@ class AssociatedAccessions(Base):
         sa.Index("unique_pair_in_origin", "origin", "tx_ac", "pro_ac", unique=True),
         sa.Index("associated_accessions_pro_ac", "pro_ac"),
         sa.Index("associated_accessions_tx_ac", "tx_ac"),
+        {"comment": "transcript-protein accession pairs associated in source databases"},
     )
 
     # columns:
