@@ -30,6 +30,7 @@ GFF_files=$(ls $ncbi_dir/genomes/refseq/vertebrate_mammalian/Homo_sapiens/all_as
 sbin/ncbi_parse_genomic_gff.py "$GFF_files" | gzip -c > "$working_dir/unfiltered_exonsets.gz" 2>&1 | \
     tee "$logs_dir/ncbi-parse-genomic-gff.log"
 
+# filter transcripts
 sbin/filter_exonset_transcripts.py --tx-info "$working_dir/gbff.txinfo.gz" --exonsets "$working_dir/unfiltered_exonsets.gz" \
     --missing-ids "$working_dir/filtered_tx_acs.txt" | gzip -c > "$working_dir/exonsets.gz" 2>&1 | \
     tee "$logs_dir/filter_exonset_transcripts.log"

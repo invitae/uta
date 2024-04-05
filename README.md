@@ -338,29 +338,23 @@ Note: a container called seqrepo will be left behind.
 
 ### 2. Extract and transform data from NCBI
 
-Download files from NCBI, and extract into intermediate files.
+Download files from NCBI, extract into intermediate files, and load into UTA and SeqRepo.
 
 See 2A for nuclear transcripts and 2B for mitochondrial transcripts.
 
 #### 2A. Nuclear transcripts
 ```
 docker compose run ncbi-download
+docker compose run seqrepo-load
 docker compose run uta-extract
+docker compose run uta-load
 ```
 
 #### 2B. Mitochondrial transcripts
 ```
 docker compose run mito-extract
-```
-
-### 3. Load data into SeqRepo
-```
 docker compose run seqrepo-load
-```
-
-### 4. Load data into UTA
-```
-docker compose run uta-load
+UTA_ETL_SKIP_GENE_LOAD=true docker compose run uta-load
 ```
 
 UTA has updated and the database has been dumped into a pgd file in `UTA_ETL_WORK_DIR`. SeqRepo has been updated in place.

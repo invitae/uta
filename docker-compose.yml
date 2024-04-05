@@ -42,7 +42,7 @@ services:
     network_mode: host
   uta-load:
     image: uta-update
-    command: etc/scripts/uta-load ${UTA_ETL_OLD_UTA_VERSION} /ncbi-dir /uta-load/work /uta-load/logs
+    command: etc/scripts/uta-load ${UTA_ETL_OLD_UTA_VERSION} /ncbi-dir /uta-load/work /uta-load/logs ${UTA_ETL_SKIP_GENE_LOAD}
     depends_on:
       uta:
         condition: service_healthy

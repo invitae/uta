@@ -5,6 +5,7 @@
 # ncbi_dir is where the script looks for NCBI data files.
 # working_dir stores intermediate data files and the final database dump.
 # log_dir stores log files.
+# skip_load_genes, if truthy, will skip the gene loading step
 
 # Note that the uta loading code uses the seqrepo location defined in the conf files, under [sequences].seqrepo.
 
@@ -14,6 +15,8 @@ source_uta_v=$1
 ncbi_dir=$2
 working_dir=$3
 log_dir=$4
+# optionally skip loading geneinfo
+skip_load_genes=$5
 
 if [ -z "$source_uta_v" ] || [ -z "$ncbi_dir" ] || [ -z "$working_dir" ] || [ -z "$log_dir" ]
 then
@@ -33,9 +36,12 @@ etc/scripts/create-new-schema.sh "$source_uta_v" "$loading_uta_v"
 sbin/assoc-acs-merge "$working_dir/assocacs.gz" | gzip -c > "$working_dir/assoc-ac.gz" 2>&1 | \
     tee "$log_dir/assoc-acs-merge.log"
 
-# # Load genes into gene table.
-# uta --conf=etc/global.conf --conf=etc/uta_dev@localhost.conf load-geneinfo "$working_dir/geneinfo.gz" 2>&1 | \
-#     tee "$log_dir/load-geneinfo.log"
+# Load genes into gene table.
+if [ -z "$skip_load_genes" ]
+then
+    uta --conf=etc/global.conf --conf=etc/uta_dev@localhost.conf load-geneinfo "$working_dir/geneinfo.gz" 2>&1 | \
+        tee "$log_dir/load-geneinfo.log"
+fi
 
 # Load accessions into associated_accessions table.
 uta --conf=etc/global.conf --conf=etc/uta_dev@localhost.conf load-assoc-ac "$working_dir/assoc-ac.gz" 2>&1 | \
