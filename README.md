@@ -309,11 +309,11 @@ See 2A for nuclear transcripts and 2B for mitochondrial transcripts.
 #### 2A. Nuclear transcripts
 ```
 mkdir -p $(pwd)/ncbi-data
-mkdir -p $(pwd)/uta-build
-mkdir -p $(pwd)/uta-logs
+mkdir -p $(pwd)/output/artifacts
+mkdir -p $(pwd)/output/logs
 
 sbin/ncbi-download-docker $(pwd)/ncbi-data
-sbin/uta-extract $(pwd)/ncbi-data $(pwd)/uta-build $(pwd)/uta-logs
+sbin/uta-extract $(pwd)/ncbi-data $(pwd)/output/artifacts $(pwd)/output/logs
 ```
 
 The `ncbi-data` directory will have the following structure:
@@ -342,15 +342,15 @@ The `ncbi-data` directory will have the following structure:
 
 #### 2B. Mitochondrial transcripts
 ```
-sbin/ncbi_process_mito.py NC_012920.1 --output-dir $(pwd)/uta-build | tee $(pwd)/uta-logs/mito.log
+sbin/ncbi_process_mito.py NC_012920.1 --output-dir $(pwd)/output/artifacts | tee $(pwd)/output/logs/mito.log
 ```
 
 ### 3. Load data into SeqRepo
 ```
-sbin/seqrepo-load $(pwd)/seqrepo-data 2024-02-20 $(pwd)/uta-build $(pwd)/uta-logs
+sbin/seqrepo-load $(pwd)/seqrepo-data 2024-02-20 $(pwd)/output/artifacts $(pwd)/output/logs
 ```
 
 ### 4. Load data into UTA
 ```
-sbin/uta-load $(pwd)/ncbi-data $(pwd)/seqrepo-data $(pwd)/uta-build uta_20210129b
+sbin/uta-load $(pwd)/ncbi-data $(pwd)/seqrepo-data $(pwd)/output/artifacts uta_20210129b
 ```
