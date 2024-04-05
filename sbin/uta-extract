@@ -27,8 +27,12 @@ sbin/ncbi-parse-gbff "$GBFF_files" | gzip -c > "$working_dir/txinfo.gz" 2>&1 | \
 
 # parse alignments from GFF input files
 GFF_files=$(ls $ncbi_dir/genomes/refseq/vertebrate_mammalian/Homo_sapiens/all_assembly_versions/GCF_000001405*/GCF_*_genomic.gff.gz)
-sbin/ncbi_parse_genomic_gff.py "$GFF_files" | gzip -c > "$working_dir/exonsets.gz" 2>&1 | \
+sbin/ncbi_parse_genomic_gff.py "$GFF_files" | gzip -c > "$working_dir/unfiltered_exonsets.gz" 2>&1 | \
     tee "$logs_dir/ncbi-parse-genomic-gff.log"
+
+sbin/filter_exonset_transcripts.py --tx-info "$working_dir/gbff.txinfo.gz" --exonsets "$working_dir/unfiltered_exonsets.gz" \
+    --missing-ids "$working_dir/filtered_tx_acs.txt" | gzip -c > "$working_dir/exonsets.gz" 2>&1 | \
+    tee "$logs_dir/filter_exonset_transcripts.log"
 
 # generate seqinfo files from exonsets (this step requires seqrepo)
 sbin/exonset-to-seqinfo -o NCBI "$working_dir/exonsets.gz" | gzip -c > "$working_dir/seqinfo.gz" 2>&1 | \
