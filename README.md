@@ -359,11 +359,8 @@ docker compose run seqrepo-load
 ```
 
 ### 4. Load data into UTA
-
-Bring up a UTA database and run the UTA load procedure.
-
-UTA is updated and the database is dumped into a pgd file. SeqRepo is updated in place.
-
 ```
 docker compose run uta-load
 ```
+
+UTA has updated and the database has been dumped into a pgd file in `UTA_ETL_WORK_DIR`. SeqRepo has been updated in place.
