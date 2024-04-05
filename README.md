@@ -289,7 +289,7 @@ To develop UTA, follow these steps.
 4. Testing
 
         $ docker build --target uta-test -t uta-test .
-        $ docker run -it --rm uta-test python -m unittest
+        $ docker run --rm uta-test python -m unittest
 
 ## UTA update procedure
 
@@ -334,7 +334,35 @@ Example:
 sbin/seqrepo-download 2024-02-20 $(pwd)/seqrepo-data
 ```
 
-### 3. Update UTA and SeqRepo
+### 3. Extract data from NCBI files into intermediate files
+
+See 3A for nuclear transcript updates and 3B for mitochondrial transcript updates.
+
+In either case, first create directories:
+```
+mkdir -p $(pwd)/uta-build/loading
+mkdir -p $(pwd)/uta-build/logs
+```
+
+#### 3A. Nuclear transcripts
+
+Run `sbin/uta-extract`. Requires bash and docker.
+
+Example:
+```
+sbin/uta-extract $(pwd)/ncbi-data $(pwd)/uta-build/loading $(pwd)/uta-build/logs
+```
+
+#### 3B. Mitochondrial transcripts
+
+Run `sbin/ncbi_process_mito.py`. Requires bash and docker.
+
+Example:
+```
+sbin/ncbi_process_mito.py NC_012920.1 --output-dir $(pwd)/uta-build/loading | tee $(pwd)/uta-build/logs/mito.log
+```
+
+### 4. Update UTA and SeqRepo
 
 Run `sbin/uta-update`. Requires bash and docker.
 

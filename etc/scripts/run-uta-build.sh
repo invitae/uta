@@ -38,50 +38,31 @@ seqrepo load -n NCBI -i "$seqrepo_data_release" \
   $ncbi_dir/genomes/refseq/vertebrate_mammalian/Homo_sapiens/all_assembly_versions/GCF_000001405*/GCF_*_genomic.fna.gz 2>& 1 | \
   tee "$logs_dir/seqrepo-load.log"
 
-### extract meta data
-# genes
-sbin/ncbi-parse-geneinfo $ncbi_dir/gene/DATA/GENE_INFO/Mammalia/Homo_sapiens.gene_info.gz | \
-  gzip -c > "$loading_dir/genes.geneinfo.gz" 2>&1 | tee "$logs_dir/ncbi-parse-geneinfo.log"
+# Filter out columns from assocacs file.
+sbin/assoc-acs-merge "$loading_dir/assocacs.gz" | gzip -c > "$loading_dir/assoc-ac.gz" 2>&1 | \
+    tee "$logs_dir/assoc-acs-merge.log"
 
-# transcript protein associations
-sbin/ncbi-parse-gene2refseq $ncbi_dir/gene/DATA/gene2accession.gz | gzip -c > "$loading_dir/assocacs.gz" 2>&1 | \
-  tee "$logs_dir/ncbi-fetch-assoc-acs"
+# Load genes into gene table.
+uta --conf=etc/global.conf --conf=etc/uta_dev@localhost.conf load-geneinfo "$loading_dir/geneinfo.gz" 2>&1 | \
+    tee "$logs_dir/load-geneinfo.log"
 
-sbin/assoc-acs-merge "$loading_dir/assocacs.gz" | gzip -c > "$loading_dir/assocacs.cleaned.gz" 2>&1 | \
-  tee "$logs_dir/assoc-acs-merge"
+# Load accessions into associated_accessions table.
+uta --conf=etc/global.conf --conf=etc/uta_dev@localhost.conf load-assoc-ac "$loading_dir/assoc-ac.gz" 2>&1 | \
+    tee "$logs_dir/load-assoc-ac.log"
 
-# parse transcript info from GBFF input files
-GBFF_files=$(ls $ncbi_dir/refseq/H_sapiens/mRNA_Prot/human.*.rna.gbff.gz)
-sbin/ncbi-parse-gbff "$GBFF_files" | gzip -c > "$loading_dir/gbff.txinfo.gz" 2>&1 | \
-  tee "$logs_dir/ncbi-parse-gbff.log"
+# Load transcript info into transcript and exon_set tables.
+uta --conf=etc/global.conf --conf=etc/uta_dev@localhost.conf load-txinfo "$loading_dir/txinfo.gz" 2>&1 | \
+    tee "$logs_dir/load-txinfo.log"
 
-# parse alignments from GFF input files
-GFF_files=$(ls $ncbi_dir/genomes/refseq/vertebrate_mammalian/Homo_sapiens/all_assembly_versions/GCF_000001405*/GCF_*_genomic.gff.gz)
-sbin/ncbi_parse_genomic_gff.py "$GFF_files" | gzip -c > "$loading_dir/gff.exonsets.gz" 2>&1 | \
-  tee "$logs_dir/ncbi-parse-genomic-gff.log"
+# Load exon sets into into exon_set and exon tables.
+uta --conf=etc/global.conf --conf=etc/uta_dev@localhost.conf load-exonset "$loading_dir/exonsets.gz" 2>&1 | \
+    tee "$logs_dir/load-exonsets.log"
 
-# generate seqinfo files from exonsets
-sbin/exonset-to-seqinfo -o NCBI "$loading_dir/gff.exonsets.gz" | gzip -c > "$loading_dir/seqinfo.gz" 2>&1 | \
-  tee "$logs_dir/exonset-to-seqinfo.log"
+# Create cigar strings for all rows in tx_alt_exon_pairs_v view and update exon_aln table.
+uta --conf=etc/global.conf --conf=etc/uta_dev@localhost.conf align-exons 2>&1 | \
+    tee "$logs_dir/align-exons.log"
 
-### update the uta database
-# genes
-uta --conf=etc/global.conf --conf=etc/uta_dev@localhost.conf load-geneinfo "$loading_dir/genes.geneinfo.gz" 2>&1 | \
-  tee "$logs_dir/load-geneinfo.log"
-
-uta --conf=etc/global.conf --conf=etc/uta_dev@localhost.conf load-assoc-ac "$loading_dir/assocacs.cleaned.gz" 2>&1 | \
-  tee "$logs_dir/load-assoc-ac.log"
-
-# transcript info
-uta --conf=etc/global.conf --conf=etc/uta_dev@localhost.conf load-txinfo "$loading_dir/gbff.txinfo.gz" 2>&1 | \
-  tee "$logs_dir/load-txinfo.log"
-
-# gff exon sets
-uta --conf=etc/global.conf --conf=etc/uta_dev@localhost.conf load-exonset "$loading_dir/gff.exonsets.gz" 2>&1 | \
-  tee "$logs_dir/load-exonsets.log"
-
-# align exons
-uta --conf=etc/global.conf --conf=etc/uta_dev@localhost.conf align-exons 2>&1 | tee "$logs_dir/align-exons.log"
+# Load seqinfo?
 
 ### run diff
 sbin/uta-diff "$source_uta_v" "$loading_uta_v"
