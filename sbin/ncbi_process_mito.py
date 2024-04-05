@@ -54,6 +54,7 @@ details to intermediate file needed to update UTA database and SeqRepo.
 """
 import argparse
 import dataclasses
+import gzip
 import importlib_resources
 import logging
 import logging.config
@@ -245,7 +246,7 @@ def main(ncbi_accession: str, output_dir: str):
     logger.info(f"found {len(mito_genes)} genes from parsing {input_files['gbff']}")
 
     # write gene accessions
-    with open(f"{output_dir}/{ncbi_accession}.assocacs", "w") as o_file:
+    with gzip.open(f"{output_dir}/assocacs.gz", "wt") as o_file:
         gaw = GeneAccessionsWriter(o_file)
         for mg in mito_genes:
             if mg.pro_ac is not None:
@@ -256,7 +257,7 @@ def main(ncbi_accession: str, output_dir: str):
                 )
 
     # write sequence information
-    with open(f"{output_dir}/{ncbi_accession}.seqinfo", "w") as o_file:
+    with gzip.open(f"{output_dir}/seqinfo.gz", "wt") as o_file:
         siw = SeqInfoWriter(o_file)
         for mg in mito_genes:
             siw.write(
@@ -303,7 +304,7 @@ def main(ncbi_accession: str, output_dir: str):
                 o_file.write(record.format("fasta"))
 
     # write transcript information
-    with open(f"{output_dir}/{ncbi_accession}.txinfo", "w") as o_file:
+    with gzip.open(f"{output_dir}/txinfo.gz", "wt") as o_file:
         tiw = TxInfoWriter(o_file)
         for mg in mito_genes:
             tiw.write(
@@ -318,7 +319,7 @@ def main(ncbi_accession: str, output_dir: str):
             )
 
     # write exonset
-    with open(f"{output_dir}/{ncbi_accession}.exonset", "w") as o_file:
+    with gzip.open(f"{output_dir}/exonsets.gz", "wt") as o_file:
         esw = ExonSetWriter(o_file)
         for mg in mito_genes:
             esw.write(
