@@ -9,6 +9,7 @@ import sqlalchemy.orm as sao
 import sqlalchemy.types
 import sqlalchemy.sql.functions
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.dialects import postgresql
 
 
 ############################################################################
@@ -235,7 +236,7 @@ class AssociatedAccessions(Base):
     pro_ac = sa.Column(sa.Text, nullable=False)
     origin = sa.Column(sa.Text, nullable=False)
     added = sa.Column(
-        sqlalchemy.types.TIMESTAMP,
+        postgresql.TIMESTAMP(timezone=True),
         server_default=sqlalchemy.sql.functions.now(),
         nullable=False,
     )
