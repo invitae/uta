@@ -30,7 +30,7 @@ GFF_files=$(ls $ncbi_dir/genomes/refseq/vertebrate_mammalian/Homo_sapiens/all_as
 sbin/ncbi_parse_genomic_gff.py "$GFF_files" | gzip -c > "$loading_dir/exonsets.gz" 2>&1 | \
     tee "$logs_dir/ncbi-parse-genomic-gff.log"
 
-# generate seqinfo files from exonsets
+# generate seqinfo files from exonsets (this step requires seqrepo)
 sbin/exonset-to-seqinfo -o NCBI "$loading_dir/exonsets.gz" | gzip -c > "$loading_dir/seqinfo.gz" 2>&1 | \
     tee "$logs_dir/exonset-to-seqinfo.log"
 

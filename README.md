@@ -293,19 +293,33 @@ To develop UTA, follow these steps.
 
 ## UTA update procedure
 
-Requires bash and docker.
+Requires docker.
 
-### 1. Download SeqRepo data
-```
-sbin/seqrepo-download 2024-02-20 $(pwd)/seqrepo-data
-```
+### 0. Setup
 
-### 2. Extract and transform data from NCBI
+Make directories:
 ```
 mkdir -p $(pwd)/ncbi-data
 mkdir -p $(pwd)/output/artifacts
 mkdir -p $(pwd)/output/logs
 ```
+
+Set variables:
+```
+export UTA_ETL_NCBI_DIR=./ncbi-data
+export UTA_ETL_SEQREPO_DIR=./seqrepo-data
+export UTA_ETL_UTA_VERSION=uta_20210129b
+export UTA_ETL_WORK_DIR=./output/artifacts
+export UTA_ETL_LOG_DIR=./output/logs
+```
+
+### 1. Download SeqRepo data
+```
+tbd
+sbin/seqrepo-download 2024-02-20 $(pwd)/seqrepo-data
+```
+
+### 2. Extract and transform data from NCBI
 
 Download files from NCBI, and extract into intermediate files.
 
@@ -313,35 +327,9 @@ See 2A for nuclear transcripts and 2B for mitochondrial transcripts.
 
 #### 2A. Nuclear transcripts
 ```
-NCBI_DIR=./ncbi-data2 docker compose run ncbi-download
-
-# todo: move into docker
-sbin/uta-extract $(pwd)/ncbi-data $(pwd)/output/artifacts $(pwd)/output/logs
+docker compose run ncbi-download
+docker compose run uta-extract
 ```
-
-The `ncbi-data` directory will have the following structure:
-
-    ├── gene
-    │   └── DATA
-    │       ├── GENE_INFO
-    │       │   └── Mammalia
-    │       │       └── Homo_sapiens.gene_info.gz
-    │       └── gene2accession.gz
-    ├── genomes
-    │   └── refseq
-    │       └── vertebrate_mammalian
-    │           └── Homo_sapiens
-    │               └── all_assembly_versions
-    │                   └── GCF_000001405.25_GRCh37.p13
-    │                       ├── GCF_000001405.25_GRCh37.p13_genomic.fna.gz
-    │                       └── GCF_000001405.25_GRCh37.p13_genomic.gff.gz
-    └── refseq
-        └── H_sapiens
-            └── mRNA_Prot
-                ├── human.1.protein.faa.gz
-                ├── human.1.rna.fna.gz
-                └── human.1.rna.gbff.gz
-
 
 #### 2B. Mitochondrial transcripts
 ```

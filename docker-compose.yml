@@ -8,7 +8,18 @@ services:
     command: sbin/ncbi-download /ncbi-dir
     volumes:
       - .:/opt/repos/uta
-      - ${NCBI_DIR}:/ncbi-dir
+      - ${UTA_ETL_NCBI_DIR}:/ncbi-dir
+    working_dir: /opt/repos/uta
+    network_mode: host
+  uta-extract:
+    image: uta-load
+    command: sbin/uta-extract /ncbi-dir /uta-extract/work /uta-extract/logs
+    volumes:
+      - .:/opt/repos/uta
+      - ${UTA_ETL_NCBI_DIR}:/ncbi-dir
+      - ${UTA_ETL_SEQREPO_DIR}:/usr/local/share/seqrepo
+      - ${UTA_ETL_WORK_DIR}:/uta-extract/work
+      - ${UTA_ETL_LOG_DIR}:/uta-extract/logs
     working_dir: /opt/repos/uta
     network_mode: host
   uta:
@@ -28,8 +39,8 @@ services:
       uta:
         condition: service_healthy
     volumes:
-      - ${NCBI_DIR}:/ncbi-dir
-      - ${SEQREPO_DIR}:/usr/local/share/seqrepo
-      - ${WORKING_DIR}:/uta-load/work
-      - ${LOG_DIR}:/uta-load/logs
+      - ${UTA_ETL_NCBI_DIR}:/ncbi-dir
+      - ${UTA_ETL_SEQREPO_DIR}:/usr/local/share/seqrepo
+      - ${UTA_ETL_WORK_DIR}:/uta-load/work
+      - ${UTA_ETL_LOG_DIR}:/uta-load/logs
     network_mode: host
