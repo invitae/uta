@@ -345,8 +345,8 @@ See 2A for nuclear transcripts and 2B for mitochondrial transcripts.
 #### 2A. Nuclear transcripts
 ```
 docker compose run ncbi-download
-docker compose run seqrepo-load
 docker compose run uta-extract
+docker compose run seqrepo-load
 docker compose run uta-load
 ```
 
