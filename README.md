@@ -306,9 +306,10 @@ mkdir -p $(pwd)/output/logs
 
 Set variables:
 ```
+export UTA_ETL_OLD_SEQREPO_VERSION=2024-02-20
+export UTA_ETL_OLD_UTA_VERSION=uta_20210129b
 export UTA_ETL_NCBI_DIR=./ncbi-data
 export UTA_ETL_SEQREPO_DIR=./seqrepo-data
-export UTA_ETL_UTA_VERSION=uta_20210129b
 export UTA_ETL_WORK_DIR=./output/artifacts
 export UTA_ETL_LOG_DIR=./output/logs
 ```
@@ -323,9 +324,20 @@ so you may want to specify it with `--name=<container_name>`
 
 ### 1. Download SeqRepo data
 ```
-tbd
-sbin/seqrepo-download 2024-02-20 $(pwd)/seqrepo-data
+docker pull biocommons/seqrepo:$UTA_ETL_OLD_SEQREPO_VERSION
+
+# download seqrepo. can skip if container already exists.
+docker run --name seqrepo biocommons/seqrepo:$UTA_ETL_OLD_SEQREPO_VERSION
+
+# copy seqrepo data into a local directory
+docker run -v $UTA_ETL_SEQREPO_DIR:/output-dir --volumes-from seqrepo ubuntu bash -c 'cp -R /usr/local/share/seqrepo/* /output-dir'
+
+# allow seqrepo to be modified
+docker run -it -v $UTA_ETL_SEQREPO_DIR:/output-dir ubuntu bash -c 'chmod -R +w /output-dir'
 ```
+
+Note: pulling data takes ~30 minutes and requires ~13 GB.
+Note: a container called seqrepo will be left behind.
 
 ### 2. Extract and transform data from NCBI
 
