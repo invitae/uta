@@ -22,6 +22,16 @@ services:
       - ${UTA_ETL_LOG_DIR}:/uta-extract/logs
     working_dir: /opt/repos/uta
     network_mode: host
+  seqrepo-load:
+    image: uta-load
+    command: sbin/seqrepo-load /usr/local/share/seqrepo 2024-02-20 /seqrepo-load/work /seqrepo-load/logs
+    volumes:
+      - .:/opt/repos/uta
+      - ${UTA_ETL_SEQREPO_DIR}:/usr/local/share/seqrepo
+      - ${UTA_ETL_WORK_DIR}:/seqrepo-load/work
+      - ${UTA_ETL_LOG_DIR}:/seqrepo-load/logs
+    working_dir: /opt/repos/uta
+    network_mode: host
   uta:
     container_name: uta
     image: biocommons/uta:${UTA_VERSION}

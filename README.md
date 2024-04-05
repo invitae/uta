@@ -338,8 +338,7 @@ docker compose run mito-extract
 
 ### 3. Load data into SeqRepo
 ```
-# todo: move into docker
-sbin/seqrepo-load $(pwd)/seqrepo-data 2024-02-20 $(pwd)/output/artifacts $(pwd)/output/logs
+docker compose run seqrepo-load
 ```
 
 ### 4. Load data into UTA
