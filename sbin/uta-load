@@ -1,9 +1,5 @@
 #!/usr/bin/env bash
 
-# This script runs the UTA update procedure.
-# It expects to be run from the root of the uta repository.
-# It updates the specified UTA and SeqRepo using the given NCBI files.
-# The UTA update is provided as a postgres database dump, and SeqRepo is updated in place.
 
 set -e
 
@@ -19,10 +15,7 @@ then
     echo 'Usage: sbin/uta-load <ncbi_file_dir> <seqrepo_dir> <uta_version> <output_dir> <log_dir>'
     exit 1
 else
-    echo "Updating UTA and SeqRepo using files in $NCBI_DIR and SeqRepo data in $SEQREPO_DIR"
-    echo "Starting from UTA version $UTA_VERSION"
-    echo "Final dump and any intermediate files will be available in $WORKING_DIR"
-    echo "Logs will be available in $LOG_DIR"
+
 fi
 
 # Ensure directories are compatible with docker volume usage

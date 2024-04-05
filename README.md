@@ -313,6 +313,14 @@ export UTA_ETL_WORK_DIR=./output/artifacts
 export UTA_ETL_LOG_DIR=./output/logs
 ```
 
+Build the UTA image:
+```
+docker build --target uta -t uta-update .
+```
+
+Note: docker compose does not respect the container name specified in the compose file,
+so you may want to specify it with `--name=<container_name>`
+
 ### 1. Download SeqRepo data
 ```
 tbd
@@ -342,6 +350,11 @@ docker compose run seqrepo-load
 ```
 
 ### 4. Load data into UTA
+
+Bring up a UTA database and run the UTA load procedure.
+
+UTA is updated and the database is dumped into a pgd file. SeqRepo is updated in place.
+
 ```
-sbin/uta-load $(pwd)/ncbi-data $(pwd)/seqrepo-data uta_20210129b $(pwd)/output/artifacts $(pwd)/output/logs
+docker compose run uta-load
 ```

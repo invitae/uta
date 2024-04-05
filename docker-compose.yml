@@ -1,10 +1,10 @@
-# docker compose file for the UTA load procedure
+# docker compose file for the UTA update procedure
 
 version: '3'
 
 services:
   ncbi-download:
-    image: uta-load
+    image: uta-update
     command: sbin/ncbi-download /ncbi-dir
     volumes:
       - .:/opt/repos/uta
@@ -12,7 +12,7 @@ services:
     working_dir: /opt/repos/uta
     network_mode: host
   uta-extract:
-    image: uta-load
+    image: uta-update
     command: sbin/uta-extract /ncbi-dir /uta-extract/work /uta-extract/logs
     volumes:
       - .:/opt/repos/uta
@@ -23,7 +23,7 @@ services:
     working_dir: /opt/repos/uta
     network_mode: host
   seqrepo-load:
-    image: uta-load
+    image: uta-update
     command: sbin/seqrepo-load /usr/local/share/seqrepo 2024-02-20 /seqrepo-load/work /seqrepo-load/logs
     volumes:
       - .:/opt/repos/uta
@@ -34,28 +34,29 @@ services:
     network_mode: host
   uta:
     container_name: uta
-    image: biocommons/uta:${UTA_VERSION}
+    image: biocommons/uta:${UTA_ETL_UTA_VERSION}
     environment:
       - POSTGRES_HOST_AUTH_METHOD=trust
     healthcheck:
-      test: psql -h localhost -U anonymous -d uta -c "select * from ${UTA_VERSION}.meta"
+      test: psql -h localhost -U anonymous -d uta -c "select * from ${UTA_ETL_UTA_VERSION}.meta"
       interval: 10s
       retries: 60
     network_mode: host
   uta-load:
-    image: uta-load
-    command: etc/scripts/uta-load ${UTA_VERSION} /ncbi-dir /uta-load/work /uta-load/logs
+    image: uta-update
+    command: etc/scripts/uta-load ${UTA_ETL_UTA_VERSION} /ncbi-dir /uta-load/work /uta-load/logs
     depends_on:
       uta:
         condition: service_healthy
     volumes:
+      - .:/opt/repos/uta
       - ${UTA_ETL_NCBI_DIR}:/ncbi-dir
       - ${UTA_ETL_SEQREPO_DIR}:/usr/local/share/seqrepo
       - ${UTA_ETL_WORK_DIR}:/uta-load/work
       - ${UTA_ETL_LOG_DIR}:/uta-load/logs
     network_mode: host
   mito-extract:
-    image: uta-load
+    image: uta-update
     command: sbin/ncbi_process_mito.py NC_012920.1 --output-dir /mito-extract/work | tee /mito-extract/logs/mito.log
     volumes:
       - .:/opt/repos/uta

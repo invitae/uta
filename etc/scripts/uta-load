@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+# This script updates UTA and SeqRepo using NCBI files.
 # source_uta_v is the UTA version before the update.
 # ncbi_dir is where the script looks for NCBI data files.
 # working_dir stores intermediate data files and the final database dump.
