@@ -314,6 +314,8 @@ See 2A for nuclear transcripts and 2B for mitochondrial transcripts.
 #### 2A. Nuclear transcripts
 ```
 sbin/ncbi-download-docker $(pwd)/ncbi-data
+
+# todo: move into docker
 sbin/uta-extract $(pwd)/ncbi-data $(pwd)/output/artifacts $(pwd)/output/logs
 ```
 
@@ -343,11 +345,13 @@ The `ncbi-data` directory will have the following structure:
 
 #### 2B. Mitochondrial transcripts
 ```
+# todo: move into docker
 sbin/ncbi_process_mito.py NC_012920.1 --output-dir $(pwd)/output/artifacts | tee $(pwd)/output/logs/mito.log
 ```
 
 ### 3. Load data into SeqRepo
 ```
+# todo: move into docker
 sbin/seqrepo-load $(pwd)/seqrepo-data 2024-02-20 $(pwd)/output/artifacts $(pwd)/output/logs
 ```
 
