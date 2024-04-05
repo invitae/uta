@@ -301,6 +301,11 @@ sbin/seqrepo-download 2024-02-20 $(pwd)/seqrepo-data
 ```
 
 ### 2. Extract and transform data from NCBI
+```
+mkdir -p $(pwd)/ncbi-data
+mkdir -p $(pwd)/output/artifacts
+mkdir -p $(pwd)/output/logs
+```
 
 Download files from NCBI, and extract into intermediate files.
 
@@ -308,10 +313,6 @@ See 2A for nuclear transcripts and 2B for mitochondrial transcripts.
 
 #### 2A. Nuclear transcripts
 ```
-mkdir -p $(pwd)/ncbi-data
-mkdir -p $(pwd)/output/artifacts
-mkdir -p $(pwd)/output/logs
-
 sbin/ncbi-download-docker $(pwd)/ncbi-data
 sbin/uta-extract $(pwd)/ncbi-data $(pwd)/output/artifacts $(pwd)/output/logs
 ```
