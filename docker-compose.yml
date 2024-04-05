@@ -1,4 +1,4 @@
-# docker compose file for the UTA update procedure
+# docker compose file for the UTA load procedure
 
 version: '3'
 
@@ -13,8 +13,8 @@ services:
       interval: 10s
       retries: 60
     network_mode: host
-  uta-update:
-    image: uta-update
+  uta-load:
+    image: uta-load
     command: etc/scripts/run-uta-build.sh ${UTA_VERSION} /ncbi-dir /workdir
     depends_on:
       uta:

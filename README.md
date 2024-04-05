@@ -375,9 +375,9 @@ sbin/seqrepo-load $(pwd)/seqrepo-data 2024-02-20 $(pwd)/uta-build $(pwd)/uta-log
 
 ### 5. Load data into UTA
 
-Run `sbin/uta-update`.
+Run `sbin/uta-load`.
 
 Example:
 ```
-sbin/uta-update $(pwd)/ncbi-data $(pwd)/seqrepo-data $(pwd)/uta-build uta_20210129b 2024-02-20
+sbin/uta-load $(pwd)/ncbi-data $(pwd)/seqrepo-data $(pwd)/uta-build uta_20210129b 2024-02-20
 ```

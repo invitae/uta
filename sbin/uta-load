@@ -15,7 +15,7 @@ export UTA_VERSION=$4
 
 if [ -z "$NCBI_DIR" ] || [ -z "$SEQREPO_DIR" ] || [ -z "$WORKING_DIR" ] || [ -z "$UTA_VERSION" ]
 then
-    echo 'Usage: sbin/uta-update <ncbi_file_dir> <seqrepo_dir> <working_dir> <uta_version>'
+    echo 'Usage: sbin/uta-load <ncbi_file_dir> <seqrepo_dir> <working_dir> <uta_version>'
     exit 1
 else
     echo "Updating UTA and SeqRepo using files in $NCBI_DIR and SeqRepo data in $SEQREPO_DIR"
@@ -59,8 +59,8 @@ if [ ! -d "$WORKING_DIR" ]; then
 fi
 
 # Build the UTA image.
-docker build --target uta -t uta-update .
+docker build --target uta -t uta-load .
 
-# Bring up a UTA database and run the UTA update procedure.
+# Bring up a UTA database and run the UTA load procedure.
 # docker compose doesn't respect the container name specified in the compose file, so container name is specified here
-docker compose run --rm --name uta-update uta-update
+docker compose run --rm --name uta-load uta-load
