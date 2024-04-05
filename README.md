@@ -319,9 +319,6 @@ Build the UTA image:
 docker build --target uta -t uta-update .
 ```
 
-Note: docker compose does not respect the container name specified in the compose file,
-so you may want to specify it with `--name=<container_name>`
-
 ### 1. Download SeqRepo data
 ```
 docker pull biocommons/seqrepo:$UTA_ETL_OLD_SEQREPO_VERSION
