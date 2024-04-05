@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # source_uta_v is the UTA version before the update.
 # ncbi_dir is where the script looks for NCBI data files.
@@ -16,7 +16,7 @@ log_dir=$4
 
 if [ -z "$source_uta_v" ] || [ -z "$ncbi_dir" ] || [ -z "$working_dir" ] || [ -z "$log_dir" ]
 then
-    echo 'Usage: run-uta-build.sh <source_uta_v> <ncbi_dir> <working_dir> <log_dir>'
+    echo 'Usage: uta-load <source_uta_v> <ncbi_dir> <working_dir> <log_dir>'
     exit 1
 fi
 
