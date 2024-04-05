@@ -296,10 +296,6 @@ To develop UTA, follow these steps.
 Requires bash and docker.
 
 ### 1. Download files from NCBI
-
-Run `sbin/ncbi-download-docker`.
-
-Example:
 ```
 sbin/ncbi-download-docker $(pwd)/ncbi-data
 ```
@@ -328,10 +324,6 @@ The specified directory will have the following structure:
                 └── human.1.rna.gbff.gz
 
 ### 2. Download SeqRepo data
-
-Run `sbin/seqrepo-download`.
-
-Example:
 ```
 sbin/seqrepo-download 2024-02-20 $(pwd)/seqrepo-data
 ```
@@ -347,37 +339,21 @@ mkdir -p $(pwd)/uta-logs
 ```
 
 #### 3A. Nuclear transcripts
-
-Run `sbin/uta-extract`.
-
-Example:
 ```
 sbin/uta-extract $(pwd)/ncbi-data $(pwd)/uta-build $(pwd)/uta-logs
 ```
 
 #### 3B. Mitochondrial transcripts
-
-Run `sbin/ncbi_process_mito.py`.
-
-Example:
 ```
 sbin/ncbi_process_mito.py NC_012920.1 --output-dir $(pwd)/uta-build | tee $(pwd)/uta-logs/mito.log
 ```
 
 ### 4. Load data into SeqRepo
-
-Run `sbin/seqrepo-load`.
-
-Example:
 ```
 sbin/seqrepo-load $(pwd)/seqrepo-data 2024-02-20 $(pwd)/uta-build $(pwd)/uta-logs
 ```
 
 ### 5. Load data into UTA
-
-Run `sbin/uta-load`.
-
-Example:
 ```
 sbin/uta-load $(pwd)/ncbi-data $(pwd)/seqrepo-data $(pwd)/uta-build uta_20210129b 2024-02-20
 ```
