@@ -50,4 +50,4 @@ fi
 
 # Copy seqrepo data into a local directory
 echo "Copying seqrepo data into $OUTPUT_DIR ..."
-docker run -it -v $OUTPUT_DIR:/output-dir --volumes-from $SEQREPO_CONTAINER_NAME:ro ubuntu bash -c 'cp -R /usr/local/share/seqrepo/* /output-dir'
+docker run -it -v $OUTPUT_DIR:/output-dir --volumes-from $SEQREPO_CONTAINER_NAME ubuntu bash -c 'cp -R /usr/local/share/seqrepo/* /output-dir'

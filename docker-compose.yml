@@ -15,7 +15,7 @@ services:
     network_mode: host
   uta-update:
     image: uta-update
-    command: etc/scripts/run-uta-build.sh ${UTA_VERSION} ${SEQREPO_VERSION} /ncbi-dir /workdir
+    command: etc/scripts/run-uta-build.sh ${UTA_VERSION} /ncbi-dir /workdir
     depends_on:
       uta:
         condition: service_healthy

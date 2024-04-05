@@ -1,20 +1,20 @@
 #!/bin/bash
 
 # source_uta_v is the UTA version before the update.
-# seqrepo_data_release is the SeqRepo version before the update.
 # ncbi_dir is where the script looks for NCBI data files.
 # working_dir stores log files, intermediate data files, and the final database dump.
+
+# Note that the uta loading code uses the seqrepo location defined in the conf files, under [sequences].seqrepo.
 
 set -euxo pipefail
 
 source_uta_v=$1
-seqrepo_data_release=$2
-ncbi_dir=$3
-working_dir=$4
+ncbi_dir=$2
+working_dir=$3
 
-if [ -z "$source_uta_v" ] || [ -z "$seqrepo_data_release" ] || [ -z "$ncbi_dir" ] || [ -z "$working_dir" ]
+if [ -z "$source_uta_v" ] || [ -z "$ncbi_dir" ] || [ -z "$working_dir" ]
 then
-    echo 'Usage: run-uta-build.sh <source_uta_v> <seqrepo_data_release> <ncbi_dir> <working_dir>'
+    echo 'Usage: run-uta-build.sh <source_uta_v> <ncbi_dir> <working_dir>'
     exit 1
 fi
 
