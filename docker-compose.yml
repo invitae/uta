@@ -15,12 +15,13 @@ services:
     network_mode: host
   uta-load:
     image: uta-load
-    command: etc/scripts/run-uta-build.sh ${UTA_VERSION} /ncbi-dir /workdir
+    command: etc/scripts/run-uta-build.sh ${UTA_VERSION} /ncbi-dir /uta-load/work /uta-load/logs
     depends_on:
       uta:
         condition: service_healthy
     volumes:
       - ${NCBI_DIR}:/ncbi-dir
       - ${SEQREPO_DIR}:/usr/local/share/seqrepo
-      - ${WORKING_DIR}:/workdir
+      - ${WORKING_DIR}:/uta-load/work
+      - ${LOG_DIR}:/uta-load/logs
     network_mode: host

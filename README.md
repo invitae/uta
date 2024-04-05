@@ -352,5 +352,5 @@ sbin/seqrepo-load $(pwd)/seqrepo-data 2024-02-20 $(pwd)/output/artifacts $(pwd)/
 
 ### 4. Load data into UTA
 ```
-sbin/uta-load $(pwd)/ncbi-data $(pwd)/seqrepo-data $(pwd)/output/artifacts uta_20210129b
+sbin/uta-load $(pwd)/ncbi-data $(pwd)/seqrepo-data uta_20210129b $(pwd)/output/artifacts $(pwd)/output/logs
 ```

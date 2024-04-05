@@ -1,26 +1,28 @@
 #!/usr/bin/env bash
 
 # This script runs the UTA update procedure.
-# It updates the specified UTA and SeqRepo using the given NCBI files.
-# It produces a postgres dump of the updated UTA database and an updated SeqRepo (updated in place).
 # It expects to be run from the root of the uta repository.
+# It updates the specified UTA and SeqRepo using the given NCBI files.
+# The UTA update is provided as a postgres database dump, and SeqRepo is updated in place.
 
 set -e
 
 # export environment variables for docker compose file
 export NCBI_DIR=$1
 export SEQREPO_DIR=$2
-export WORKING_DIR=$3
-export UTA_VERSION=$4
+export UTA_VERSION=$3
+export WORKING_DIR=$4
+export LOG_DIR=$4
 
-if [ -z "$NCBI_DIR" ] || [ -z "$SEQREPO_DIR" ] || [ -z "$WORKING_DIR" ] || [ -z "$UTA_VERSION" ]
+if [ -z "$NCBI_DIR" ] || [ -z "$SEQREPO_DIR" ] || [ -z "$UTA_VERSION" ] || [ -z "$WORKING_DIR" ] || [ -z "$LOG_DIR" ]
 then
-    echo 'Usage: sbin/uta-load <ncbi_file_dir> <seqrepo_dir> <working_dir> <uta_version>'
+    echo 'Usage: sbin/uta-load <ncbi_file_dir> <seqrepo_dir> <uta_version> <output_dir> <log_dir>'
     exit 1
 else
     echo "Updating UTA and SeqRepo using files in $NCBI_DIR and SeqRepo data in $SEQREPO_DIR"
     echo "Starting from UTA version $UTA_VERSION"
-    echo "Logs and intermediate files will be available in $WORKING_DIR"
+    echo "Final dump and any intermediate files will be available in $WORKING_DIR"
+    echo "Logs will be available in $LOG_DIR"
 fi
 
 # Ensure directories are compatible with docker volume usage
@@ -38,7 +40,13 @@ fi
 
 if [[ $WORKING_DIR != /* ]] && [[ $WORKING_DIR != .* ]]
 then
-    echo 'Working directory must start with / or .'
+    echo 'Output directory must start with / or .'
+    exit 1
+fi
+
+if [[ $LOG_DIR != /* ]] && [[ $LOG_DIR != .* ]]
+then
+    echo 'Log directory must start with / or .'
     exit 1
 fi
 
@@ -55,6 +63,11 @@ fi
 
 if [ ! -d "$WORKING_DIR" ]; then
     echo "Directory $WORKING_DIR does not exist."
+    exit 1
+fi
+
+if [ ! -d "$LOG_DIR" ]; then
+    echo "Directory $LOG_DIR does not exist."
     exit 1
 fi
 
