@@ -347,7 +347,7 @@ See 2A for nuclear transcripts and 2B for mitochondrial transcripts.
 docker compose run ncbi-download
 docker compose run uta-extract
 docker compose run seqrepo-load
-docker compose run uta-load
+UTA_ETL_SKIP_GENE_LOAD=false docker compose run uta-load
 ```
 
 #### 2B. Mitochondrial transcripts
