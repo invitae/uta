@@ -2,6 +2,8 @@
 
 # Extract data from NCBI files into intermediate files.
 
+set -e
+
 ncbi_dir=$1
 working_dir=$2
 logs_dir=$3
