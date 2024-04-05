@@ -342,8 +342,8 @@ See 3A for nuclear transcript updates and 3B for mitochondrial transcript update
 
 In either case, first create directories:
 ```
-mkdir -p $(pwd)/uta-build/loading
-mkdir -p $(pwd)/uta-build/logs
+mkdir -p $(pwd)/uta-build
+mkdir -p $(pwd)/uta-logs
 ```
 
 #### 3A. Nuclear transcripts
@@ -352,7 +352,7 @@ Run `sbin/uta-extract`.
 
 Example:
 ```
-sbin/uta-extract $(pwd)/ncbi-data $(pwd)/uta-build/loading $(pwd)/uta-build/logs
+sbin/uta-extract $(pwd)/ncbi-data $(pwd)/uta-build $(pwd)/uta-logs
 ```
 
 #### 3B. Mitochondrial transcripts
@@ -361,7 +361,7 @@ Run `sbin/ncbi_process_mito.py`.
 
 Example:
 ```
-sbin/ncbi_process_mito.py NC_012920.1 --output-dir $(pwd)/uta-build/loading | tee $(pwd)/uta-build/logs/mito.log
+sbin/ncbi_process_mito.py NC_012920.1 --output-dir $(pwd)/uta-build | tee $(pwd)/uta-logs/mito.log
 ```
 
 ### 4. Load data into SeqRepo
@@ -370,7 +370,7 @@ Run `sbin/seqrepo-load`.
 
 Example:
 ```
-sbin/seqrepo-load $(pwd)/seqrepo-data 2024-02-20 $(pwd)/ncbi-data $(pwd)/seqrepo-data $(pwd)/logs
+sbin/seqrepo-load $(pwd)/seqrepo-data 2024-02-20 $(pwd)/uta-build $(pwd)/uta-logs
 ```
 
 ### 5. Load data into UTA

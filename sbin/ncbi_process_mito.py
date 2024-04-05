@@ -283,7 +283,7 @@ def main(ncbi_accession: str, output_dir: str):
                 )
 
     # write out transcript sequence fasta files.
-    with open(f"{output_dir}/{ncbi_accession}.rna.fna", "w") as o_file:
+    with gzip.open(f"{output_dir}/{ncbi_accession}.rna.fna.gz", "wt") as o_file:
         for mg in mito_genes:
             record = SeqRecord(
                 Seq(mg.tx_seq),
@@ -293,7 +293,7 @@ def main(ncbi_accession: str, output_dir: str):
             o_file.write(record.format("fasta"))
 
     # write out protein sequence fasta files.
-    with open(f"{output_dir}/{ncbi_accession}.protein.faa", "w") as o_file:
+    with gzip.open(f"{output_dir}/{ncbi_accession}.protein.faa.gz", "wt") as o_file:
         for mg in mito_genes:
             if mg.pro_ac is not None:
                 record = SeqRecord(

@@ -33,3 +33,8 @@ sbin/ncbi_parse_genomic_gff.py "$GFF_files" | gzip -c > "$loading_dir/exonsets.g
 # generate seqinfo files from exonsets
 sbin/exonset-to-seqinfo -o NCBI "$loading_dir/exonsets.gz" | gzip -c > "$loading_dir/seqinfo.gz" 2>&1 | \
     tee "$logs_dir/exonset-to-seqinfo.log"
+
+# move fasta files into same dir
+cp $ncbi_dir/refseq/H_sapiens/mRNA_Prot/human.*.rna.fna.gz uta-build/
+cp $ncbi_dir/refseq/H_sapiens/mRNA_Prot/human.*.protein.faa.gz uta-build/
+cp $ncbi_dir/genomes/refseq/vertebrate_mammalian/Homo_sapiens/all_assembly_versions/GCF_000001405*/GCF_*_genomic.fna.gz uta-build/
