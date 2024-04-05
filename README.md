@@ -333,8 +333,7 @@ docker compose run uta-extract
 
 #### 2B. Mitochondrial transcripts
 ```
-# todo: move into docker
-sbin/ncbi_process_mito.py NC_012920.1 --output-dir $(pwd)/output/artifacts | tee $(pwd)/output/logs/mito.log
+docker compose run mito-extract
 ```
 
 ### 3. Load data into SeqRepo
