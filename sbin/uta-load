@@ -46,6 +46,8 @@ sbin/assoc-acs-merge "$working_dir/assocacs.gz" | gzip -c > "$working_dir/assoc-
 # Load genes into gene table.
 if [ "$skip_load_genes" = "true" ]
 then
+    echo "Skipping load-geneinfo"
+else
     uta --conf=etc/global.conf --conf=etc/uta_dev@localhost.conf load-geneinfo "$working_dir/geneinfo.gz" 2>&1 | \
         tee "$log_dir/load-geneinfo.log"
 fi
