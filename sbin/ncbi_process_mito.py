@@ -86,7 +86,7 @@ class MitoGeneData:
     alt_ac: str
     alt_start: int
     alt_end: int
-    strand: str
+    strand: int
     origin: str = "NCBI"
     alignment_method: str = "splign"
     transl_table: Optional[str] = None
@@ -204,9 +204,7 @@ def get_mito_genes(gbff_filepath: str):
                     # retrieve sequence, and reverse compliment if on reverse strand
                     ac = f"{record.id}_{feature.location.start:05}_{feature.location.end:05}"
                     feature_seq = record.seq[feature_start:feature_end]
-                    strand = "+"
                     if feature.location.strand == -1:
-                        strand = "-"
                         feature_seq = feature_seq.reverse_complement()
 
                     if feature.type == "CDS":
@@ -229,7 +227,7 @@ def get_mito_genes(gbff_filepath: str):
                         alt_ac=record.id,
                         alt_start=feature_start,
                         alt_end=feature_end,
-                        strand=strand,
+                        strand=feature.location.strand,
                         transl_table=transl_table,
                         transl_except=transl_except,
                         pro_ac=pro_ac,

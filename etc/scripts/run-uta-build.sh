@@ -32,9 +32,9 @@ etc/scripts/create-new-schema.sh "$source_uta_v" "$loading_uta_v"
 sbin/assoc-acs-merge "$working_dir/assocacs.gz" | gzip -c > "$working_dir/assoc-ac.gz" 2>&1 | \
     tee "$log_dir/assoc-acs-merge.log"
 
-# Load genes into gene table.
-uta --conf=etc/global.conf --conf=etc/uta_dev@localhost.conf load-geneinfo "$working_dir/geneinfo.gz" 2>&1 | \
-    tee "$log_dir/load-geneinfo.log"
+# # Load genes into gene table.
+# uta --conf=etc/global.conf --conf=etc/uta_dev@localhost.conf load-geneinfo "$working_dir/geneinfo.gz" 2>&1 | \
+#     tee "$log_dir/load-geneinfo.log"
 
 # Load accessions into associated_accessions table.
 uta --conf=etc/global.conf --conf=etc/uta_dev@localhost.conf load-assoc-ac "$working_dir/assoc-ac.gz" 2>&1 | \
