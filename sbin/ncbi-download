@@ -26,6 +26,7 @@ do
     DOWNLOAD_MODULE="${DOWNLOAD_PATH%%/*}"
     DOWNLOAD_SRC="ftp.ncbi.nlm.nih.gov::$DOWNLOAD_PATH"
     DOWNLOAD_DST="$DOWNLOAD_DIR/$DOWNLOAD_MODULE"
+    mkdir -p $DOWNLOAD_DST
     echo "Downloading $DOWNLOAD_SRC to $DOWNLOAD_DST"
     rsync --no-motd -DHPRprtv "$DOWNLOAD_SRC" "$DOWNLOAD_DST"
 done

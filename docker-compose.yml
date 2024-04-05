@@ -3,6 +3,14 @@
 version: '3'
 
 services:
+  ncbi-download:
+    image: uta-load
+    command: sbin/ncbi-download /ncbi-dir
+    volumes:
+      - .:/opt/repos/uta
+      - ${NCBI_DIR}:/ncbi-dir
+    working_dir: /opt/repos/uta
+    network_mode: host
   uta:
     container_name: uta
     image: biocommons/uta:${UTA_VERSION}

@@ -313,7 +313,7 @@ See 2A for nuclear transcripts and 2B for mitochondrial transcripts.
 
 #### 2A. Nuclear transcripts
 ```
-sbin/ncbi-download-docker $(pwd)/ncbi-data
+NCBI_DIR=./ncbi-data2 docker compose run ncbi-download
 
 # todo: move into docker
 sbin/uta-extract $(pwd)/ncbi-data $(pwd)/output/artifacts $(pwd)/output/logs
