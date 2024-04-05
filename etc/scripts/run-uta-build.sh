@@ -31,13 +31,6 @@ done
 etc/scripts/delete-schema.sh "$loading_uta_v"
 etc/scripts/create-new-schema.sh "$source_uta_v" "$loading_uta_v"
 
-## Load SeqRepo with new sequences
-seqrepo load -n NCBI -i "$seqrepo_data_release" \
-  $ncbi_dir/refseq/H_sapiens/mRNA_Prot/human.*.rna.fna.gz \
-  $ncbi_dir/refseq/H_sapiens/mRNA_Prot/human.*.protein.faa.gz \
-  $ncbi_dir/genomes/refseq/vertebrate_mammalian/Homo_sapiens/all_assembly_versions/GCF_000001405*/GCF_*_genomic.fna.gz 2>& 1 | \
-  tee "$logs_dir/seqrepo-load.log"
-
 # Filter out columns from assocacs file.
 sbin/assoc-acs-merge "$loading_dir/assocacs.gz" | gzip -c > "$loading_dir/assoc-ac.gz" 2>&1 | \
     tee "$logs_dir/assoc-acs-merge.log"

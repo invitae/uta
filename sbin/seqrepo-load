@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+
+set -e
+
+seqrepo_root=$1
+seqrepo_version=$2
+ncbi_dir=$3
+logs_dir=$4
+
+if [ -z "$seqrepo_root" ] || [ -z "$seqrepo_version" ] || [ -z "$ncbi_dir" ] || [ -z "$logs_dir" ]
+then
+    echo 'Usage: sbin/seqrepo-load <seqrepo_root> <seqrepo_version> <ncbi_dir> <logs_dir>'
+    exit 1
+fi
+
+## Load SeqRepo with new sequences
+seqrepo --root-directory "$seqrepo_root" \
+    load -n NCBI --instance-name "$seqrepo_version" \
+    $ncbi_dir/refseq/H_sapiens/mRNA_Prot/human.*.rna.fna.gz \
+    $ncbi_dir/refseq/H_sapiens/mRNA_Prot/human.*.protein.faa.gz \
+    $ncbi_dir/genomes/refseq/vertebrate_mammalian/Homo_sapiens/all_assembly_versions/GCF_000001405*/GCF_*_genomic.fna.gz 2>& 1 | \
+    tee "$logs_dir/seqrepo-load.log"

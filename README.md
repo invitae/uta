@@ -293,9 +293,11 @@ To develop UTA, follow these steps.
 
 ## UTA update procedure
 
+Requires bash and docker.
+
 ### 1. Download files from NCBI
 
-Run `sbin/ncbi-download-docker`. Requires bash and docker.
+Run `sbin/ncbi-download-docker`.
 
 Example:
 ```
@@ -327,7 +329,7 @@ The specified directory will have the following structure:
 
 ### 2. Download SeqRepo data
 
-Run `sbin/seqrepo-download`. Requires bash and docker.
+Run `sbin/seqrepo-download`.
 
 Example:
 ```
@@ -346,7 +348,7 @@ mkdir -p $(pwd)/uta-build/logs
 
 #### 3A. Nuclear transcripts
 
-Run `sbin/uta-extract`. Requires bash and docker.
+Run `sbin/uta-extract`.
 
 Example:
 ```
@@ -355,16 +357,25 @@ sbin/uta-extract $(pwd)/ncbi-data $(pwd)/uta-build/loading $(pwd)/uta-build/logs
 
 #### 3B. Mitochondrial transcripts
 
-Run `sbin/ncbi_process_mito.py`. Requires bash and docker.
+Run `sbin/ncbi_process_mito.py`.
 
 Example:
 ```
 sbin/ncbi_process_mito.py NC_012920.1 --output-dir $(pwd)/uta-build/loading | tee $(pwd)/uta-build/logs/mito.log
 ```
 
-### 4. Update UTA and SeqRepo
+### 4. Load data into SeqRepo
 
-Run `sbin/uta-update`. Requires bash and docker.
+Run `sbin/seqrepo-load`.
+
+Example:
+```
+sbin/seqrepo-load $(pwd)/seqrepo-data 2024-02-20 $(pwd)/ncbi-data $(pwd)/seqrepo-data $(pwd)/logs
+```
+
+### 5. Load data into UTA
+
+Run `sbin/uta-update`.
 
 Example:
 ```
