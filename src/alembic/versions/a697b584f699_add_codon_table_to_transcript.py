@@ -1,4 +1,4 @@
-"""Added codon_table to Transcript
+"""add codon_table to Transcript
 
 Revision ID: a697b584f699
 Revises: cc51f50ae896
