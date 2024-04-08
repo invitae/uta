@@ -88,6 +88,10 @@ uta --conf=etc/global.conf --conf=etc/uta_dev@localhost.conf load-txinfo "$loadi
 uta --conf=etc/global.conf --conf=etc/uta_dev@localhost.conf load-exonset "$loading_dir/gff.filtered_exonsets.gz" 2>&1 | \
   tee "$logs_dir/load-exonsets.log"
 
+# seqinfo
+uta --conf=etc/global.conf --conf=etc/uta_dev@localhost.conf load-seqinfo "$loading_dir/seqinfo.gz" 2>&1 | \
+    tee "$logs_dir/load-seqinfo.log"
+
 # align exons
 uta --conf=etc/global.conf --conf=etc/uta_dev@localhost.conf align-exons 2>&1 | tee "$logs_dir/align-exons.log"
 
