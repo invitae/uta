@@ -72,7 +72,6 @@ uta --conf=etc/global.conf --conf=etc/uta_dev@localhost.conf load-seqinfo "$load
 uta --conf=etc/global.conf --conf=etc/uta_dev@localhost.conf align-exons 2>&1 | \
     tee "$log_dir/align-exons.log"
 
-
 ### run diff
 sbin/uta-diff "$source_uta_v" "$loading_uta_v"
 
