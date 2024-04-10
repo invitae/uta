@@ -32,6 +32,6 @@ make SRC_NAME=splign-manual logs/uta_dev@localhost/splign-manual/exonset.log
 
 make align-exons
 
-uta --conf=etc/global.conf --conf=etc/uta_dev@localhost.conf analyze
-uta --conf=etc/global.conf --conf=etc/uta_dev@localhost.conf refresh-matviews
-uta --conf=etc/global.conf --conf=etc/uta_dev@localhost.conf grant-permissions
+uta --conf=../etc/global.conf --conf=../etc/uta_dev@localhost.conf analyze
+uta --conf=../etc/global.conf --conf=../etc/uta_dev@localhost.conf refresh-matviews
+uta --conf=../etc/global.conf --conf=../etc/uta_dev@localhost.conf grant-permissions
