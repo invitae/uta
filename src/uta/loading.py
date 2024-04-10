@@ -161,7 +161,7 @@ def analyze(session, opts, cf):
     ]
     for cmd in cmds:
         logger.info(cmd)
-        session.execute(cmd)
+        session.execute(text(cmd))
     session.commit()
 
 

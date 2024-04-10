@@ -19,6 +19,8 @@ COPY pyproject.toml ./
 COPY etc ./etc
 COPY sbin ./sbin
 COPY src ./src
+COPY loading/data/splign-manual ./splign-manual
+COPY loading ./loading
 RUN pip install -e .[dev]
 
 

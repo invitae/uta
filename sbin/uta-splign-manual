@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+
+# Process splign-manual alignments
+
+set -euxo pipefail
+
+cwd=$(dirname $0)
+working_dir=$1
+log_dir=$2
+
+if [ -z "$working_dir" ] || [ -z "$log_dir" ]
+then
+    echo 'Usage: sbin/uta-splign-manual <working_dir> <log_dir>'
+    exit 1
+fi
+
+mkdir -p "$log_dir"
+
+# Generate txinfo.gz and exonset.gz files
+python splign-manual/generate-loading-data splign-manual/alignments/*.splign 2>&1 --txdata splign-manual/txdata.yaml --output-dir splign-manual | tee "$log_dir/generate-loading-data.log"
+
+# Generate fasta files
+seqrepo export $(gzip -cdq splign-manual/txinfo.gz  | cut -f2 | tail +2) | gzip -c > splign-manual/seqs.fa.gz | tee "$log_dir/seqrepo-export.log"
+
+# Generate seqinfo.gz file
+sbin/fasta-to-seqinfo -o NCBI splign-manual/seqs.fa.gz | gzip -c > splign-manual/seqinfo.gz | tee "$log_dir/fasta-to-seqinfo.log"
+
+cd loading
+make SRC_NAME=splign-manual logs/uta_dev@localhost/splign-manual/seqinfo.log
+make SRC_NAME=splign-manual logs/uta_dev@localhost/splign-manual/txinfo.log
+make SRC_NAME=splign-manual logs/uta_dev@localhost/splign-manual/exonset.log
+
+make align-exons
+
+uta --conf=etc/global.conf --conf=etc/uta_dev@localhost.conf analyze
+uta --conf=etc/global.conf --conf=etc/uta_dev@localhost.conf refresh-matviews
+uta --conf=etc/global.conf --conf=etc/uta_dev@localhost.conf grant-permissions
