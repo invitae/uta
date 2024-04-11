@@ -16,18 +16,21 @@ fi
 
 # set local variables and create working directories
 loading_uta_v="uta"
+working_dir="$working_dir/splign-manual"
+log_dir="$log_dir/splign-manual"
 mkdir -p "$log_dir"
+mkdir -p "$working_dir"
 
 # Generate txinfo.gz and exonset.gz files
-python splign-manual/generate-loading-data splign-manual/alignments/*.splign 2>&1 --txdata splign-manual/txdata.yaml --output-dir $working_dir | tee "$log_dir/generate-loading-data.log"
+python loading/data/splign-manual/generate-loading-data loading/data/splign-manual/alignments/*.splign 2>&1 --txdata loading/data/splign-manual/txdata.yaml --output-dir $working_dir | tee "$log_dir/generate-loading-data.log"
 
 # Generate fasta files
-seqrepo export $(gzip -cdq splign-manual/txinfo.gz  | cut -f2 | tail +2) | gzip -c > $working_dir/seqs.fa.gz | tee "$log_dir/seqrepo-export.log"
+seqrepo export $(gzip -cdq $working_dir/txinfo.gz  | cut -f2 | tail +2) | gzip -c > $working_dir/seqs.fa.gz | tee "$log_dir/seqrepo-export.log"
 
 # Generate seqinfo.gz file
 sbin/fasta-to-seqinfo -o NCBI $working_dir/seqs.fa.gz | gzip -c > $working_dir/seqinfo.gz | tee "$log_dir/fasta-to-seqinfo.log"
 
-# Load seqinfo  -- todo: multiple files?
+# Load seqinfo
 uta --conf=etc/global.conf --conf=etc/uta_dev@localhost.conf load-seqinfo $working_dir/seqinfo.gz 2>&1 | tee "$log_dir/load-seqinfo.log"
 
 # Load txinfo
@@ -40,12 +43,12 @@ uta --conf=etc/global.conf --conf=etc/uta_dev@localhost.conf load-exonset $worki
 uta --conf=etc/global.conf --conf=etc/uta_dev@localhost.conf align-exons 2>&1 | tee "$log_dir/align-exons.log"
 
 
-uta --conf=etc/global.conf --conf=etc/uta_dev@localhost.conf analyze
-uta --conf=etc/global.conf --conf=etc/uta_dev@localhost.conf refresh-matviews
-uta --conf=etc/global.conf --conf=etc/uta_dev@localhost.conf grant-permissions
+uta --conf=etc/global.conf --conf=etc/uta_dev@localhost.conf analyze 2>&1 | tee "$log_dir/analyze.log"
+uta --conf=etc/global.conf --conf=etc/uta_dev@localhost.conf refresh-matviews 2>&1 | tee "$log_dir/refresh-matviews.log"
+uta --conf=etc/global.conf --conf=etc/uta_dev@localhost.conf grant-permissions 2>&1 | tee "$log_dir/grant-permissions.log"
 
 ### run diff
-sbin/uta-diff "$source_uta_v" "$loading_uta_v"
+sbin/uta-diff "$source_uta_v" "$loading_uta_v" 2>&1 | tee "$log_dir/uta-diff.log"
 
 ### psql_dump
 pg_dump -U uta_admin -h localhost -d uta -t "$loading_uta_v.gene" | gzip -c > "$working_dir/uta.pgd.gz"
