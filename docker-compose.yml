@@ -63,7 +63,6 @@ services:
   splign-manual:
     image: uta-update
     command: sbin/uta-splign-manual ${UTA_ETL_OLD_UTA_VERSION} /uta-splign-manual/work /uta-splign-manual/logs
-#    command: bash
     depends_on:
       uta:
         condition: service_healthy

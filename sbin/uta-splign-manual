@@ -10,7 +10,7 @@ log_dir=$3
 
 if [ -z "$working_dir" ] || [ -z "$log_dir" ]
 then
-    echo 'Usage: sbin/uta-splign-manual <working_dir> <log_dir>'
+    echo 'Usage: sbin/uta-splign-manual <source_uta_version> <working_dir> <log_dir>'
     exit 1
 fi
 
