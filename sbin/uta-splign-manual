@@ -4,9 +4,9 @@
 
 set -euxo pipefail
 
-cwd=$(dirname $0)
-working_dir=$1
-log_dir=$2
+source_uta_v=$1
+working_dir=$2
+log_dir=$3
 
 if [ -z "$working_dir" ] || [ -z "$log_dir" ]
 then
@@ -14,24 +14,38 @@ then
     exit 1
 fi
 
+# set local variables and create working directories
+loading_uta_v="uta"
 mkdir -p "$log_dir"
 
 # Generate txinfo.gz and exonset.gz files
-python splign-manual/generate-loading-data splign-manual/alignments/*.splign 2>&1 --txdata splign-manual/txdata.yaml --output-dir splign-manual | tee "$log_dir/generate-loading-data.log"
+python splign-manual/generate-loading-data splign-manual/alignments/*.splign 2>&1 --txdata splign-manual/txdata.yaml --output-dir $working_dir | tee "$log_dir/generate-loading-data.log"
 
 # Generate fasta files
-seqrepo export $(gzip -cdq splign-manual/txinfo.gz  | cut -f2 | tail +2) | gzip -c > splign-manual/seqs.fa.gz | tee "$log_dir/seqrepo-export.log"
+seqrepo export $(gzip -cdq splign-manual/txinfo.gz  | cut -f2 | tail +2) | gzip -c > $working_dir/seqs.fa.gz | tee "$log_dir/seqrepo-export.log"
 
 # Generate seqinfo.gz file
-sbin/fasta-to-seqinfo -o NCBI splign-manual/seqs.fa.gz | gzip -c > splign-manual/seqinfo.gz | tee "$log_dir/fasta-to-seqinfo.log"
+sbin/fasta-to-seqinfo -o NCBI $working_dir/seqs.fa.gz | gzip -c > $working_dir/seqinfo.gz | tee "$log_dir/fasta-to-seqinfo.log"
 
-cd loading
-make SRC_NAME=splign-manual logs/uta_dev@localhost/splign-manual/seqinfo.log
-make SRC_NAME=splign-manual logs/uta_dev@localhost/splign-manual/txinfo.log
-make SRC_NAME=splign-manual logs/uta_dev@localhost/splign-manual/exonset.log
+# Load seqinfo  -- todo: multiple files?
+uta --conf=etc/global.conf --conf=etc/uta_dev@localhost.conf load-seqinfo $working_dir/seqinfo.gz 2>&1 | tee "$log_dir/load-seqinfo.log"
 
-make align-exons
+# Load txinfo
+uta --conf=etc/global.conf --conf=etc/uta_dev@localhost.conf load-txinfo $working_dir/txinfo.gz 2>&1 | tee "$log_dir/load-txinfo.log"
 
-uta --conf=../etc/global.conf --conf=../etc/uta_dev@localhost.conf analyze
-uta --conf=../etc/global.conf --conf=../etc/uta_dev@localhost.conf refresh-matviews
-uta --conf=../etc/global.conf --conf=../etc/uta_dev@localhost.conf grant-permissions
+# Load exonset
+uta --conf=etc/global.conf --conf=etc/uta_dev@localhost.conf load-exonset $working_dir/exonset.gz 2>&1 | tee "$log_dir/load-exonset.log"
+
+# Align exons
+uta --conf=etc/global.conf --conf=etc/uta_dev@localhost.conf align-exons 2>&1 | tee "$log_dir/align-exons.log"
+
+
+uta --conf=etc/global.conf --conf=etc/uta_dev@localhost.conf analyze
+uta --conf=etc/global.conf --conf=etc/uta_dev@localhost.conf refresh-matviews
+uta --conf=etc/global.conf --conf=etc/uta_dev@localhost.conf grant-permissions
+
+### run diff
+sbin/uta-diff "$source_uta_v" "$loading_uta_v"
+
+### psql_dump
+pg_dump -U uta_admin -h localhost -d uta -t "$loading_uta_v.gene" | gzip -c > "$working_dir/uta.pgd.gz"
