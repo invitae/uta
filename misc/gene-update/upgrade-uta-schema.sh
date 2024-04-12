@@ -50,12 +50,5 @@ python misc/gene-update/backfill_gene_id.py \
 # run Alembic migrations to add constraints and update existing views
 alembic -c etc/alembic.ini upgrade head
 
-## Copy data into destination schema
-# dump working schema
-pg_dump -U uta_admin -h localhost -d uta -n "$working_uta_v" | \
- gzip -c > "$dumps_dir/$working_uta_v".pgd.gz
-
-# copy data into destination schema
-gzip -cdq "$dumps_dir/$working_uta_v".pgd.gz | \
- sbin/pg-dump-schema-rename "$working_uta_v" "$dest_uta_v" | \
- psql -U uta_admin -h localhost -d uta -aeE
+## Rename schema to destination schema name
+psql -h localhost -U uta_admin -d uta -c "ALTER SCHEMA uta RENAME TO $dest_uta_v";
