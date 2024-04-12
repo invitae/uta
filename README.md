@@ -359,7 +359,7 @@ UTA_ETL_SKIP_GENE_LOAD=true docker compose run uta-load
 
 #### 2C. Manual splign transcripts
 To load splign-manual transcripts, the workflow expects an input txdata.yaml file and splign alignments. Define this path 
-using the environment variable $UTA_SPLIGN_MANUAL_DIR:
+using the environment variable $UTA_SPLIGN_MANUAL_DIR. These file paths should exist:
 - `$UTA_SPLIGN_MANUAL_DIR/splign-manual/txdata.yaml`
 - `$UTA_SPLIGN_MANUAL_DIR/splign-manual/alignments/*.splign`
 
