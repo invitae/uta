@@ -5,12 +5,13 @@
 set -euxo pipefail
 
 source_uta_v=$1
-working_dir=$2
-log_dir=$3
+input_dir=$2
+working_dir=$3
+log_dir=$4
 
-if [ -z "$working_dir" ] || [ -z "$log_dir" ]
+if [ -z "$input_dir" ] || [ -z "$working_dir" ] || [ -z "$log_dir" ]
 then
-    echo 'Usage: sbin/uta-splign-manual <source_uta_version> <working_dir> <log_dir>'
+    echo 'Usage: sbin/uta-splign-manual <source_uta_version> <input_dir> <working_dir> <log_dir>'
     exit 1
 fi
 
@@ -22,7 +23,7 @@ mkdir -p "$log_dir"
 mkdir -p "$working_dir"
 
 # Generate txinfo.gz and exonset.gz files
-python loading/data/splign-manual/generate-loading-data loading/data/splign-manual/alignments/*.splign 2>&1 --txdata loading/data/splign-manual/txdata.yaml --output-dir $working_dir | tee "$log_dir/generate-loading-data.log"
+python sbin/generate-loading-data $input_dir/alignments/*.splign 2>&1 --txdata $input_dir/txdata.yaml --output-dir $working_dir | tee "$log_dir/generate-loading-data.log"
 
 # Generate fasta files
 seqrepo export $(gzip -cdq $working_dir/txinfo.gz  | cut -f2 | tail +2) | gzip -c > $working_dir/seqs.fa.gz | tee "$log_dir/seqrepo-export.log"
