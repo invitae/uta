@@ -336,13 +336,14 @@ def load_geneinfo(session, opts, cf):
     for i_gi, gi in enumerate(gir):
         session.merge(
             usam.Gene(
+                gene_id=gi.gene_id,
                 hgnc=gi.hgnc,
                 maploc=gi.maploc,
                 descr=gi.descr,
                 summary=gi.summary,
                 aliases=gi.aliases,
             ))
-        logger.info("Added {gi.hgnc} ({gi.summary})".format(gi=gi))
+        logger.info("Added {gi.hgnc}: {gi.gene_id} ({gi.summary})".format(gi=gi))
     session.commit()
 
 
@@ -698,7 +699,7 @@ def load_txinfo(session, opts, cf):
             u_tx = usam.Transcript(
                 ac=ti.ac,
                 origin=ori,
-                hgnc=ti.gene_symbol,
+                gene_id=ti.gene_id,
                 cds_start_i=cds_start_i,
                 cds_end_i=cds_end_i,
                 cds_md5=cds_md5,
