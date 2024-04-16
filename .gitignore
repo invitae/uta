@@ -58,6 +58,10 @@ misc/partial-alignments
 sdist
 tmp
 update/ncbi/
+seqrepo-data/
+ncbi-data/
+uta-update/
+output/
 venv
 nosetests.xml
 .vscode
