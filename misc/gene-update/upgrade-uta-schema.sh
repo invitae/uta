@@ -21,7 +21,7 @@ dumps_dir="/workdir/dumps"
 mkdir -p $dumps_dir
 
 ## setup working uta schema
-# delete destination schema if exists
+# delete schema if exists
 psql -h localhost -U uta_admin -d uta -c "DROP SCHEMA IF EXISTS $working_uta_v CASCADE;"
 
 # dump source version
@@ -51,4 +51,5 @@ python misc/gene-update/backfill_gene_id.py \
 alembic -c etc/alembic.ini upgrade head
 
 ## Rename schema to destination schema name
+psql -h localhost -U uta_admin -d uta -c "DROP SCHEMA IF EXISTS $dest_uta_v CASCADE;"
 psql -h localhost -U uta_admin -d uta -c "ALTER SCHEMA uta RENAME TO $dest_uta_v";

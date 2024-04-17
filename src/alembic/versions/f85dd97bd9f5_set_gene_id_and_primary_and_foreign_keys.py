@@ -48,17 +48,25 @@ def upgrade() -> None:
     )
     # ### end Alembic commands ###
 
+    # ### handle first part of hgnc -> gene_symbol column rename ###
+    op.add_column("gene", sa.Column("symbol", sa.Text(), nullable=True), schema="uta")
+    op.create_index(op.f("ix_uta_gene_symbol"), "gene", ["symbol"], unique=False, schema="uta")
+    op.execute("UPDATE gene SET symbol = hgnc;")
+    # ### end of hgnc -> gene_symbol column rename ###
+
     # ### updates required to existing views needed to drop hgnc from transcript. ###
-    op.execute("""DROP MATERIALIZED VIEW IF EXISTS tx_def_summary_mv CASCADE;""")
-    op.execute("""DROP VIEW IF EXISTS tx_def_summary_dv CASCADE;""")
-    op.execute("""DROP MATERIALIZED VIEW IF EXISTS tx_exon_set_summary_mv CASCADE;""")
-    op.execute("""DROP VIEW IF EXISTS tx_exon_set_summary_dv CASCADE;""")
-    op.execute("""DROP VIEW IF EXISTS tx_exon_aln_v CASCADE;""")
-    op.execute("""DROP VIEW IF EXISTS tx_alt_exon_pairs_v CASCADE;""")
-    op.execute("""DROP VIEW IF EXISTS _discontiguous_tx CASCADE;""")
+    op.execute("DROP VIEW IF EXISTS tx_similarity_v CASCADE;")
+    op.execute("DROP MATERIALIZED VIEW IF EXISTS tx_def_summary_mv CASCADE;")
+    op.execute("DROP VIEW IF EXISTS tx_def_summary_dv CASCADE;")
+    op.execute("DROP MATERIALIZED VIEW IF EXISTS tx_exon_set_summary_mv CASCADE;")
+    op.execute("DROP VIEW IF EXISTS tx_exon_set_summary_dv CASCADE;")
+    op.execute("DROP VIEW IF EXISTS tx_exon_aln_v CASCADE;")
+    op.execute("DROP VIEW IF EXISTS tx_alt_exon_pairs_v CASCADE;")
+    op.execute("DROP VIEW IF EXISTS _discontiguous_tx CASCADE;")
     op.execute("""
             CREATE VIEW _discontiguous_tx AS 
-                SELECT g.hgnc,
+                SELECT g.symbol,
+                g.symbol as hgnc,
                 g.gene_id,
                 es.exon_set_id,
                 es.tx_ac,
@@ -80,11 +88,11 @@ def upgrade() -> None:
         """)
     op.execute("""
             CREATE VIEW tx_alt_exon_pairs_v AS
-                SELECT g.hgnc, g.gene_id,TES.exon_SET_id AS tes_exon_SET_id,AES.exon_SET_id AS aes_exon_SET_id,
-                   TES.tx_ac AS tx_ac,AES.alt_ac AS alt_ac,AES.alt_strand,AES.alt_aln_method,
-                   TEX.ORD AS ORD,TEX.exon_id AS tx_exon_id,AEX.exon_id AS alt_exon_id,
-                   TEX.start_i AS tx_start_i,TEX.END_i AS tx_END_i, AEX.start_i AS alt_start_i,AEX.END_i AS alt_END_i,
-                   EA.exon_aln_id,EA.cigar
+                SELECT g.symbol, g.symbol as hgnc, g.gene_id,TES.exon_SET_id AS tes_exon_SET_id,
+                   AES.exon_SET_id AS aes_exon_SET_id, TES.tx_ac AS tx_ac,AES.alt_ac AS alt_ac,
+                   AES.alt_strand,AES.alt_aln_method, TEX.ORD AS ORD,TEX.exon_id AS tx_exon_id,
+                   AEX.exon_id AS alt_exon_id, TEX.start_i AS tx_start_i,TEX.END_i AS tx_END_i, 
+                   AEX.start_i AS alt_start_i, AEX.END_i AS alt_END_i, EA.exon_aln_id,EA.cigar
                 FROM exon_SET tes
                 JOIN transcript t ON tes.tx_ac=t.ac
                 JOIN gene g ON t.gene_id=g.gene_id
@@ -95,13 +103,12 @@ def upgrade() -> None:
         """)
     op.execute("""
             CREATE VIEW tx_exon_aln_v AS 
-                SELECT G.hgnc,G.gene_id,T.ac as tx_ac,AES.alt_ac,AES.alt_aln_method,AES.alt_strand,
-                       TE.ord, TE.start_i as tx_start_i,TE.end_i as tx_end_i,
-                       AE.start_i as alt_start_i, AE.end_i as alt_end_i,
-                       EA.cigar, EA.tx_aseq, EA.alt_aseq,
-                       TES.exon_set_id AS tx_exon_set_id,AES.exon_set_id as alt_exon_set_id,
-                       TE.exon_id as tx_exon_id, AE.exon_id as alt_exon_id,
-                       EA.exon_aln_id
+                SELECT G.symbol, G.symbol AS hgnc, G.gene_id, T.ac as tx_ac, AES.alt_ac,
+                       AES.alt_aln_method,AES.alt_strand, TE.ord, TE.start_i as tx_start_i,
+                       TE.end_i as tx_end_i, AE.start_i as alt_start_i, AE.end_i as alt_end_i,
+                       EA.cigar, EA.tx_aseq, EA.alt_aseq, TES.exon_set_id AS tx_exon_set_id,
+                       AES.exon_set_id as alt_exon_set_id, TE.exon_id as tx_exon_id, 
+                       AE.exon_id as alt_exon_id, EA.exon_aln_id
                 FROM transcript T
                 JOIN gene G ON T.gene_id=G.gene_id
                 JOIN exon_set TES ON T.ac=TES.tx_ac AND TES.alt_aln_method ='transcript'
@@ -112,7 +119,8 @@ def upgrade() -> None:
         """)
     op.execute("""
             CREATE VIEW tx_exon_set_summary_dv AS
-                SELECT G.hgnc,G.gene_id,cds_md5,es_fingerprint,tx_ac,alt_ac,alt_aln_method,alt_strand,exon_set_id,n_exons,se_i,starts_i,ends_i,lengths
+                SELECT G.symbol, G.symbol as hgnc, G.gene_id, cds_md5, es_fingerprint, tx_ac, alt_ac, 
+                       alt_aln_method, alt_strand, exon_set_id, n_exons, se_i, starts_i, ends_i, lengths
                 FROM transcript T
                 JOIN gene G ON T.gene_id=G.gene_id
                 JOIN exon_set_exons_fp_mv ESE ON T.ac=ESE.tx_ac;
@@ -130,7 +138,7 @@ def upgrade() -> None:
     op.execute("""
             CREATE VIEW tx_def_summary_dv AS
                 SELECT TESS.exon_set_id, TESS.tx_ac, TESS.alt_ac, TESS.alt_aln_method, TESS.alt_strand,
-                       TESS.hgnc, TESS.gene_id, TESS.cds_md5, TESS.es_fingerprint, CEF.cds_es_fp, 
+                       TESS.symbol, TESS.hgnc, TESS.gene_id, TESS.cds_md5, TESS.es_fingerprint, CEF.cds_es_fp, 
                        CEF.cds_exon_lengths_fp, TESS.n_exons, TESS.se_i, CEF.cds_se_i, TESS.starts_i, 
                        TESS.ends_i, TESS.lengths, T.cds_start_i, T.cds_end_i, CEF.cds_start_exon, CEF.cds_end_exon
                 FROM tx_exon_set_summary_mv TESS
@@ -144,10 +152,28 @@ def upgrade() -> None:
             CREATE INDEX tx_def_summary_mv_alt_ac ON tx_def_summary_mv (alt_ac);
             CREATE INDEX tx_def_summary_mv_alt_aln_method ON tx_def_summary_mv (alt_aln_method);
             CREATE INDEX tx_def_summary_mv_hgnc ON tx_def_summary_mv (hgnc);
+            CREATE INDEX tx_def_summary_mv_symbol ON tx_def_summary_mv (symbol);
             CREATE INDEX tx_def_summary_mv_gene_id ON tx_def_summary_mv (gene_id);
             REFRESH MATERIALIZED VIEW tx_def_summary_mv;
         """)
-
+    op.execute("""
+        CREATE VIEW tx_similarity_v AS
+        SELECT DISTINCT
+               D1.tx_ac as tx_ac1, D2.tx_ac as tx_ac2,
+               D1.symbol = D2.symbol as symbol_eq,
+               D1.cds_md5=D2.cds_md5 as cds_eq,
+               D1.es_fingerprint=D2.es_fingerprint as es_fp_eq,
+               D1.cds_es_fp=D2.cds_es_fp as cds_es_fp_eq,
+               D1.cds_exon_lengths_fp=D2.cds_exon_lengths_fp as cds_exon_lengths_fp_eq
+        FROM tx_def_summary_mv D1
+        JOIN tx_def_summary_mv D2 on (D1.tx_ac != D2.tx_ac
+                                      and (D1.symbol=D2.symbol
+                                           or D1.cds_md5=D2.cds_md5
+                                           or D1.es_fingerprint=D2.es_fingerprint
+                                           or D1.cds_es_fp=D2.cds_es_fp
+                                           or D1.cds_exon_lengths_fp=D2.cds_exon_lengths_fp
+                                           ));
+    """)
     # ### end of updates to existing views ###
 
     # ### drop hgnc from transcript ###
@@ -161,13 +187,14 @@ def downgrade() -> None:
     # ### end of updates to transcript ###
 
     # ### commands to downgrade views before adding hgnc to transcript ###
-    op.execute("""DROP MATERIALIZED VIEW IF EXISTS tx_def_summary_mv CASCADE;""")
-    op.execute("""DROP VIEW IF EXISTS tx_def_summary_dv CASCADE;""")
-    op.execute("""DROP MATERIALIZED VIEW IF EXISTS tx_exon_set_summary_mv CASCADE;""")
-    op.execute("""DROP VIEW IF EXISTS tx_exon_set_summary_dv CASCADE;""")
-    op.execute("""DROP VIEW IF EXISTS tx_exon_aln_v CASCADE;""")
-    op.execute("""DROP VIEW IF EXISTS tx_alt_exon_pairs_v CASCADE;""")
-    op.execute("""DROP VIEW IF EXISTS _discontiguous_tx CASCADE;""")
+    op.execute("DROP VIEW IF EXISTS tx_similarity_v CASCADE;")
+    op.execute("DROP MATERIALIZED VIEW IF EXISTS tx_def_summary_mv CASCADE;")
+    op.execute("DROP VIEW IF EXISTS tx_def_summary_dv CASCADE;")
+    op.execute("DROP MATERIALIZED VIEW IF EXISTS tx_exon_set_summary_mv CASCADE;")
+    op.execute("DROP VIEW IF EXISTS tx_exon_set_summary_dv CASCADE;")
+    op.execute("DROP VIEW IF EXISTS tx_exon_aln_v CASCADE;")
+    op.execute("DROP VIEW IF EXISTS tx_alt_exon_pairs_v CASCADE;")
+    op.execute("DROP VIEW IF EXISTS _discontiguous_tx CASCADE;")
     op.execute("""
             CREATE VIEW _discontiguous_tx AS 
                 SELECT t.hgnc,
@@ -253,19 +280,39 @@ def downgrade() -> None:
                 CREATE INDEX tx_def_summary_mv_hgnc ON tx_def_summary_mv (hgnc);
                 REFRESH MATERIALIZED VIEW tx_def_summary_mv;
             """)
+    op.execute("""
+    CREATE VIEW tx_similarity_v AS
+    SELECT DISTINCT
+           D1.tx_ac as tx_ac1, D2.tx_ac as tx_ac2,
+           D1.hgnc = D2.hgnc as hgnc_eq,
+           D1.cds_md5=D2.cds_md5 as cds_eq,
+           D1.es_fingerprint=D2.es_fingerprint as es_fp_eq,
+           D1.cds_es_fp=D2.cds_es_fp as cds_es_fp_eq,
+           D1.cds_exon_lengths_fp=D2.cds_exon_lengths_fp as cds_exon_lengths_fp_eq
+    FROM tx_def_summary_mv D1
+    JOIN tx_def_summary_mv D2 on (D1.tx_ac != D2.tx_ac
+                                  and (D1.hgnc=D2.hgnc
+                                       or D1.cds_md5=D2.cds_md5
+                                       or D1.es_fingerprint=D2.es_fingerprint
+                                       or D1.cds_es_fp=D2.cds_es_fp
+                                       or D1.cds_exon_lengths_fp=D2.cds_exon_lengths_fp
+                                       ));
+    """)
     # ### end of updates to views ###
 
     # ### commands auto generated by Alembic - please adjust! ###
-    op.drop_constraint('fk_uta_transcript_gene_gene_id', 'transcript', schema='uta', type_='foreignkey')
-    op.drop_index(op.f('ix_uta_transcript_gene_id'), table_name='transcript', schema='uta')
-    op.alter_column('transcript', 'gene_id',
+    op.drop_constraint("fk_uta_transcript_gene_gene_id", "transcript", schema="uta", type_="foreignkey")
+    op.drop_index(op.f("ix_uta_transcript_gene_id"), table_name="transcript", schema="uta")
+    op.alter_column("transcript", "gene_id",
                existing_type=sa.TEXT(),
                nullable=True,
-               schema='uta')
-    op.drop_index(op.f('ix_uta_gene_hgnc'), table_name='gene', schema='uta')
-    op.drop_constraint('gene_pkey', 'gene', schema='uta')
-    op.alter_column('gene', 'gene_id',
+               schema="uta")
+    op.drop_index(op.f("ix_uta_gene_hgnc"), table_name="gene", schema="uta")
+    op.drop_constraint("gene_pkey", "gene", schema="uta")
+    op.alter_column("gene", "gene_id",
                existing_type=sa.TEXT(),
                nullable=True,
-               schema='uta')
+               schema="uta")
+    op.drop_index(op.f("ix_uta_gene_symbol"), table_name="gene", schema="uta")
+    op.drop_column("gene", "symbol", schema="uta")
     # ### end Alembic commands ###

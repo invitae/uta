@@ -337,40 +337,16 @@ def load_geneinfo(session, opts, cf):
         session.merge(
             usam.Gene(
                 gene_id=gi.gene_id,
-                hgnc=gi.hgnc,
+                hgnc=gi.gene_symbol,
+                symbol=gi.gene_symbol,
                 maploc=gi.maploc,
                 descr=gi.descr,
                 summary=gi.summary,
                 aliases=gi.aliases,
+                type=gi.type,
+                xrefs=gi.xrefs,
             ))
-        logger.info("Added {gi.hgnc}: {gi.gene_id} ({gi.summary})".format(gi=gi))
-    session.commit()
-
-
-def load_ncbi_geneinfo(session, opts, cf):
-    """
-    import data as downloaded (by you) from
-    ftp://ftp.ncbi.nlm.nih.gov/gene/DATA/gene_info.gz
-    """
-
-    session.execute(text("set role {admin_role};".format(
-        admin_role=cf.get("uta", "admin_role"))))
-    session.execute(text("set search_path = " + usam.schema_name))
-
-    gip = uta.parsers.geneinfo.GeneInfoParser(gzip.open(opts["FILE"], 'rt'))
-    for gi in gip:
-        if gi["tax_id"] != "9606" or gi["Symbol_from_nomenclature_authority"] == "-":
-            continue
-        g = usam.Gene(
-            gene_id=gi["GeneID"],
-            hgnc=gi["Symbol_from_nomenclature_authority"],
-            maploc=gi["map_location"],
-            descr=gi["Full_name_from_nomenclature_authority"],
-            aliases=gi["Synonyms"],
-            strand=gi[""],
-        )
-        session.add(g)
-        logger.info("loaded gene {g.hgnc} ({g.descr})".format(g=g))
+        logger.info("Added {gi.gene_symbol}: {gi.gene_id} ({gi.summary})".format(gi=gi))
     session.commit()
 
 

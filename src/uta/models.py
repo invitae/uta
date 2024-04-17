@@ -100,12 +100,15 @@ class Gene(Base):
     # columns:
     gene_id = sa.Column(sa.Text, primary_key=True)
     hgnc = sa.Column(sa.Text, nullable=False, index=True)
+    symbol = sa.Column(sa.Text, nullable=False, index=True)
     maploc = sa.Column(sa.Text)
     descr = sa.Column(sa.Text)
     summary = sa.Column(sa.Text)
     aliases = sa.Column(sa.Text)
     added = sa.Column(
         sa.DateTime, nullable=False, default=datetime.datetime.now())
+    type = sa.Column(sa.Text)
+    xrefs = sa.Column(sa.Text)
 
     # methods:
 
