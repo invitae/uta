@@ -57,11 +57,6 @@ misc/ncbi-geneinfo/ncbi.geneinfo.tsv.gz
 misc/partial-alignments
 sdist
 tmp
-update/ncbi/
-seqrepo-data/
-ncbi-data/
-uta-update/
-output/
 venv
 nosetests.xml
 .vscode
