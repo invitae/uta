@@ -53,13 +53,23 @@ class TestUtaLoading(unittest.TestCase):
             gene_id='49',
             hgnc='ACR',
             symbol='ACR',
+            maploc='22q13.33',
             descr='acrosin',
+            summary='acrosin',
+            aliases='SPGF87',
+            type='protein-coding',
+            xrefs='MIM:102480,HGNC:HGNC:126,Ensembl:ENSG00000100312,AllianceGenome:HGNC:126',
         )
         g2 = usam.Gene(
             gene_id=50,
             hgnc='ACO2',
             symbol='ACO2',
+            maploc='22q13.2',
             descr='aconitase 2',
+            summary='aconitase 2',
+            aliases='ACONM,HEL-S-284,ICRD,OCA8,OPA9',
+            type='protein-coding',
+            xrefs='MIM:100850,HGNC:HGNC:118,Ensembl:ENSG00000100412,AllianceGenome:HGNC:118',
         )
         self.session.add(g1)
         self.session.add(g2)
