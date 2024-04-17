@@ -67,7 +67,6 @@ services:
       uta:
         condition: service_healthy
     volumes:
-      - ${UTA_ETL_NCBI_DIR}:/ncbi-dir
       - ${UTA_ETL_SEQREPO_DIR}:/usr/local/share/seqrepo
       - ${UTA_SPLIGN_MANUAL_DIR}:/uta-splign-manual/input
       - ${UTA_ETL_WORK_DIR}:/uta-splign-manual/work

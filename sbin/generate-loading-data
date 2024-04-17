@@ -74,12 +74,12 @@ def parse_splign(fn, txdata):
         raise KeyError(f"{tx_ac}: no cds or gene_symbol info in txdata")
 
     gene_symbol = txd["hgnc"]
-    if gene_symbol is None:
-        _logger.warning(f"No gene symbol in txdata for {tx_ac}")
 
     gene_id = txd["gene_id"]
     if gene_id is None:
-        _logger.warning(f"No gene id in txdata for {tx_ac}")
+        msg = f"No gene id in txdata for {tx_ac}"
+        _logger.error(msg)
+        raise ValueError(msg)
 
     cds = txd["cds"]
     if cds is None:

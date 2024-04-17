@@ -23,13 +23,13 @@ mkdir -p "$log_dir"
 mkdir -p "$working_dir"
 
 # Generate txinfo.gz and exonset.gz files
-python sbin/generate-loading-data $input_dir/alignments/*.splign 2>&1 --txdata $input_dir/txdata.yaml --output-dir $working_dir | tee "$log_dir/generate-loading-data.log"
+python sbin/generate-loading-data $input_dir/alignments/*.splign --txdata $input_dir/txdata.yaml --output-dir $working_dir 2>&1 | tee "$log_dir/generate-loading-data.log"
 
 # Generate fasta files
-seqrepo export $(gzip -cdq $working_dir/txinfo.gz  | cut -f2 | tail +2) | gzip -c > $working_dir/seqs.fa.gz | tee "$log_dir/seqrepo-export.log"
+seqrepo export $(gzip -cdq $working_dir/txinfo.gz  | cut -f2 | tail +2) | gzip -c > $working_dir/seqs.fa.gz 2>&1 | tee "$log_dir/seqrepo-export.log"
 
 # Generate seqinfo.gz file
-sbin/fasta-to-seqinfo -o NCBI $working_dir/seqs.fa.gz | gzip -c > $working_dir/seqinfo.gz | tee "$log_dir/fasta-to-seqinfo.log"
+sbin/fasta-to-seqinfo -o NCBI $working_dir/seqs.fa.gz | gzip -c > $working_dir/seqinfo.gz 2>&1 | tee "$log_dir/fasta-to-seqinfo.log"
 
 # Load seqinfo
 uta --conf=etc/global.conf --conf=etc/uta_dev@localhost.conf load-seqinfo $working_dir/seqinfo.gz 2>&1 | tee "$log_dir/load-seqinfo.log"
@@ -42,11 +42,6 @@ uta --conf=etc/global.conf --conf=etc/uta_dev@localhost.conf load-exonset $worki
 
 # Align exons
 uta --conf=etc/global.conf --conf=etc/uta_dev@localhost.conf align-exons 2>&1 | tee "$log_dir/align-exons.log"
-
-
-uta --conf=etc/global.conf --conf=etc/uta_dev@localhost.conf analyze 2>&1 | tee "$log_dir/analyze.log"
-uta --conf=etc/global.conf --conf=etc/uta_dev@localhost.conf refresh-matviews 2>&1 | tee "$log_dir/refresh-matviews.log"
-uta --conf=etc/global.conf --conf=etc/uta_dev@localhost.conf grant-permissions 2>&1 | tee "$log_dir/grant-permissions.log"
 
 ### run diff
 sbin/uta-diff "$source_uta_v" "$loading_uta_v" 2>&1 | tee "$log_dir/uta-diff.log"
