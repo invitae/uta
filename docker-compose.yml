@@ -62,7 +62,7 @@ services:
     network_mode: host
   splign-manual:
     image: uta-update
-    command: sbin/uta-splign-manual ${UTA_ETL_OLD_UTA_VERSION} /uta-splign-manual/input /uta-splign-manual/work /uta-splign-manual/logs
+    command: sbin/uta-splign-manual 2024-02-20 ${UTA_ETL_OLD_UTA_VERSION} /uta-splign-manual/input /uta-splign-manual/work /uta-splign-manual/logs
     depends_on:
       uta:
         condition: service_healthy

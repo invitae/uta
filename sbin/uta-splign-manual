@@ -4,12 +4,13 @@
 
 set -euxo pipefail
 
-source_uta_v=$1
-input_dir=$2
-working_dir=$3
-log_dir=$4
+seqrepo_version=$1
+source_uta_v=$2
+input_dir=$3
+working_dir=$4
+log_dir=$5
 
-if [ -z "$input_dir" ] || [ -z "$working_dir" ] || [ -z "$log_dir" ]
+if [ -z "$seqrepo_version" ] || [ -z "$source_uta_v" ] || [ -z "$input_dir" ] || [ -z "$working_dir" ] || [ -z "$log_dir" ]
 then
     echo 'Usage: sbin/uta-splign-manual <source_uta_version> <input_dir> <working_dir> <log_dir>'
     exit 1
@@ -26,7 +27,7 @@ mkdir -p "$working_dir"
 python sbin/generate-loading-data $input_dir/alignments/*.splign --txdata $input_dir/txdata.yaml --output-dir $working_dir 2>&1 | tee "$log_dir/generate-loading-data.log"
 
 # Generate fasta files
-seqrepo export $(gzip -cdq $working_dir/txinfo.gz  | cut -f2 | tail +2) | gzip -c > $working_dir/seqs.fa.gz 2>&1 | tee "$log_dir/seqrepo-export.log"
+seqrepo export $(gzip -cdq $working_dir/txinfo.gz  | cut -f2 | tail +2) --instance-name "$seqrepo_version" | gzip -c > $working_dir/seqs.fa.gz 2>&1 | tee "$log_dir/seqrepo-export.log"
 
 # Generate seqinfo.gz file
 sbin/fasta-to-seqinfo -o NCBI $working_dir/seqs.fa.gz | gzip -c > $working_dir/seqinfo.gz 2>&1 | tee "$log_dir/fasta-to-seqinfo.log"
