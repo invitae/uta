@@ -337,7 +337,7 @@ def load_geneinfo(session, opts, cf):
         session.merge(
             usam.Gene(
                 gene_id=gi.gene_id,
-                hgnc=gi.gene_symbol,
+                hgnc=gi.hgnc,
                 symbol=gi.gene_symbol,
                 maploc=gi.maploc,
                 descr=gi.descr,
@@ -682,7 +682,7 @@ def load_txinfo(session, opts, cf):
             )
             session.add(u_tx)
         if u_tx.gene_id != ti.gene_id:
-            logger.warn("{ti.ac}: GeneID changed from {u_tx.gene_id} to {ti.gene_id}".format(
+            raise Exception("{ti.ac}: GeneID changed from {u_tx.gene_id} to {ti.gene_id}".format(
                 u_tx=u_tx, ti=ti))
 
         # state: transcript now exists, either existing or freshly-created
