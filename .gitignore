@@ -60,7 +60,3 @@ tmp
 venv
 nosetests.xml
 .vscode
-output/
-uta-update/
-seqrepo-data/
-ncbi-data/
