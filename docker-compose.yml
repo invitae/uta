@@ -23,10 +23,10 @@ services:
     network_mode: host
   seqrepo-load:
     image: uta-update
-    command: sbin/seqrepo-load /usr/local/share/seqrepo 2024-02-20 /seqrepo-load/work /seqrepo-load/logs
+    command: sbin/seqrepo-load /usr/local/share/seqrepo ${UTA_ETL_OLD_SEQREPO_VERSION} /seqrepo-load/input /seqrepo-load/logs
     volumes:
       - ${UTA_ETL_SEQREPO_DIR}:/usr/local/share/seqrepo
-      - ${UTA_ETL_WORK_DIR}:/seqrepo-load/work
+      - ${UTA_ETL_NCBI_DIR}:/seqrepo-load/input
       - ${UTA_ETL_LOG_DIR}:/seqrepo-load/logs
     working_dir: /opt/repos/uta
     network_mode: host
@@ -62,7 +62,7 @@ services:
     network_mode: host
   splign-manual:
     image: uta-update
-    command: sbin/uta-splign-manual 2024-02-20 ${UTA_ETL_OLD_UTA_VERSION} /uta-splign-manual/input /uta-splign-manual/work /uta-splign-manual/logs
+    command: sbin/uta-splign-manual ${UTA_ETL_OLD_SEQREPO_VERSION} ${UTA_ETL_OLD_UTA_VERSION} /uta-splign-manual/input /uta-splign-manual/work /uta-splign-manual/logs
     depends_on:
       uta:
         condition: service_healthy
