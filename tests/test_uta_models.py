@@ -316,6 +316,28 @@ class TestUtaModels(unittest.TestCase):
         translation_exceptions = self.session.query(usam.TranslationException).filter_by(tx_ac='NM_000680.2').all()
         self.assertEqual(len(translation_exceptions), 2)
 
+    def test_translation_exception_start_not_greater_than_end(self):
+        """
+        Should not create row in translation_exception table if start is greater than end.
+        """
+        te = usam.TranslationException(
+            tx_ac='NM_033302.2',
+            start_position=100,
+            end_position=99,
+            amino_acid='dummy_aa',
+        )
+        self.session.add(te)
+
+        with self.assertRaises(sqlalchemy.exc.IntegrityError):
+            self.session.commit()
+
+        # allow session to be used after failure
+        self.session.rollback()
+
+        # translation exception should not exist because transaction failed
+        translation_exceptions = self.session.query(usam.TranslationException).filter_by(tx_ac='NM_033302.2').all()
+        self.assertEqual(translation_exceptions, [])
+
 
 if __name__ == '__main__':
     unittest.main()
