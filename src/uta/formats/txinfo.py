@@ -1,5 +1,6 @@
 import csv
 import recordtype
+from typing import List, Optional
 
 
 # transl_except should be a semicolon-separated list:
@@ -11,9 +12,12 @@ class TxInfo(
 )):
 
     @staticmethod
-    def serialize_transl_except(transl_except_list) -> str:
+    def serialize_transl_except(transl_except_list: Optional[List[str]]) -> str:
         """Helper for formatting transl_except list as a string."""
-        return ";".join(transl_except_list)
+        if transl_except_list is None:
+            return None
+        else:
+            return ";".join(transl_except_list)
 
 
 class TxInfoWriter(csv.DictWriter):
