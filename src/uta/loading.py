@@ -681,6 +681,33 @@ def load_txinfo(session, opts, cf):
                 cds_md5=cds_md5,
             )
             session.add(u_tx)
+
+            if ti.transl_except:
+                # if transl_except exists, it looks like this:
+                # (pos:333..335,aa:Sec);(pos:1017,aa:TERM)
+                for te in ti.transl_except.split(';'):
+                    # remove parens
+                    te = te.replace('(','').replace(')','')
+
+                    # extract positions
+                    pos_str, aa_str = te.split(',')
+                    pos_str = pos_str.removeprefix('pos:')
+                    if '..' in pos_str:
+                        start_position, _, end_position = pos_str.partition('..')
+                    else:
+                        start_position = end_position = pos_str
+
+                    # extract amino acid
+                    amino_acid = aa_str.removeprefix('aa:')
+
+                    u_te = usam.TranslationException(
+                        tx_ac=ti.ac,
+                        start_position=int(start_position),
+                        end_position=int(end_position),
+                        amino_acid=amino_acid,
+                    )
+                    session.add(u_te)
+
         if u_tx.gene_id != ti.gene_id:
             raise Exception("{ti.ac}: GeneID changed from {u_tx.gene_id} to {ti.gene_id}".format(
                 u_tx=u_tx, ti=ti))
