@@ -97,6 +97,7 @@ def parse_splign(fn, txdata):
         gene_symbol=gene_symbol,
         cds_se_i=cds_se_i,
         exons_se_i=tx_exons_str,
+        transl_except=None,
     )
     exonset = uta.formats.exonset.ExonSet(
         tx_ac=tx_ac,
