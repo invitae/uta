@@ -12,7 +12,7 @@ class TxInfo(
 )):
 
     @staticmethod
-    def serialize_transl_except(transl_except_list: Optional[List[str]]) -> str:
+    def serialize_transl_except(transl_except_list: Optional[List[str]]) -> Optional[str]:
         """Helper for formatting transl_except list as a string."""
         if transl_except_list is None:
             return None
