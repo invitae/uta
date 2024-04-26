@@ -202,8 +202,28 @@ class TestUtaLoading(unittest.TestCase):
             },
             {
                 'tx_ac': 'NM_080430.4',
-                'start_position': 205,
+                'start_position': 204,
                 'end_position': 207,
                 'amino_acid': 'Sec',
             },
         )
+
+
+class TestUtaLoadingFunctions(unittest.TestCase):
+    def test__create_translation_exceptions(self):
+        transl_except_list = ['(pos:333..335,aa:Sec)', '(pos:1017,aa:TERM)']
+        translation_exceptions = ul._create_translation_exceptions(transcript='dummy_tx', transl_except_list=transl_except_list)
+        self.assertEqual(translation_exceptions, [
+            {
+                'tx_ac': 'dummy_tx',
+                'start_position': 332,
+                'end_position': 335,
+                'amino_acid': 'Sec',
+            },
+            {
+                'tx_ac': 'dummy_tx',
+                'start_position': 1016,
+                'end_position': 1017,
+                'amino_acid': 'TERM',
+            },
+        ])
