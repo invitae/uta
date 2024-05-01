@@ -37,5 +37,9 @@ sbin/filter_exonset_transcripts.py --tx-info "$working_dir/txinfo.gz" --exonsets
     --missing-ids "$working_dir/filtered_tx_acs.txt" | gzip -c > "$working_dir/exonsets.gz" 2>&1 | \
     tee "$log_dir/filter_exonset_transcripts.log"
 
+# generate seqinfo files from exonsets (this step requires seqrepo)
+sbin/exonset-to-seqinfo -o NCBI "$working_dir/exonsets.gz" | gzip -c > "$working_dir/seqinfo.gz" 2>&1 | \
+    tee "$log_dir/exonset-to-seqinfo.log"
+
 # move fasta files into same dir
 find "$ncbi_dir" -type f -name "*.f[an]a.gz" -print0 | xargs -i --null cp {} "$working_dir/"
