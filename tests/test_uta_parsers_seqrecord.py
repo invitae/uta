@@ -80,7 +80,7 @@ class TestSeqRecordFacade(unittest.TestCase):
             expected_cds_product=None,
             expected_cds_protein_id=None,
             expected_cds_translation=None,
-            expected_exons_se_i=[(0,1073)],
+            expected_exons_se_i=[],
         ),
         param(
             'NR_173148 - no exon features, misc_RNA',
@@ -95,7 +95,7 @@ class TestSeqRecordFacade(unittest.TestCase):
             expected_cds_product=None,
             expected_cds_protein_id=None,
             expected_cds_translation=None,
-            expected_exons_se_i=[(0,698)],
+            expected_exons_se_i=[],
         ),
     ])
     def test_seq_record_facade(
