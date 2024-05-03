@@ -33,7 +33,7 @@ relative_path="refseq/H_sapiens/historical/GRCh38/GCF_000001405.40-RS_2023_03_hi
 file_path="$relative_path/GCF_000001405.40-RS_2023_03_knownrefseq_rna.gbff.gz"
 download_ncbi_file $file_path $ncbi_dir
 
-#download historical gff file
+# download historical gff file
 file_path="$relative_path/GCF_000001405.40-RS_2023_03_knownrefseq_alns.gff.gz"
 download_ncbi_file $file_path $ncbi_dir
 
@@ -43,4 +43,9 @@ python sbin/ncbi_extract_gbff.py "$ncbi_dir/$relative_path/GCF_000001405.40-RS_2
 
 # extract exonset intermediate file from gff file
 python sbin/ncbi_parse_genomic_gff.py "$ncbi_dir/$relative_path/GCF_000001405.40-RS_2023_03_knownrefseq_alns.gff.gz" | \
-  gzip -c > "$working_dir/exonsets.gz" 2>&1 | tee "$log_dir/ncbi-parse-historical-gff.log"
+  gzip -c > "$working_dir/unfiltered_exonsets.gz" 2>&1 | tee "$log_dir/ncbi-parse-historical-gff.log"
+
+# filter exonset alignments by txinfo
+sbin/filter_exonset_transcripts.py --tx-info "$working_dir/txinfo.gz" --exonsets "$working_dir/unfiltered_exonsets.gz" \
+    --missing-ids "$working_dir/filtered_tx_acs.txt" | gzip -c > "$working_dir/exonsets.gz" 2>&1 | \
+    tee "$log_dir/filter_exonset_transcripts.log"

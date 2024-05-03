@@ -346,7 +346,7 @@ def load_geneinfo(session, opts, cf):
                 type=gi.type,
                 xrefs=gi.xrefs,
             ))
-        logger.info("Added {gi.gene_symbol}: {gi.gene_id} ({gi.summary})".format(gi=gi))
+        logger.debug("Added {gi.gene_symbol}: {gi.gene_id} ({gi.summary})".format(gi=gi))
     session.commit()
 
 
@@ -834,7 +834,7 @@ def _upsert_exon_set_record(session, tx_ac, alt_ac, strand, method, ess):
     returns tuple of (new_record, old_record) as follows:
 
     (new, None) -- no prior record; new was inserted
-    (None, old) -- prior record and unchaged; nothing was inserted
+    (None, old) -- prior record and unchanged; nothing was inserted
     (new, old)  -- prior record existed and was changed
 
     """

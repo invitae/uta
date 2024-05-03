@@ -57,7 +57,8 @@ def main(gbff_files: Iterable, origin: str, prefix: str, output_dir: str) -> Non
         # Protein fasta file
         protein_fasta_fh = stack.enter_context(
             io.TextIOWrapper(
-                gzip.open(f"{output_dir}/{prefix}protein.faa.gz", "wb"), encoding="utf-8"
+                gzip.open(f"{output_dir}/{prefix}protein.faa.gz", "wb"),
+                encoding="utf-8",
             )
         )
 
@@ -83,16 +84,23 @@ def main(gbff_files: Iterable, origin: str, prefix: str, output_dir: str) -> Non
         assocacs_writer = GeneAccessionsWriter(assocacs_fh)
 
         total_genes = set()
-        skipped_ids = set()
+        total_skipped = set()
         all_prefixes = Counter()
         for gbff_fn in gbff_files:
             logger.info(f"Processing {gbff_fn}")
             gbff_file_handler = stack.enter_context(open_file(gbff_fn))
             i = 0
             genes = set()
+            skipped = set()
             prefixes = Counter()
             for r in Bio.SeqIO.parse(gbff_file_handler, "gb"):
                 srf = SeqRecordFacade(r)
+
+                # skip transcripts where the exon structure is unknown
+                if not srf.exons_se_i:
+                    skipped.add(srf.id)
+                    continue
+
                 prefixes.update([srf.id[:2]])
                 try:
                     fna_record = SeqRecord(
@@ -100,20 +108,21 @@ def main(gbff_files: Iterable, origin: str, prefix: str, output_dir: str) -> Non
                     )
                     dna_fasta_fh.write(fna_record.format("fasta"))
 
-                    geneinfo_writer.write(
-                        GeneInfo(
-                            gene_id=srf.gene_id,
-                            gene_symbol=srf.gene_symbol,
-                            tax_id="9606",
-                            hgnc=srf.gene_symbol,
-                            maploc="",
-                            aliases=srf.gene_synonyms,
-                            type=srf.gene_type,
-                            summary="",
-                            descr="",
-                            xrefs=srf.db_xrefs,
+                    if srf.gene_id not in genes:
+                        geneinfo_writer.write(
+                            GeneInfo(
+                                gene_id=srf.gene_id,
+                                gene_symbol=srf.gene_symbol,
+                                tax_id="9606",
+                                hgnc=srf.gene_symbol,
+                                maploc="",
+                                aliases=srf.gene_synonyms,
+                                type=srf.gene_type,
+                                summary="",
+                                descr="",
+                                xrefs=srf.db_xrefs,
+                            )
                         )
-                    )
 
                     txinfo_writer.write(
                         TxInfo(
@@ -132,7 +141,9 @@ def main(gbff_files: Iterable, origin: str, prefix: str, output_dir: str) -> Non
                     # only write cds features for protein-coding transcripts
                     if srf.cds_feature is not None:
                         pro_record = SeqRecord(
-                            Seq(srf.cds_translation), id=srf.cds_protein_id, description=srf.cds_product,
+                            Seq(srf.cds_translation),
+                            id=srf.cds_protein_id,
+                            description=srf.cds_product,
                         )
                         protein_fasta_fh.write(pro_record.format("fasta"))
 
@@ -149,7 +160,14 @@ def main(gbff_files: Iterable, origin: str, prefix: str, output_dir: str) -> Non
                     genes.add(srf.gene_id)
                     i += 1
                     if i % 5000 == 0:
-                        logger.info(f"Processed {i} records")
+                        logger.info(
+                            f"  - {ng} genes in {fn} ({c}); {s} transcripts skipped".format(
+                                ng=len(genes),
+                                fn=gbff_fn,
+                                c=prefixes,
+                                s=len(skipped),
+                            )
+                        )
                 except SeqRecordFeatureError as e:
                     logger.error(f"SeqRecordFeatureError processing {sr.id}: {e}")
                     raise
@@ -157,14 +175,18 @@ def main(gbff_files: Iterable, origin: str, prefix: str, output_dir: str) -> Non
                     logger.error(f"ValueError processing {sr.id}: {e}")
                     raise
 
+
             logger.info(
-                "{ng} genes in {fn} ({c})".format(ng=len(genes), fn=gbff_fn, c=prefixes)
+                "{ng} genes in {fn} ({c}); {s} transcripts skipped".format(
+                    ng=len(genes), fn=gbff_fn, c=prefixes, s=len(skipped)
+                )
             )
             total_genes ^= genes
+            total_skipped ^= skipped
             all_prefixes += prefixes
         logger.info(
-            "{ng} genes in {nf} files ({c})".format(
-                ng=len(total_genes), nf=len(gbff_files), c=all_prefixes
+            "{ng} genes in {nf} ({c}); {s} transcripts skipped".format(
+                ng=len(total_genes), nf=len(gbff_files), c=all_prefixes, s=len(total_skipped)
             )
         )
 

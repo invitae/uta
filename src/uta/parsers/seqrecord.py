@@ -143,11 +143,11 @@ class SeqRecordFacade:
 
     @property
     def exons_se_i(self):
+        se_i = []
         if "exon" in self.features_by_type:
             exons = self.features_by_type["exon"]
-        else:
-            exons = [self.gene_feature]
-        return [(f.location.start.real, f.location.end.real) for f in exons]
+            se_i = [(f.location.start.real, f.location.end.real) for f in exons]
+        return se_i
 
     @property
     def transl_except(self) -> Optional[List[str]]:

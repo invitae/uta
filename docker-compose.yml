@@ -55,7 +55,6 @@ services:
       uta:
         condition: service_healthy
     volumes:
-      - ${UTA_ETL_NCBI_DIR}:/ncbi-dir
       - ${UTA_ETL_SEQREPO_DIR}:/usr/local/share/seqrepo
       - ${UTA_ETL_WORK_DIR}:/uta-load/work
       - ${UTA_ETL_LOG_DIR}:/uta-load/logs
