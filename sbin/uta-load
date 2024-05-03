@@ -32,6 +32,10 @@ etc/scripts/create-new-schema.sh "$source_uta_v" "$loading_uta_v"
 ## for now set up Alembic for schema migrations
 alembic -c etc/alembic.ini upgrade head
 
+# generate seqinfo files from exonsets (this step requires seqrepo)
+sbin/exonset-to-seqinfo -o NCBI "$working_dir/exonsets.gz" | gzip -c > "$working_dir/seqinfo.gz" 2>&1 | \
+    tee "$log_dir/exonset-to-seqinfo.log"
+
 # Filter out columns from assocacs file.
 sbin/assoc-acs-merge "$working_dir/assocacs.gz" | gzip -c > "$working_dir/assoc-ac.gz" 2>&1 | \
     tee "$log_dir/assoc-acs-merge.log"
