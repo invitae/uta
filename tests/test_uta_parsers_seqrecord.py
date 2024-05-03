@@ -136,7 +136,8 @@ class TestSeqRecordFacade(unittest.TestCase):
             srf = SeqRecordFacade(seqrecord=Mock())
             self.assertIsNone(srf.cds_feature)
             # one CDS feature
-            dummy_cds_feature = {"protein_id": "NP_fake", "translation": "MNBVCXZ"}
+            dummy_cds_feature = Mock()
+            dummy_cds_feature.qualifiers = {"protein_id": "NP_fake", "translation": "MNBVCXZ"}
             mock_features_by_type.return_value = {'CDS': [dummy_cds_feature]}
             srf = SeqRecordFacade(seqrecord=Mock())
             self.assertIs(srf.cds_feature, dummy_cds_feature)
