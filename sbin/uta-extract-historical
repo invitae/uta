@@ -28,7 +28,6 @@ download_ncbi_file () {
 }
 
 relative_path="refseq/H_sapiens/historical/GRCh38/GCF_000001405.40-RS_2023_03_historical"
-prefix="GCF_000001405.40-RS_2023_03_historical"
 
 # download historical genbank file
 file_path="$relative_path/GCF_000001405.40-RS_2023_03_knownrefseq_rna.gbff.gz"
@@ -40,8 +39,8 @@ download_ncbi_file $file_path $ncbi_dir
 
 # extract intermediate files from genbank file
 python sbin/ncbi_extract_gbff.py "$ncbi_dir/$relative_path/GCF_000001405.40-RS_2023_03_knownrefseq_rna.gbff.gz" \
-  --prefix "$prefix" --output_dir "$working_dir" 2>&1 | tee "$log_dir/ncbi-parse-historical-ggbb.log"
+  --output_dir "$working_dir" 2>&1 | tee "$log_dir/ncbi-parse-historical-ggbb.log"
 
 # extract exonset intermediate file from gff file
 python sbin/ncbi_parse_genomic_gff.py "$ncbi_dir/$relative_path/GCF_000001405.40-RS_2023_03_knownrefseq_alns.gff.gz" | \
-  gzip -c > "$working_dir/$prefix.exonsets.gz" 2>&1 | tee "$log_dir/ncbi-parse-historical-gff.log"
+  gzip -c > "$working_dir/exonsets.gz" 2>&1 | tee "$log_dir/ncbi-parse-historical-gff.log"
