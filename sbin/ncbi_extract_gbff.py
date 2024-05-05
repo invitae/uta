@@ -1,6 +1,6 @@
 """
 Extract and write all files needed by UTA load, except alt accession exonsets (aka, alignments). From a single
-GBFF file we can create dna fasta, protein fasta, associated accessions, and txinfo files.
+GBFF file we can create dna fasta, protein fasta, associated accessions, geneinfo, and txinfo files.
 """
 import argparse
 import gzip
