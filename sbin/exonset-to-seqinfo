@@ -31,8 +31,8 @@ def parse_args(argv):
                     required=True)
     ap.add_argument("--conf",
                     default=[
-                        pkg_resources.resource_filename("uta", "../../etc/global.conf")]
-                    )
+                        importlib_resources.files("uta").joinpath("../../etc/global.conf")
+                    ])
 
     opts = ap.parse_args(argv)
     return opts
@@ -51,7 +51,7 @@ if __name__ == "__main__":
     cf = ConfigParser.ConfigParser()
     for conf_fn in opts.conf:
         cf.read_file(open(conf_fn))
-        logger.info("loaded " + conf_fn)
+        logger.info("loaded " + str(conf_fn))
 
     in_fn = opts.FILES[0]
     in_fh = gzip.open(in_fn, 'rt') if in_fn.endswith(".gz") else open(in_fn)

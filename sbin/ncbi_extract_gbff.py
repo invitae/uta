@@ -161,7 +161,7 @@ def main(gbff_files: Iterable, origin: str, prefix: str, output_dir: str) -> Non
                     i += 1
                     if i % 5000 == 0:
                         logger.info(
-                            f"  - {ng} genes in {fn} ({c}); {s} transcripts skipped".format(
+                            "  - {ng} genes in {fn} ({c}); {s} transcripts skipped".format(
                                 ng=len(genes),
                                 fn=gbff_fn,
                                 c=prefixes,

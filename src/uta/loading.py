@@ -868,9 +868,29 @@ def _upsert_exon_set_record(session, tx_ac, alt_ac, strand, method, ess):
             usam.ExonSet.alt_aln_method == alt_aln_method_with_hash,
             )
         if existing.count() == 1:
+            logger.warning(
+                "Exon set {tx_ac}/{alt_ac} with method {method} already exists with hash {esh}".format(
+                    tx_ac=tx_ac,
+                    alt_ac=alt_ac,
+                    method=method,
+                    esh=alt_aln_method_with_hash,
+                )
+            )
             return (None, existing[0])
 
         # update aln_method to add a unique exon set hash based on the *existing* exon set string
+        logger.warning(
+            "Exon set {tx_ac}/{alt_ac} with method {method} already exists, but with different exons; "
+            "existing exon set: {es_ess}; new exon set: {ess}; updated method of existing to "
+            "{alt_aln_method_with_hash}".format(
+                tx_ac=tx_ac,
+                alt_ac=alt_ac,
+                method=method,
+                es_ess=es_ess,
+                ess=ess,
+                alt_aln_method_with_hash=alt_aln_method_with_hash,
+            )
+        )
         es.alt_aln_method = alt_aln_method_with_hash
         session.flush()
         old_es = es
