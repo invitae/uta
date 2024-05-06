@@ -654,6 +654,29 @@ def load_txinfo(session, opts, cf):
                 u_tx = None
                 n_cds_changed += 1
 
+            if ti.transl_except:
+                # if the transl_except exists, make sure it exists in the database.
+                te_list = _create_translation_exceptions(
+                    transcript=ti.ac, transl_except_list=ti.transl_except.split(";")
+                )
+                for te_data in te_list:
+                    te, created = _get_or_insert(
+                        session=session,
+                        table=usam.TranslationException,
+                        row=te_data,
+                        row_identifier=("tx_ac", "start_position", "end_position", "amino_acid"),
+                    )
+                    if created:
+                        logger.info(
+                            f"TranslationException added: {te.tx_ac}, {te.start_position}, {te.end_position}, {te.amino_acid}"
+                        )
+                    else:
+                        logger.info(
+                            f"TranslationException already exists: {te.tx_ac}, {te.start_position}, {te.end_position}, {te.amino_acid}"
+                        )
+
+
+
         # state: u_tx is set if a transcript was found and was
         # unchanged, or None if 1) no such was found or 2) was found
         # and had updated CDS coords.
