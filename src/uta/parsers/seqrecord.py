@@ -28,6 +28,24 @@ class SeqRecordFacade:
         Some NCBI records will contain multiple CDS features. In these one CDS describes a protein
         with accession and protein sequence, they other CDS features describes a pseudogene. This method
         will preferentially choose the CDS feature with a protein sequence.
+        Example:
+                 CDS             422..778
+                                 /gene="C6orf119"
+                                 /gene_synonym="dJ427A4.2"
+                                 /codon_start=1
+                                 /product="chromosome 6 open reading frame 119"
+                                 /protein_id="NP_001012240.1"
+                                 /db_xref="GI:59276067"
+                                 /db_xref="GeneID:353267"
+                                 /translation="MTDTAEAVPNFEEMFASRFTENDKEYQEYLKRPPESPPIVEEWN
+                                 SRAGGNQRNRGNRLQDNRQFRGRDNRWGWPSDNRSNQWHGRSWGNNYPQHRQEPYYPQ
+                                 QYGHYGYNQRPPYGYY"
+                 CDS             422..775
+                                 /locus_tag="RP3-427A4.2-001"
+                                 /note="match: proteins: Q9BTL3 Q9CQY2 Q9CWI1"
+                                 /pseudo
+                                 /codon_start=1
+                                 /product="Novel pseudogene"
         """
         cds_features = self.features_by_type.get("CDS")
         if cds_features is None:

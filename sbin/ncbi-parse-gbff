@@ -111,20 +111,17 @@ if __name__ == "__main__":
             if srf.id.partition("_")[0] not in ["NM", "NR"]:
                 skipped_ids.add(srf.id)
                 continue
-            try:
-                ti = TxInfo(
-                    ac=srf.id,
-                    origin=opts.origin,
-                    gene_id=srf.gene_id,
-                    gene_symbol=srf.gene_symbol,
-                    cds_se_i=TxInfo.serialize_cds_se_i(srf.cds_se_i),
-                    exons_se_i=TxInfo.serialize_exons_se_i(srf.exons_se_i),
-                    transl_except=TxInfo.serialize_transl_except(srf.transl_except),
-                )
-                tiw.write(ti)
-                genes.add(srf.gene_symbol)
-            except SeqRecordFeatureError as e:
-                logger.error("skipping {id}: {msg}".format(id=srf.id, msg=e))
+            ti = TxInfo(
+                ac=srf.id,
+                origin=opts.origin,
+                gene_id=srf.gene_id,
+                gene_symbol=srf.gene_symbol,
+                cds_se_i=TxInfo.serialize_cds_se_i(srf.cds_se_i),
+                exons_se_i=TxInfo.serialize_exons_se_i(srf.exons_se_i),
+                transl_except=TxInfo.serialize_transl_except(srf.transl_except),
+            )
+            tiw.write(ti)
+            genes.add(srf.gene_symbol)
         logger.info("{ng} genes in {fn} ({c})".format(ng=len(genes), fn=fn, c=prefixes))
         total_genes ^= genes
         all_prefixes += prefixes

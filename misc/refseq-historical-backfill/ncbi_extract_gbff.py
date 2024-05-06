@@ -169,10 +169,10 @@ def main(gbff_files: Iterable, origin: str, prefix: str, output_dir: str) -> Non
                             )
                         )
                 except SeqRecordFeatureError as e:
-                    logger.error(f"SeqRecordFeatureError processing {sr.id}: {e}")
+                    logger.error(f"SeqRecordFeatureError processing {r.id}: {e}")
                     raise
                 except ValueError as e:
-                    logger.error(f"ValueError processing {sr.id}: {e}")
+                    logger.error(f"ValueError processing {r.id}: {e}")
                     raise
 
 
