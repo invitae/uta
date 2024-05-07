@@ -299,9 +299,31 @@ def load_exonset(session, opts, cf):
     n_new = 0
     n_unchanged = 0
     n_deprecated = 0
+    n_skipped = 0
     n_errors = 0
     for i_es, es in enumerate(esr):
+        skipped = False
         try:
+            # determine if alignment and transcript have the same exon structure
+            tx_es = (
+                session.query(usam.ExonSet)
+                .filter(
+                    usam.ExonSet.tx_ac == es.tx_ac,
+                    usam.ExonSet.alt_ac == es.tx_ac,
+                    usam.ExonSet.alt_aln_method == "transcript",
+                )
+                .one()
+            )
+            tx_exon_count = len(tx_es.exons_se_i())
+            aln_exon_count = len(es.exons_se_i.split(";"))
+            if tx_exon_count != aln_exon_count:
+                logger.warning(
+                    "Exon structure mismatch: {tx_exon_count} exons in transcript {es.tx_ac}; {aln_exon_count} in alignment {es.alt_ac}".format(
+                        tx_exon_count=tx_exon_count, aln_exon_count=aln_exon_count, es=es
+                    ))
+                skipped = True
+                continue
+
             n, o = _upsert_exon_set_record(session, es.tx_ac, es.alt_ac, es.strand, es.method, es.exons_se_i)
             session.commit()
         except IntegrityError as e:
@@ -309,18 +331,21 @@ def load_exonset(session, opts, cf):
             session.rollback()
             n_errors += 1
         finally:
-            (no) = (n is not None, o is not None)
-            if no == (True, False):
-                n_new += 1
-            elif no == (True, True):
-                n_deprecated += 1
-            elif no == (False, True):
-                n_unchanged += 1
+            if skipped:
+                n_skipped += 1
+            else:
+                (no) = (n is not None, o is not None)
+                if no == (True, False):
+                    n_new += 1
+                elif no == (True, True):
+                    n_deprecated += 1
+                elif no == (False, True):
+                    n_unchanged += 1
 
             if i_es % update_period == 0 or i_es + 1 == n_rows:
-                logger.info("{i_es}/{n_rows} {p:.1f}%; {n_new} new, {n_unchanged} unchanged, {n_deprecated} deprecated, {n_errors} n_errors".format(
+                logger.info("{i_es}/{n_rows} {p:.1f}%; {n_new} new, {n_unchanged} unchanged, {n_deprecated} deprecated, {n_skipped} skipped, {n_errors} n_errors".format(
                     i_es=i_es, n_rows=n_rows,
-                    n_new=n_new, n_unchanged=n_unchanged, n_deprecated=n_deprecated, n_errors=n_errors,
+                    n_new=n_new, n_unchanged=n_unchanged, n_deprecated=n_deprecated, n_skipped=n_skipped, n_errors=n_errors,
                     p=(i_es + 1) / n_rows * 100))
     session.commit()
 
@@ -704,7 +729,7 @@ def load_txinfo(session, opts, cf):
         if no == (True, False):
             n_new += 1
         elif no == (True, True):
-            logger.warn("Transcript {ti.ac} exon structure changed".format(ti=ti))
+            logger.warning("Transcript {ti.ac} exon structure changed".format(ti=ti))
             n_exons_changed += 1
         elif no == (False, True):
             logger.debug("Transcript {ti.ac} exon structure unchanged".format(ti=ti))
