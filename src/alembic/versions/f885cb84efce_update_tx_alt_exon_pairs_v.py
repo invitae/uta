@@ -30,7 +30,7 @@ def upgrade() -> None:
                     FROM exon_SET tes
                     JOIN transcript t ON tes.tx_ac=t.ac
                     JOIN gene g ON t.gene_id=g.gene_id
-                    JOIN exon_set aes ON tes.tx_ac=aes.tx_ac AND tes.alt_aln_method='transcript' AND aes.alt_aln_method NOT LIKE 'transcript%'
+                    JOIN exon_set aes ON tes.tx_ac=aes.tx_ac AND tes.alt_aln_method='transcript' AND aes.alt_aln_method !~ 'transcript'
                     JOIN exon tex ON tes.exon_SET_id=tex.exon_SET_id
                     JOIN exon aex ON aes.exon_SET_id=aex.exon_SET_id AND tex.ORD=aex.ORD
                     LEFT JOIN exon_aln ea ON ea.tx_exon_id=tex.exon_id AND ea.alt_exon_id=AEX.exon_id;
