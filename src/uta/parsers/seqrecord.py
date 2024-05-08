@@ -66,7 +66,8 @@ class SeqRecordFacade:
         """Returns the gene feature, which should exist for all transcripts."""
         gene_features = self.features_by_type.get("gene")
         if gene_features is None or len(gene_features) != 1:
-            raise SeqRecordFeatureError(f"Expected exactly one `gene` feature, for {self.id} found {len(gene_features)}")
+            raise SeqRecordFeatureError(f"Expected exactly one `gene` feature, for {self.id} "
+                                        f"found {len(gene_features) if gene_features is not None else None}")
 
         return gene_features[0]
 

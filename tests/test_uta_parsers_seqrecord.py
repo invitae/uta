@@ -140,11 +140,12 @@ class TestSeqRecordFacade(unittest.TestCase):
     #         SeqRecordFacade.validate_features_by_type(features)
 
     @parameterized.expand([
-        param('gene feature is None', features=None),
-        param('gene feature is empty', features=[]),
-        param('gene feature has more than one', features=[Mock(), Mock()]),
+        param("no gene feature", gene_feature_mock={}),
+        param("gene feature is None", gene_feature_mock={"gene": None}),
+        param("gene feature is empty", gene_feature_mock={"gene": []}),
+        param("gene feature has more than one", gene_feature_mock={"gene": [Mock(), Mock()]}),
     ])
-    def test_validate_gene_feature(self, gene_feature_mock):
+    def test_validate_gene_feature(self, test_name, gene_feature_mock):
         with patch('uta.parsers.seqrecord.SeqRecordFacade.features_by_type',
                    new_callable=PropertyMock) as mock_features_by_type:
             mock_features_by_type.return_value = gene_feature_mock
@@ -152,18 +153,36 @@ class TestSeqRecordFacade(unittest.TestCase):
             with self.assertRaises(SeqRecordFeatureError):
                 _ = srf.gene_feature
 
+    def test_cds_feature_validation_error(self):
+        with patch('uta.parsers.seqrecord.SeqRecordFacade.features_by_type',
+                   new_callable=PropertyMock) as mock_features_by_type:
+            mock_cds_feature = Mock()
+            mock_cds_feature.qualifiers = {"protein_id": "NP_fake", "translation": "MNBVCXZ"}
+            mock_features_by_type.return_value = {'CDS': [mock_cds_feature, mock_cds_feature]}
+            srf = SeqRecordFacade(seqrecord=Mock())
+            with self.assertRaises(SeqRecordFeatureError):
+                _ = srf.cds_feature
+
     def test_cds_feature(self):
         with patch('uta.parsers.seqrecord.SeqRecordFacade.features_by_type', new_callable=PropertyMock) as mock_features_by_type:
             # no CDS feature
             mock_features_by_type.return_value = {}
             srf = SeqRecordFacade(seqrecord=Mock())
             self.assertIsNone(srf.cds_feature)
+
             # one CDS feature
-            dummy_cds_feature = Mock()
-            dummy_cds_feature.qualifiers = {"protein_id": "NP_fake", "translation": "MNBVCXZ"}
-            mock_features_by_type.return_value = {'CDS': [dummy_cds_feature]}
+            desired_cds_feature = Mock()
+            desired_cds_feature.qualifiers = {"protein_id": "NP_fake", "translation": "MNBVCXZ"}
+            mock_features_by_type.return_value = {'CDS': [desired_cds_feature]}
             srf = SeqRecordFacade(seqrecord=Mock())
-            self.assertIs(srf.cds_feature, dummy_cds_feature)
+            self.assertIs(srf.cds_feature, desired_cds_feature)
+
+            # more than one CDS feature, but only one is returned
+            extra_cds_feature = Mock()
+            extra_cds_feature.qualifiers = {"other_key": "NP_fake", "second_key": "MNBVCXZ"}
+            mock_features_by_type.return_value = {'CDS': [desired_cds_feature, extra_cds_feature]}
+            srf = SeqRecordFacade(seqrecord=Mock())
+            self.assertIs(srf.cds_feature, desired_cds_feature)
 
     def test_transl_except(self):
         with patch('uta.parsers.seqrecord.SeqRecordFacade.cds_feature', new_callable=PropertyMock) as mock_cds_feature:
