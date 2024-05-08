@@ -904,7 +904,7 @@ def _upsert_exon_set_record(session, tx_ac, alt_ac, strand, method, ess):
         # update aln_method to add a unique exon set hash based on the *existing* exon set string
         logger.warning(
             "Exon set {tx_ac}/{alt_ac} with method {method} already exists, but with different exons; "
-            "existing exon set: {es_ess}; new exon set: {ess}; updated method of existing to "
+            "existing exon set: {es_ess}; new exon set: {ess}; updated alt_aln_method of exonset to "
             "{alt_aln_method_with_hash}".format(
                 tx_ac=tx_ac,
                 alt_ac=alt_ac,
