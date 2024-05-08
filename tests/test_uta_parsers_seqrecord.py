@@ -129,6 +129,29 @@ class TestSeqRecordFacade(unittest.TestCase):
         assert self.seq_record_facade.cds_translation == expected_cds_translation
         assert self.seq_record_facade.exons_se_i == expected_exons_se_i
 
+    # @parameterized.expand([    @parameterized.expand([
+    #     param('no genes', features={}),
+    #     param('no genes', features={'gene': []}),
+    #     param('more than one gene', features={'gene': [Mock(), Mock()]}),
+    #     param('more than one CDS', features={'CDS': [Mock(), Mock()]}),
+    # ])
+    # def test_validate_features_by_type_invalid(self, test_name, features):
+    #     with self.assertRaises(SeqRecordFeatureError):
+    #         SeqRecordFacade.validate_features_by_type(features)
+
+    @parameterized.expand([
+        param('gene feature is None', features=None),
+        param('gene feature is empty', features=[]),
+        param('gene feature has more than one', features=[Mock(), Mock()]),
+    ])
+    def test_validate_gene_feature(self, gene_feature_mock):
+        with patch('uta.parsers.seqrecord.SeqRecordFacade.features_by_type',
+                   new_callable=PropertyMock) as mock_features_by_type:
+            mock_features_by_type.return_value = gene_feature_mock
+            srf = SeqRecordFacade(seqrecord=Mock())
+            with self.assertRaises(SeqRecordFeatureError):
+                _ = srf.gene_feature
+
     def test_cds_feature(self):
         with patch('uta.parsers.seqrecord.SeqRecordFacade.features_by_type', new_callable=PropertyMock) as mock_features_by_type:
             # no CDS feature
