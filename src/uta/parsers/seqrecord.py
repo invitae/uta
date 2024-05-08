@@ -26,7 +26,7 @@ class SeqRecordFacade:
         """
         Returns the CDS feature for any coding transcript, None for any non-coding transcript.
         Some NCBI records will contain multiple CDS features. In these one CDS describes a protein
-        with accession and protein sequence, they other CDS features describes a pseudogene. This method
+        with accession and protein sequence, the other CDS features describes a pseudogene. This method
         will preferentially choose the CDS feature with a protein sequence.
         Example:
                  CDS             422..778
