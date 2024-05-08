@@ -288,12 +288,13 @@ def load_exonset(session, opts, cf):
 
     update_period = 25
 
-    session.execute(text("set role {admin_role};".format(
-        admin_role=cf.get("uta", "admin_role"))))
+    session.execute(
+        text("set role {admin_role};".format(admin_role=cf.get("uta", "admin_role")))
+    )
     session.execute(text("set search_path = " + usam.schema_name))
 
-    n_rows = len(gzip.open(opts["FILE"], 'rt').readlines()) - 1
-    esr = ufes.ExonSetReader(gzip.open(opts["FILE"], 'rt'))
+    n_rows = len(gzip.open(opts["FILE"], "rt").readlines()) - 1
+    esr = ufes.ExonSetReader(gzip.open(opts["FILE"], "rt"))
     logger.info("opened " + opts["FILE"])
 
     n_new = 0
@@ -319,18 +320,23 @@ def load_exonset(session, opts, cf):
             if tx_exon_count != aln_exon_count:
                 logger.warning(
                     "Exon structure mismatch: {tx_exon_count} exons in transcript {es.tx_ac}; {aln_exon_count} in alignment {es.alt_ac}".format(
-                        tx_exon_count=tx_exon_count, aln_exon_count=aln_exon_count, es=es
-                    ))
+                        tx_exon_count=tx_exon_count,
+                        aln_exon_count=aln_exon_count,
+                        es=es,
+                    )
+                )
                 skipped = True
                 continue
 
-            n, o = _upsert_exon_set_record(session, es.tx_ac, es.alt_ac, es.strand, es.method, es.exons_se_i)
+            n, o = _upsert_exon_set_record(
+                session, es.tx_ac, es.alt_ac, es.strand, es.method, es.exons_se_i
+            )
             session.commit()
         except IntegrityError as e:
             logger.exception(e)
             session.rollback()
             n_errors += 1
-        finally:
+        else:
             if skipped:
                 n_skipped += 1
             else:
@@ -341,12 +347,21 @@ def load_exonset(session, opts, cf):
                     n_deprecated += 1
                 elif no == (False, True):
                     n_unchanged += 1
-
+        finally:
             if i_es % update_period == 0 or i_es + 1 == n_rows:
-                logger.info("{i_es}/{n_rows} {p:.1f}%; {n_new} new, {n_unchanged} unchanged, {n_deprecated} deprecated, {n_skipped} skipped, {n_errors} n_errors".format(
-                    i_es=i_es, n_rows=n_rows,
-                    n_new=n_new, n_unchanged=n_unchanged, n_deprecated=n_deprecated, n_skipped=n_skipped, n_errors=n_errors,
-                    p=(i_es + 1) / n_rows * 100))
+                logger.info(
+                    "{i_es}/{n_rows} {p:.1f}%; {n_new} new, {n_unchanged} unchanged, {n_deprecated} deprecated, {n_skipped} skipped, {n_errors} n_errors".format(
+                        i_es=i_es,
+                        n_rows=n_rows,
+                        n_new=n_new,
+                        n_unchanged=n_unchanged,
+                        n_deprecated=n_deprecated,
+                        n_skipped=n_skipped,
+                        n_errors=n_errors,
+                        p=(i_es + 1) / n_rows * 100,
+                    )
+                )
+
     session.commit()
 
 
