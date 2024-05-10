@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import argparse
 import logging.config
 import sys
@@ -30,7 +32,9 @@ def main():
             for exonset in exonsets:
                 key = (exonset.tx_ac, exonset.alt_ac)
                 if key in seen_ess:
-                    logger.debug(f"  - exon set for transcript {exonset.tx_ac}/{exonset.alt_ac} already seen. Skipping.")
+                    logger.warning(f"  - exon set for transcript {exonset.tx_ac}/{exonset.alt_ac} already "
+                                   f"seen in {seen_ess[(exonset.tx_ac, exonset.alt_ac)]}. Skipping.")
+                    skipped += 1
                 else:
                     seen_ess[key] = exonset_fn
                     esw.write(exonset)
