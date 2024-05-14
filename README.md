@@ -353,7 +353,7 @@ UTA_ETL_NEW_UTA_VERSION=uta_20240512 docker compose run uta-load
 
 #### 2B. Mitochondrial transcripts
 ```
-docker compose run mito-extract
+docker compose -f docker-compose.yml -f misc/mito-transcripts/docker-compose-mito-extract.yml run mito-extract
 docker compose run seqrepo-load
 UTA_ETL_NEW_UTA_VERSION=uta_20240512 docker compose run uta-load
 ```
