@@ -1,8 +1,14 @@
 #!/usr/bin/env python
 
+"""
+This script coalesces exonsets from multiple input files. It builds a cache of tx_ac/alt_ac pairs. If a mapping is
+seen in a later input file, the exonset is skipped. The output is written to stdout.
+"""
+
 import argparse
 import logging.config
 import sys
+from typing import Dict, List, Tuple
 
 import importlib_resources
 
@@ -15,17 +21,12 @@ logging.getLogger().setLevel(logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-def main():
-    parser = argparse.ArgumentParser(description='Coalesce exonsets.')
-    parser.add_argument('exonsets', nargs="+", help='Path to the exonset file')
-    args = parser.parse_args()
-
-    logger.info(f"Coalescing exonsets from {len(args.exonsets)} files")
+def coalesce_exonsets(exonset_files: List[str]) -> None:
+    skipped = 0
     esw = ExonSetWriter(sys.stdout)
     seen_ess: Dict[Tuple[str, str], str] = {}
-    skipped = 0
 
-    for exonset_fn in args.exonsets:
+    for exonset_fn in exonset_files:
         logger.info(f"  - processing exonset file {exonset_fn}")
         with open_file(exonset_fn) as f:
             exonsets = ExonSetReader(f)
@@ -39,7 +40,17 @@ def main():
                     seen_ess[key] = exonset_fn
                     esw.write(exonset)
 
-    logger.info(f"Coalesced {len(seen_ess)} exonsets from {len(args.exonsets)} files, skipped {skipped} duplicates.")
+    logger.info(f"Coalesced {len(seen_ess)} exonsets from {len(exonset_files)} files, skipped {skipped} duplicates.")
+    return seen_ess
+
+
+def main():
+    parser = argparse.ArgumentParser(description='Coalesce exonsets.')
+    parser.add_argument('exonsets', nargs="+", help='Path to the exonset file')
+    args = parser.parse_args()
+
+    logger.info(f"Coalescing exonsets from {len(args.exonsets)} files")
+    coalesce_exonsets(args.exonsets)
 
 
 if __name__ == '__main__':
