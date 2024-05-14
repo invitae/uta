@@ -5,7 +5,7 @@ version: '3'
 services:
   mito-extract:
     image: uta-update
-    command: misc/mito-transcripts/ncbi_process_mito.py NC_012920.1 --output-dir /mito-extract/work | tee /mito-extract/logs/mito.log
+    command: sbin/ncbi_process_mito.py NC_012920.1 --output-dir /mito-extract/work | tee /mito-extract/logs/mito.log
     volumes:
       - ${UTA_ETL_WORK_DIR}:/mito-extract/work
       - ${UTA_ETL_LOG_DIR}:/mito-extract/logs
