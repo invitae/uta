@@ -31,7 +31,7 @@ services:
     network_mode: host
   uta:
     container_name: uta
-    image: biocommons/uta:${UTA_ETL_OLD_UTA_VERSION}
+    image: biocommons/uta:${UTA_ETL_OLD_UTA_IMAGE_TAG}
     environment:
       - POSTGRES_HOST_AUTH_METHOD=trust
     healthcheck:
@@ -41,7 +41,7 @@ services:
     network_mode: host
   uta-load:
     image: uta-update
-    command: sbin/uta-load ${UTA_ETL_OLD_UTA_VERSION} /ncbi-dir /uta-load/work /uta-load/logs
+    command: sbin/uta-load ${UTA_ETL_OLD_UTA_VERSION} ${UTA_ETL_NEW_UTA_VERSION} /ncbi-dir /uta-load/work /uta-load/logs
     depends_on:
       uta:
         condition: service_healthy
