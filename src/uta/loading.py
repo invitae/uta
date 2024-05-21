@@ -201,7 +201,7 @@ def update_meta_data(session, opts, cf):
         md_schema_version.value = usam.schema_version
         session.commit()
     else:
-        logger.inflo("schema version already up-to-date")
+        logger.info(f"schema version {md_schema_version.value} is already up-to-date")
 
     # set updated on
     md_updated_on = session.query(usam.Meta).filter_by(key="updated on").one_or_none()
