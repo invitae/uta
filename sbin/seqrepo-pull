@@ -7,7 +7,7 @@ SEQREPO_DIR="/biocommons/dl.biocommons.org/seqrepo"
 # pull the latest seqrepo version from biocommons
 latest_version=$(seqrepo list-remote-instances | tail -n 1 | xargs)
 cd "$SEQREPO_DIR"
-rsync -rtHP --no-motd stuart.biocommons.org::seqrepo/"$latest_version" .
+rsync -rtHP --no-motd dl.biocommons.org::seqrepo/"$latest_version" .
 
 # setup seqrepo build directory
 mkdir -p master/sequences
