@@ -12,6 +12,12 @@ then
     exit 1
 fi
 
+if [ -z "$DB_HOST" ]
+then
+    echo "error: DB_HOST is not set"
+    exit 1
+fi
+
 set -euxo pipefail
 
 source_uta_v="uta_20210129b"
@@ -22,17 +28,17 @@ mkdir -p $tmp_dumps_dir
 
 ## setup working uta schema
 # delete schema if exists
-psql -h localhost -U uta_admin -d uta -c "DROP SCHEMA IF EXISTS $working_uta_v CASCADE;"
+psql -h "$DB_HOST" -U uta_admin -d uta -c "DROP SCHEMA IF EXISTS $working_uta_v CASCADE;"
 
 # dump source version
-pg_dump -U uta_admin -h localhost -d uta -n "$source_uta_v" | \
+pg_dump -U uta_admin -h "$DB_HOST" -d uta -n "$source_uta_v" | \
  gzip -c > $tmp_dumps_dir/"$source_uta_v".pgd.gz
 
 # create new schema
 gzip -cdq $tmp_dumps_dir/"$source_uta_v".pgd.gz | \
  sbin/pg-dump-schema-rename "$source_uta_v" "$working_uta_v" | \
  sbin/pg-dump-schema-rename "uta_1_1" "$working_uta_v" | \
- psql -U uta_admin -h localhost -d uta -aeE
+ psql -U uta_admin -h "$DB_HOST" -d uta -aeE
 
 ## upgrade working uta schema
 # set initial Alembic migration so it is not ran.
@@ -43,7 +49,7 @@ alembic -c etc/alembic.ini upgrade 595a586e6de7
 
 # run data migration to back fill gene_id
 python misc/gene-update/backfill_gene_id.py \
-  postgresql://uta_admin:@localhost/uta \
+  postgresql://uta_admin:@"$DB_HOST"/uta \
   misc/gene-update/gene_update.tsv.gz \
   misc/gene-update/transcript_update.tsv.gz
 
@@ -51,7 +57,7 @@ python misc/gene-update/backfill_gene_id.py \
 alembic -c etc/alembic.ini upgrade head
 
 ## Rename schema to destination schema name
-psql -h localhost -U uta_admin -d uta -c "DROP SCHEMA IF EXISTS $dest_uta_v CASCADE;"
-psql -h localhost -U uta_admin -d uta -c "ALTER SCHEMA uta RENAME TO $dest_uta_v";
-pg_dump -h localhost -U uta_admin -d uta -n "$dest_uta_v" | \
+psql -h "$DB_HOST" -U uta_admin -d uta -c "DROP SCHEMA IF EXISTS $dest_uta_v CASCADE;"
+psql -h "$DB_HOST" -U uta_admin -d uta -c "ALTER SCHEMA uta RENAME TO $dest_uta_v";
+pg_dump -h "$DB_HOST" -U uta_admin -d uta -n "$dest_uta_v" | \
  gzip -c > "/uta-gene-update/work/$dest_uta_v.pgd.gz"

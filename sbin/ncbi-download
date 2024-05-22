@@ -1,21 +1,26 @@
 #!/usr/bin/env bash
 
 # This script downloads the files needed for a UTA+SeqRepo update into to the given directory.
+# The destination directory is determined by a preset environment variable, DOWNLOAD_DIR.
 #
 # DESTINATION_DIR will have a directory structure matching the source.
 
 set -e
 
 FILE_PATH_CONFIG=$1
-DOWNLOAD_DIR=$2
 
-if [ -z "$FILE_PATH_CONFIG" ] || [ -z "$DOWNLOAD_DIR" ]
+if [ -z "$FILE_PATH_CONFIG" ]
 then
-    echo 'Usage: sbin/ncbi-download <file path config> <download_dir> '
+    echo 'Usage: sbin/ncbi-download <file path config>'
     exit 1
-else
-    echo "Downloading files to $DOWNLOAD_DIR"
 fi
+
+if [ -z "$DOWNLOAD_DIR" ] || [ ! -d "$DOWNLOAD_DIR" ]
+then
+    echo "DOWNLOAD_DIR environment variable must be set, and must be a directory."
+    exit 1
+fi
+echo "Downloading files to $DOWNLOAD_DIR"
 
 grep -v -e '^#' -e '^$' "$FILE_PATH_CONFIG" | while read -r DOWNLOAD_PATH; do
     # each top-level directory in NCBI is an rsync module.

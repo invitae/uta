@@ -1,0 +1,48 @@
+# extends the docker-compose.base.yml file to include uta service running in docker locally
+
+version: '3'
+
+services:
+  seqrepo-pull:
+    extends:
+      file: docker-compose.base.yml
+      service: seqrepo-pull
+  ncbi-download:
+    extends:
+      file: docker-compose.base.yml
+      service: ncbi-download
+  uta-extract:
+    extends:
+      file: docker-compose.base.yml
+      service: uta-extract
+  seqrepo-load:
+    extends:
+      file: docker-compose.base.yml
+      service: seqrepo-load
+  uta-db:
+    container_name: uta-db
+    image: biocommons/uta:${UTA_ETL_OLD_UTA_IMAGE_TAG}
+    environment:
+      - POSTGRES_HOST_AUTH_METHOD=trust
+    volumes:
+      - uta-db-pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: psql -h uta-db -U anonymous -d uta -c "select * from ${UTA_ETL_OLD_UTA_IMAGE_TAG}.meta"
+      interval: 10s
+      retries: 80
+  uta-load:
+    extends:
+      file: docker-compose.base.yml
+      service: uta-load
+    environment:
+      - DB_HOST=uta-db
+    depends_on:
+      uta-db:
+        condition: service_healthy
+    command: sbin/uta-load ${UTA_ETL_OLD_UTA_VERSION} ${UTA_ETL_NEW_UTA_VERSION} etc/docker.conf
+
+volumes:
+  seqrepo-volume:
+  uta-db-pgdata:

@@ -3,11 +3,17 @@
 version: '3'
 
 services:
+  uta-db:
+    extends:
+      file: ../../docker-compose.docker.yml
+      service: uta-db
   uta-gene-update:
     image: uta-update
     command: misc/gene-update/upgrade-uta-schema.sh ${UTA_ETL_NEW_UTA_VERSION}
+    environment:
+      - DB_HOST=localhost
     depends_on:
-      uta:
+      uta-db:
         condition: service_healthy
     volumes:
       - ${UTA_ETL_NCBI_DIR}:/ncbi-dir
@@ -15,3 +21,6 @@ services:
       - ${UTA_ETL_LOG_DIR}:/uta-gene-update/logs
     working_dir: /opt/repos/uta
     network_mode: host
+
+volumes:
+  uta-db-pgdata:
