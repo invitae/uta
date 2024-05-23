@@ -178,8 +178,19 @@ class TestUtaLoading(unittest.TestCase):
             type='protein-coding',
             xrefs='MIM:610918,HGNC:HGNC:30397,Ensembl:ENSG00000198832,AllianceGenome:HGNC:30397',
         )
+        g2 = usam.Gene(
+            gene_id='4514',
+            hgnc='MT-CO3',
+            symbol='MT-CO3',
+            maploc=None,
+            descr='mitochondrially encoded cytochrome c oxidase III',
+            summary='mitochondrially encoded cytochrome c oxidase III',
+            aliases='COIII,MTCO3',
+            type='protein-coding',
+            xrefs='GeneID:4514,HGNC:HGNC:7422,MIM:516050',
+        )
         self.session.add(g1)
-
+        self.session.add(g2)
         self.session.commit()
 
         cf = configparser.ConfigParser()
@@ -207,7 +218,7 @@ class TestUtaLoading(unittest.TestCase):
             },
         )
 
-        transcript.self.session.query(usam.Transcript).filter(usam.Transcript.ac == 'NC_012920.1_09206_09990').one()
+        transcript = self.session.query(usam.Transcript).filter(usam.Transcript.ac == 'NC_012920.1_09206_09990').one()
         self.assertEqual(
             {
                 'ac': transcript.ac,
