@@ -207,6 +207,24 @@ class TestUtaLoading(unittest.TestCase):
             },
         )
 
+        transcript.self.session.query(usam.Transcript).filter(usam.Transcript.ac == 'NC_012920.1_09206_09990').one()
+        self.assertEqual(
+            {
+                'ac': transcript.ac,
+                'gene_id': transcript.gene_id,
+                'cds_start_i': transcript.cds_start_i,
+                'cds_end_i': transcript.cds_end_i,
+                'codon_table': transcript.codon_table,
+            },
+            {
+                'ac': 'NC_012920.1_09206_09990',
+                'gene_id': '4514',
+                'cds_start_i': 0,
+                'cds_end_i': 784,
+                'codon_table': 2,
+            },
+        )
+
         exon_set = self.session.query(usam.ExonSet).filter(usam.ExonSet.tx_ac == 'NM_080430.4').one()
         exons = self.session.query(usam.Exon).filter(usam.Exon.exon_set_id == exon_set.exon_set_id).all()
         self.assertEqual(len(exons), 5)
