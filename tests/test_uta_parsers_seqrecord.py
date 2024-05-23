@@ -27,7 +27,7 @@ class TestSeqRecordFacade(unittest.TestCase):
             expected_cds_translation="MAESGRPWAQARSAYRASEVLRRGTGRRRDPGPQSNGPGQEDARAPGRMARLRGQLRAEAASRSEVPRLLKLVERAGAG" \
                 "AAGAGERTGAHSRGSVCSVCGEPRGGATYPAGVLEVSERRLQEGLAAVREELGAGIEALRAELRAELDALRALLPPPPSPPARREPRAVPRAAPRGPTLP" \
                 "RTLGTVSALVAASRPADDAPDGPAECGAHRAPARKNHKKMPVPPGAPQGGGD",
-            expected_codon_table=1,
+            expected_codon_table="1",
             expected_exons_se_i=[(0, 696)],
         ),
         param(
@@ -50,7 +50,7 @@ class TestSeqRecordFacade(unittest.TestCase):
                 "EDIDECALPTGGHICSYRCINIPGSFQCSCPSSGYRLAPNGRNCQDIDECVTGIHNCSINETCFNIQGGFRCLAFECPENYRRSAATRCERLPCHENREC" \
                 "SKLPLRITYYHLSFPTNIQAPAVVFRMGPSSAVPGDSMQLAITGGNEEGFFTTRKVSPHSGVVALTKPVPEPRDLLLTVKMDLSRHGTVSSFVAKLFIFV" \
                 "SAEL",
-            expected_codon_table=1,
+            expected_codon_table="1",
             expected_exons_se_i=[
                 (0, 182),
                 (182, 288),
