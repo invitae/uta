@@ -65,7 +65,7 @@ where tx_ac='{}';
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description="Generate alignment metrics for transcript alignments"
+        description="Export transcript alignments for a given genome build from UTA database."
     )
     parser.add_argument("transcripts_file", type=str)
     parser.add_argument("--genome-build", type=str, default="GRCh37.p13")
