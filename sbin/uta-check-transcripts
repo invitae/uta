@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+
+# This script ...
+# source_uta_v is the UTA version before the update procedure.
+# working_dir stores the output file.
+# log_dir stores log files.
+
+# Note that the uta loading code uses the seqrepo location defined in the conf files, under [sequences].seqrepo.
+
+set -euxo pipefail
+
+source_uta_v=$1
+working_dir=$2
+log_dir=$3
+
+if [ -z "$source_uta_v" ] || [ -z "$working_dir" ] || [ -z "$log_dir" ]
+then
+    echo 'Usage: uta-check-transcripts <source_uta_v> <working_dir> <log_dir>'
+    exit 1
+fi
+
+mkdir -p "$log_dir"
+
+# Report transcripts which have already loaded into UTA but are not part of the incoming transcript set.
+# These transcripts are at risk of missing updates to information such as transl_except. ???
+uta --conf=etc/global.conf --conf=etc/uta_dev@localhost.conf check-transcripts "$working_dir/transcripts.txt" 2>&1 | \
+    tee "$log_dir/check-transcripts.log"
