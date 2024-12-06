@@ -172,12 +172,13 @@ def check_transcripts(session: Session, opts: Dict, cf: ConfigParser):
 
     """
     # required opts
+    txinfo_file = opts['TXINFO_FILE']
     uta_schema = opts['UTA_SCHEMA']
     output_file = opts['OUTPUT_FILE']
 
     # optional opts
-    # expects comma-separated list of transcript prefixes
     prefixes = opts.get('--prefixes')
+    # prefixes should be comma-separated list
     transcript_prefixes = prefixes.split(',') if prefixes else None
 
     role = cf.get('uta', 'admin_role')
@@ -190,10 +191,18 @@ def check_transcripts(session: Session, opts: Dict, cf: ConfigParser):
     if transcript_prefixes:
         query = query.filter(or_(*[Transcript.ac.startswith(p) for p in transcript_prefixes]))
     query = query.with_entities(Transcript.ac)
-    uta_transcripts = [ac for (ac, ) in query]
-    print(uta_transcripts[:10])
-    print(len(uta_transcripts))
-    print(output_file)
+    uta_transcripts = set(ac for (ac, ) in query)
+
+    # subtract incoming txinfo transcripts
+    txinfo_transcripts = set()
+    with gzip.open(txinfo_file, 'rt') as txinfo_fp:
+        for row in csv.DictReader(txinfo_fp, delimiter='\t'):
+            txinfo_transcripts.add(row['ac'])
+    result_transcripts = uta_transcripts - txinfo_transcripts
+
+    # write difference to output file
+    with open(output_file, 'wt') as output_fp:
+        output_fp.writelines(f'{t}\n' for t in sorted(result_transcripts))
 
 
 def create_schema(session, opts, cf):
