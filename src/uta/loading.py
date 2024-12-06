@@ -176,9 +176,10 @@ def check_transcripts(session: Session, opts: Dict, cf: ConfigParser):
     role = cf.get('uta', 'admin_role')
     session.execute(text(f"set role {role};"))
     session.execute(text(f"set search_path = {uta_schema};"))
-    ori = session.query(usam.Origin).first()
-    print(ori)
+    all_uta_transcripts = session.query(usam.Transcript).with_entities(usam.Transcript.ac).all()
+    print(all_uta_transcripts[:10])
     print(output_file)
+
 
 
 def create_schema(session, opts, cf):
