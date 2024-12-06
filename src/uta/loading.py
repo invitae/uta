@@ -17,7 +17,7 @@ from bioutils.sequences import reverse_complement
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 from sqlalchemy.orm.exc import NoResultFound
-from sqlalchemy import text
+from sqlalchemy import or_, text
 import psycopg2.extras
 import six
 from uta_align.align.algorithms import cigar_alignment, needleman_wunsch_gotoh_align
@@ -176,8 +176,15 @@ def check_transcripts(session: Session, opts: Dict, cf: ConfigParser):
     role = cf.get('uta', 'admin_role')
     session.execute(text(f"set role {role};"))
     session.execute(text(f"set search_path = {uta_schema};"))
-    all_uta_transcripts = session.query(usam.Transcript).with_entities(usam.Transcript.ac).all()
-    print(all_uta_transcripts[:10])
+    Transcript = uta.models.Transcript
+    query = (
+        session.query(Transcript)
+        .filter(or_(Transcript.ac.startswith('NM_'), Transcript.ac.startswith('NR_')))
+        .with_entities(Transcript.ac)
+        .all()
+    )
+    uta_transcripts = [ac for (ac, ) in query]
+    print(uta_transcripts[:10])
     print(output_file)
 
 
