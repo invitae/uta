@@ -23,5 +23,5 @@ mkdir -p "$log_dir"
 
 # Report transcripts which have already loaded into UTA but are not part of the incoming transcript set.
 # These transcripts are at risk of missing updates to information such as transl_except. ???
-uta --conf=etc/global.conf --conf=etc/uta_dev@localhost.conf check-transcripts "$working_dir/transcripts.txt" 2>&1 | \
+UTA_USE_SCHEMA=false uta --conf=etc/global.conf --conf=etc/uta_dev@localhost.conf check-transcripts "$source_uta_v" "$working_dir/transcripts.txt" 2>&1 | \
     tee "$log_dir/check-transcripts.log"

@@ -20,3 +20,4 @@ services:
     volumes:
       - ${UTA_ETL_WORK_DIR}:/uta-check-transcripts/work
       - ${UTA_ETL_LOG_DIR}:/uta-check-transcripts/logs
+    network_mode: host

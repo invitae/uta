@@ -1,5 +1,6 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+from configparser import ConfigParser
 import csv
 import datetime
 import gzip
@@ -164,6 +165,20 @@ def analyze(session, opts, cf):
         logger.info(cmd)
         session.execute(text(cmd))
     session.commit()
+
+
+def check_transcripts(session: Session, opts: Dict, cf: ConfigParser):
+    """
+
+    """
+    uta_schema = opts['UTA_SCHEMA']
+    output_file = opts['OUTPUT_FILE']
+    role = cf.get('uta', 'admin_role')
+    session.execute(text(f"set role {role};"))
+    session.execute(text(f"set search_path = {uta_schema};"))
+    ori = session.query(usam.Origin).first()
+    print(ori)
+    print(output_file)
 
 
 def create_schema(session, opts, cf):
