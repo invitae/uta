@@ -169,7 +169,8 @@ def analyze(session, opts, cf):
 
 def check_transcripts(session: Session, opts: Dict, cf: ConfigParser):
     """
-
+    Find transcripts in the given UTA database version which are not in the given txinfo file,
+    and write those transcripts to the specified file.
     """
     # required opts
     txinfo_file = opts['TXINFO_FILE']
