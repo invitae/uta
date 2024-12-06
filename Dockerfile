@@ -15,13 +15,19 @@ RUN pip install --upgrade setuptools
 RUN pip install pysam
 
 WORKDIR /opt/repos/uta/
+
+# Install dependencies
 COPY pyproject.toml ./
+RUN pip install -e .[dev]
+
+# Install uta package
 COPY etc ./etc
 COPY misc ./misc
 COPY sbin ./sbin
 COPY src ./src
-RUN pip install -e .[dev]
+RUN pip install -e .
 
+# ---------- #
 
 # UTA test image
 FROM uta as uta-test
