@@ -171,22 +171,29 @@ def check_transcripts(session: Session, opts: Dict, cf: ConfigParser):
     """
 
     """
+    # required opts
     uta_schema = opts['UTA_SCHEMA']
     output_file = opts['OUTPUT_FILE']
+
+    # optional opts
+    # expects comma-separated list of transcript prefixes
+    prefixes = opts.get('--prefixes')
+    transcript_prefixes = prefixes.split(',') if prefixes else None
+
     role = cf.get('uta', 'admin_role')
     session.execute(text(f"set role {role};"))
     session.execute(text(f"set search_path = {uta_schema};"))
+
+    # fetch transcripts from uta
     Transcript = uta.models.Transcript
-    query = (
-        session.query(Transcript)
-        .filter(or_(Transcript.ac.startswith('NM_'), Transcript.ac.startswith('NR_')))
-        .with_entities(Transcript.ac)
-        .all()
-    )
+    query = session.query(Transcript)
+    if transcript_prefixes:
+        query = query.filter(or_(*[Transcript.ac.startswith(p) for p in transcript_prefixes]))
+    query = query.with_entities(Transcript.ac)
     uta_transcripts = [ac for (ac, ) in query]
     print(uta_transcripts[:10])
+    print(len(uta_transcripts))
     print(output_file)
-
 
 
 def create_schema(session, opts, cf):
