@@ -206,6 +206,14 @@ def check_transcripts(session: Session, opts: Dict, cf: ConfigParser):
         output_fp.writelines(f'{t}\n' for t in sorted(result_transcripts))
 
 
+def check_transl_except(session, opts, cf):
+    """
+    Find transcripts in the given transcript file which are in the given UTA database version
+    and do not have transl_except entries when they should.
+    """
+    print('hi')
+
+
 def create_schema(session, opts, cf):
     """Create and populate initial schema"""
     session.execute(text("set role {admin_role};".format(
