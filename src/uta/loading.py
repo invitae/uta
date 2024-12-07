@@ -8,12 +8,12 @@ import hashlib
 import itertools
 import logging
 import time
-from typing import Any, Dict, List
+from typing import Any, Dict, Generator, List, Optional, Tuple
 
 from biocommons.seqrepo import SeqRepo
 from bioutils.coordinates import strand_pm_to_int, MINUS_STRAND
 from bioutils.digests import seq_md5
-from bioutils.sequences import reverse_complement
+from bioutils.sequences import reverse_complement, translate_cds
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 from sqlalchemy.orm.exc import NoResultFound
@@ -211,7 +211,80 @@ def check_transl_except(session, opts, cf):
     Find transcripts in the given transcript file which are in the given UTA database version
     and do not have transl_except entries when they should.
     """
-    print('hi')
+    # required opts
+    transcript_file = opts['TRANSCRIPT_FILE']
+    uta_schema = opts['UTA_SCHEMA']
+    output_file = opts['OUTPUT_FILE']
+
+    role = cf.get('uta', 'admin_role')
+    session.execute(text(f"set role {role};"))
+    session.execute(text(f"set search_path = {uta_schema};"))
+
+    Transcript = uta.models.Transcript
+    AssociatedAccessions = usam.AssociatedAccessions
+
+    def transcript_iterator() -> Generator[Tuple[str, int, int, Optional[str]], None, None]:
+        with open(transcript_file, 'rt') as transcript_fp:
+            for line in transcript_fp:
+                transcript_ac = line.strip()
+                transcript = (
+                    session.query(Transcript)
+                    .filter(Transcript.ac == transcript_ac)
+                    .with_entities(Transcript.ac, Transcript.cds_start_i, Transcript.cds_end_i)
+                    .one()
+                )
+                try:
+                    assoc_ac = (
+                        session.query(AssociatedAccessions)
+                        .filter(AssociatedAccessions.tx_ac == transcript.ac)
+                        .with_entities(AssociatedAccessions.tx_ac, AssociatedAccessions.pro_ac)
+                        .one()
+                    )
+                    protein_ac = assoc_ac.pro_ac
+                except NoResultFound:
+                    logger.warning(f'No NP for transcript: {transcript_ac}')
+                    protein_ac = None
+
+                yield transcript.ac, transcript.cds_start_i, transcript.cds_end_i, protein_ac
+
+    result_transcripts = set()
+    warning_transcripts = set()
+    sf = _get_seqfetcher(cf)
+    for i, (transcript_ac, transcript_cds_start_i, transcript_cds_end_i, protein_ac) in enumerate(transcript_iterator()):
+        if i % 1000 == 0:
+            print(f'Progress: {i}')
+
+        if protein_ac is None:
+            warning_transcripts.add(transcript_ac)
+            continue
+
+        try:
+            transcript_seq = sf.fetch(transcript_ac, transcript_cds_start_i, transcript_cds_end_i)
+        except:
+            logger.warning(f'No sequence for transcript: {transcript_ac}')
+            transcript_seq = None
+
+        if transcript_seq is None:
+            warning_transcripts.add(transcript_ac)
+            continue
+
+        translated_protein_seq = translate_cds(transcript_seq, full_codons=False, ter_symbol='X').rstrip('*')
+
+        try:
+            protein_seq = sf.fetch(protein_ac)
+        except:
+            logger.warning(f'NP has no sequence: {protein_ac}, {transcript_ac}')
+            protein_seq = None
+
+        if protein_seq is None:
+            warning_transcripts.add(transcript_ac)
+            continue
+
+        if protein_seq != translated_protein_seq:
+            result_transcripts.add(transcript_ac)
+
+    with open(output_file, 'wt') as output_fp:
+        output_fp.writelines(f'{t}\n' for t in sorted(result_transcripts))
 
 
 def create_schema(session, opts, cf):
