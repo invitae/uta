@@ -339,6 +339,7 @@ See 2A for nuclear transcripts and 2B for mitochondrial transcripts.
 ```
 docker compose run ncbi-download
 docker compose run uta-extract
+[OPTIONAL] docker compose run uta-check-transcripts
 docker compose run seqrepo-load
 docker compose run uta-load
 ```
@@ -351,7 +352,7 @@ docker compose run uta-load
 ```
 
 #### 2C. Manual splign transcripts
-To load splign-manual transcripts, the workflow expects an input txdata.yaml file and splign alignments. Define this path 
+To load splign-manual transcripts, the workflow expects an input txdata.yaml file and splign alignments. Define this path
 using the environment variable $UTA_SPLIGN_MANUAL_DIR. These file paths should exist:
 - `$UTA_SPLIGN_MANUAL_DIR/splign-manual/txdata.yaml`
 - `$UTA_SPLIGN_MANUAL_DIR/splign-manual/alignments/*.splign`

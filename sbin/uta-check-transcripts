@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+
+# Find transcripts in the current UTA database version which are not in the txinfo file,
+# and write those transcripts to the check-transcripts.txt file.
+#
+# uta-extract, which produces the needed txinfo file, must run before this script.
+# Any action taken with respect to the identified transcripts is case-dependent and optional.
+#
+# source_uta_v is the current UTA database version.
+# working_dir stores input and output files.
+# log_dir stores log files.
+
+set -euxo pipefail
+
+source_uta_v=$1
+working_dir=$2
+log_dir=$3
+
+if [ -z "$source_uta_v" ] || [ -z "$working_dir" ] || [ -z "$log_dir" ]
+then
+    echo 'Usage: uta-check-transcripts <source_uta_v> <working_dir> <log_dir>'
+    exit 1
+fi
+
+mkdir -p "$log_dir"
+
+UTA_USE_SCHEMA=false uta --conf=etc/global.conf --conf=etc/uta_dev@localhost.conf check-transcripts --prefixes=NM,NR "$working_dir/txinfo.gz" "$source_uta_v" "$working_dir/check-transcripts.txt" 2>&1 | \
+    tee "$log_dir/check-transcripts.log"

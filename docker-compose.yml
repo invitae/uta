@@ -46,6 +46,16 @@ services:
       interval: 10s
       retries: 80
     network_mode: host
+  uta-check-transcripts:
+    image: uta-update
+    command: sbin/uta-check-transcripts ${UTA_ETL_OLD_UTA_VERSION} /uta-check-transcripts/work /uta-check-transcripts/logs
+    depends_on:
+      uta:
+        condition: service_healthy
+    volumes:
+      - ${UTA_ETL_WORK_DIR}:/uta-check-transcripts/work
+      - ${UTA_ETL_LOG_DIR}:/uta-check-transcripts/logs
+    network_mode: host
   uta-load:
     image: uta-update
     command: sbin/uta-load ${UTA_ETL_OLD_UTA_VERSION} ${UTA_ETL_NEW_UTA_VERSION} /ncbi-dir /uta-load/work /uta-load/logs

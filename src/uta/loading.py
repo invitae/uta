@@ -1,5 +1,6 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+from configparser import ConfigParser
 import csv
 import datetime
 import gzip
@@ -16,7 +17,7 @@ from bioutils.sequences import reverse_complement
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 from sqlalchemy.orm.exc import NoResultFound
-from sqlalchemy import text
+from sqlalchemy import or_, text
 import psycopg2.extras
 import six
 from uta_align.align.algorithms import cigar_alignment, needleman_wunsch_gotoh_align
@@ -164,6 +165,45 @@ def analyze(session, opts, cf):
         logger.info(cmd)
         session.execute(text(cmd))
     session.commit()
+
+
+def check_transcripts(session: Session, opts: Dict, cf: ConfigParser):
+    """
+    Find transcripts in the given UTA database version which are not in the given txinfo file,
+    and write those transcripts to the specified file.
+    """
+    # required opts
+    txinfo_file = opts['TXINFO_FILE']
+    uta_schema = opts['UTA_SCHEMA']
+    output_file = opts['OUTPUT_FILE']
+
+    # optional opts
+    prefixes = opts.get('--prefixes')
+    # prefixes should be comma-separated list
+    transcript_prefixes = prefixes.split(',') if prefixes else None
+
+    role = cf.get('uta', 'admin_role')
+    session.execute(text(f"set role {role};"))
+    session.execute(text(f"set search_path = {uta_schema};"))
+
+    # fetch transcripts from uta
+    Transcript = uta.models.Transcript
+    query = session.query(Transcript)
+    if transcript_prefixes:
+        query = query.filter(or_(*[Transcript.ac.startswith(p) for p in transcript_prefixes]))
+    query = query.with_entities(Transcript.ac)
+    uta_transcripts = set(ac for (ac, ) in query)
+
+    # subtract incoming txinfo transcripts
+    txinfo_transcripts = set()
+    with gzip.open(txinfo_file, 'rt') as txinfo_fp:
+        for row in csv.DictReader(txinfo_fp, delimiter='\t'):
+            txinfo_transcripts.add(row['ac'])
+    result_transcripts = uta_transcripts - txinfo_transcripts
+
+    # write difference to output file
+    with open(output_file, 'wt') as output_fp:
+        output_fp.writelines(f'{t}\n' for t in sorted(result_transcripts))
 
 
 def create_schema(session, opts, cf):

@@ -5,6 +5,7 @@ Usage:
   uta --version
   uta (-C CONF ...) [options] shell
   uta (-C CONF ...) [options] drop-schema
+  uta (-C CONF ...) [options] check-transcripts [--prefixes=PREFIXES] TXINFO_FILE UTA_SCHEMA OUTPUT_FILE
   uta (-C CONF ...) [options] create-schema
   uta (-C CONF ...) [options] update-meta-data
   uta (-C CONF ...) [options] load-sql FILES ...
@@ -68,6 +69,7 @@ def main():
     dispatch_table = [
         ("align-exons",         ul.align_exons),
         ("analyze",             ul.analyze),
+        ("check-transcripts",   ul.check_transcripts),
         ("create-schema",       ul.create_schema),
         ("update-meta-data",    ul.update_meta_data),
         ("drop-schema",         ul.drop_schema),

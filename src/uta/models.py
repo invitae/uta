@@ -2,7 +2,9 @@
 """
 
 import datetime
+from distutils.util import strtobool
 import hashlib
+import os
 
 import sqlalchemy as sa
 import sqlalchemy.orm as sao
@@ -17,7 +19,7 @@ from sqlalchemy.dialects import postgresql
 # also see etc/uta.conf
 
 schema_version = "1.2"
-use_schema = True
+use_schema = strtobool(os.environ.get('UTA_USE_SCHEMA', 'true'))
 if use_schema:
     schema_name = "uta"
 else:

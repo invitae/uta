@@ -1,5 +1,6 @@
 import configparser
 import signal
+from tempfile import NamedTemporaryFile
 import unittest
 from unittest.mock import Mock, patch
 
@@ -152,6 +153,68 @@ class TestUtaLoading(unittest.TestCase):
             },
         ]
         self.assertEqual(aa_list, expected_aa_list)
+
+    def test_check_transcripts(self):
+        o1 = usam.Origin(
+            name='NCBI',
+            url='http://bogus.com/ncbi',
+            url_ac_fmt='http://bogus.com/ncbi/{ac}',
+        )
+        g1 = usam.Gene(
+            gene_id='140606',
+            hgnc='SELENOM',
+            symbol='SELENOM',
+            maploc='22q12.2',
+            descr='selenoprotein M',
+            summary='selenoprotein M',
+            aliases='SELM,SEPM',
+            type='protein-coding',
+            xrefs='MIM:610918,HGNC:HGNC:30397,Ensembl:ENSG00000198832,AllianceGenome:HGNC:30397',
+        )
+        self.session.add(o1)
+        self.session.add(g1)
+        self.session.commit()
+
+        # add transcript in txinfo.gz
+        t1 = usam.Transcript(
+            ac='NM_080430.4',
+            origin_id=o1.origin_id,
+            gene_id=g1.gene_id,
+            hgnc=g1.hgnc,
+            cds_start_i=63,
+            cds_end_i=501,
+            cds_md5='abc123',
+            codon_table=1,
+        )
+        # add transcript not in txinfo.gz
+        t2 = usam.Transcript(
+            ac='NM_080430.3',
+            origin_id=o1.origin_id,
+            gene_id=g1.gene_id,
+            hgnc=g1.hgnc,
+            cds_start_i=63,
+            cds_end_i=501,
+            cds_md5='abc123',
+            codon_table=1,
+        )
+        self.session.add(t1)
+        self.session.add(t2)
+        self.session.commit()
+
+        with NamedTemporaryFile(mode='w+t') as tf:
+            opts = {
+                'TXINFO_FILE': 'tests/data/txinfo.gz',
+                'UTA_SCHEMA': 'uta',
+                'OUTPUT_FILE': tf.name,
+            }
+
+            ul.check_transcripts(self.session, opts, self.cf)
+
+            # expect one transcript but not the other
+            tf.seek(0)
+            tf_content = tf.read()
+            assert 'NM_080430.3' in tf_content
+            assert 'NM_080430.4' not in tf_content
 
     def test_load_txinfo(self):
         """
