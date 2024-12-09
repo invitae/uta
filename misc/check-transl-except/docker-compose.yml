@@ -1,0 +1,25 @@
+version: '3'
+
+services:
+  uta:
+    container_name: uta
+    image: biocommons/uta:${UTA_VERSION}
+    environment:
+      - POSTGRES_HOST_AUTH_METHOD=trust
+    healthcheck:
+      test: psql -h localhost -U anonymous -d uta -c "select * from ${UTA_VERSION}.meta"
+      interval: 10s
+      retries: 80
+    network_mode: host
+  uta-check-transl-except:
+    image: uta-update
+    command: uta --conf=etc/global.conf --conf=etc/uta_dev@localhost.conf check-transl-except /opt/uta/transcripts.txt ${UTA_VERSION} /opt/uta/check-transl-except.txt 2>&1 | tee /opt/uta/logs
+    environment:
+      - UTA_USE_SCHEMA=false
+    depends_on:
+      uta:
+        condition: service_healthy
+    volumes:
+      - ${SEQREPO_DIR}:/biocommons/dl.biocommons.org/seqrepo/master
+      - ${WORK_DIR}:/opt/uta
+    network_mode: host
