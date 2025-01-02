@@ -13,7 +13,7 @@ from typing import Any, Dict, Generator, List, Optional, Tuple
 from biocommons.seqrepo import SeqRepo
 from bioutils.coordinates import strand_pm_to_int, MINUS_STRAND
 from bioutils.digests import seq_md5
-from bioutils.sequences import reverse_complement, translate_cds
+from bioutils.sequences import reverse_complement, translate_cds, aa_to_aa3
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 from sqlalchemy.orm.exc import NoResultFound
@@ -209,7 +209,7 @@ def check_transcripts(session: Session, opts: Dict, cf: ConfigParser):
 def check_transl_except(session, opts, cf):
     """
     Find transcripts in the given transcript file which are in the given UTA database version
-    and do not have transl_except entries when they should.
+    and do not have transl_except entries when they should, and add them.
     """
     # required opts
     transcript_file = opts['TRANSCRIPT_FILE']
@@ -247,12 +247,12 @@ def check_transl_except(session, opts, cf):
 
                 yield transcript.ac, transcript.cds_start_i, transcript.cds_end_i, protein_ac
 
-    result_transcripts = set()
+    result_transl_excepts = set()
     warning_transcripts = set()
     sf = _get_seqfetcher(cf)
     for i, (transcript_ac, transcript_cds_start_i, transcript_cds_end_i, protein_ac) in enumerate(transcript_iterator()):
         if i % 1000 == 0:
-            print(f'Progress: {i}')
+            logger.info(f'Progress: {i}')
 
         if protein_ac is None:
             warning_transcripts.add(transcript_ac)
@@ -281,10 +281,54 @@ def check_transl_except(session, opts, cf):
             continue
 
         if protein_seq != translated_protein_seq:
-            result_transcripts.add(transcript_ac)
+            if len(protein_seq) != len(translated_protein_seq):
+                logger.warning(f'Protein sequence length mismatch: {protein_ac} {len(protein_seq)} != '
+                               f'translated {transcript_ac} {len(translated_protein_seq)}')
+                continue
+
+            for i in range(len(protein_seq)):
+                if protein_seq[i] != translated_protein_seq[i]:
+                    codon_start_i = (i * 3)
+                    codon_end_i = codon_start_i + 3
+                    tx_start_i = codon_start_i + transcript_cds_start_i
+                    tx_end_i = codon_end_i + transcript_cds_start_i
+                    transl_except_aa = aa_to_aa3(protein_seq[i])
+                    if transl_except_aa == "Xaa":
+                        transl_except_aa = "OTHER"
+
+                    # add transl_except entry if it does not already exist.
+                    te, created = _get_or_insert(
+                        session=session,
+                        table=usam.TranslationException,
+                        row={
+                            'tx_ac': transcript_ac,
+                            'start_position': tx_start_i,
+                            'end_position': tx_end_i,
+                            'amino_acid': transl_except_aa,
+                            'source': 'Internal',
+                        },
+                        row_identifier=('tx_ac', 'start_position', 'end_position', 'amino_acid'),
+                    )
+                    logger.info(
+                        f'Translation exception {"created:" if created else "already exists"}: {transcript_ac} '
+                        f'{tx_start_i}..{tx_end_i} {transcript_seq[codon_start_i:codon_end_i]} -> {transl_except_aa}'
+                    )
+
+                    result_transl_excepts.add((
+                        transcript_ac,
+                        f'pos:{codon_start_i}..{codon_end_i}',
+                        f'{transcript_seq[codon_start_i:codon_end_i]}',
+                        f'aa:{transl_except_aa}',
+                        created
+                    ))
+
+    session.commit()
+
+    for tx_ac in warning_transcripts:
+        logger.warning(f'Warning: {tx_ac} not processed')
 
     with open(output_file, 'wt') as output_fp:
-        output_fp.writelines(f'{t}\n' for t in sorted(result_transcripts))
+        output_fp.writelines("\t".join(row) for row in sorted(result_transl_excepts))
 
 
 def create_schema(session, opts, cf):

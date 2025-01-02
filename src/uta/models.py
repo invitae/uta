@@ -18,7 +18,7 @@ from sqlalchemy.dialects import postgresql
 # schema name support
 # also see etc/uta.conf
 
-schema_version = "1.2"
+schema_version = "1.3"
 use_schema = strtobool(os.environ.get('UTA_USE_SCHEMA', 'true'))
 if use_schema:
     schema_name = "uta"
@@ -162,6 +162,7 @@ class TranslationException(Base):
     start_position = sa.Column(sa.Integer, nullable=False)
     end_position = sa.Column(sa.Integer, nullable=False)
     amino_acid = sa.Column(sa.Text, nullable=False)
+    source = sa.Column(sa.Text, nullable=False, server_default="NCBI")
 
     # relationships:
     transcript = sao.relationship("Transcript", backref="translation_exceptions")
