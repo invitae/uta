@@ -17,6 +17,7 @@ cmp_cols.update({
     "gene": "gene_id".split(),
     "seq_anno": "seq_anno_id seq_id origin_id ac added".split(),
     "transcript": "ac".split(),
+    "translation_exception": "tx_ac start_position end_position amino_acid".split(),
     })
 
 
@@ -45,9 +46,10 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
     logger = logging.getLogger()
 
-    url = "postgresql://uta_admin@localhost/uta"
+    url = "postgresql://anonymous:anonymous@uta-int-02.cj7o8ef9mt4v.us-east-1.rds.amazonaws.com/uta"
     tables = ["associated_accessions", "exon", "exon_aln", "exon_set",
-              "gene", "meta", "origin", "seq", "seq_anno", "transcript",]
+              "gene", "meta", "origin", "seq", "seq_anno", "transcript",
+              "translation_exception",]
 
     s1, s2 = sys.argv[1:3]
     con = psycopg2.connect(url)

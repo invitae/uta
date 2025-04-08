@@ -5,7 +5,8 @@ Usage:
   uta --version
   uta (-C CONF ...) [options] shell
   uta (-C CONF ...) [options] drop-schema
-  uta (-C CONF ...) [options] check-transcripts [--prefixes=PREFIXES] TXINFO_FILE UTA_SCHEMA OUTPUT_FILE
+  uta (-C CONF ...) [options] check-transcripts
+    [--prefixes=PREFIXES] [--subset=NEW|EXISTING] TXINFO_FILE UTA_SCHEMA OUTPUT_FILE
   uta (-C CONF ...) [options] check-transl-except TRANSCRIPT_FILE UTA_SCHEMA OUTPUT_FILE
   uta (-C CONF ...) [options] create-schema
   uta (-C CONF ...) [options] update-meta-data

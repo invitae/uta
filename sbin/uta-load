@@ -69,6 +69,11 @@ uta --conf=etc/global.conf --conf=etc/uta_dev@localhost.conf align-exons 2>&1 | 
 ### run diff
 sbin/uta-diff "$source_uta_v" "$loading_uta_v"
 
+## analyze, refresh mat-views and grant permissions
+uta --conf=etc/global.conf --conf=etc/uta_dev@localhost.conf analyze 2>&1 | tee "$log_dir/analyze.log"
+uta --conf=etc/global.conf --conf=etc/uta_dev@localhost.conf refresh-matviews 2>&1 | tee "$log_dir/refresh-matviews.log"
+uta --conf=etc/global.conf --conf=etc/uta_dev@localhost.conf grant-permissions 2>&1 | tee "$log_dir/grant-permissions.log"
+
 ## Rename schema to destination schema name and export to dump file
 psql -h localhost -U uta_admin -d uta -c "DROP SCHEMA IF EXISTS $dest_uta_v CASCADE;"
 psql -h localhost -U uta_admin -d uta -c "ALTER SCHEMA uta RENAME TO $dest_uta_v";
